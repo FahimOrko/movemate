@@ -1,0 +1,34 @@
+import { phaseOrder, phaseSchema, type Move } from '@movemate/contracts';
+import { HouseIcon } from 'lucide-react';
+import { Navigate, useOutletContext, useParams } from 'react-router';
+import { Stepper } from '@/components/stepper';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { PreparePhase } from '@/features/prepare/prepare-phase';
+import { phaseLabels } from '@/lib/phases';
+
+export function MovePhasePage() {
+  const move = useOutletContext<Move>();
+  const parsed = phaseSchema.safeParse(useParams().phase);
+  const isReached = parsed.success && phaseOrder.indexOf(parsed.data) <= phaseOrder.indexOf(move.phase);
+  if (!parsed.success || !isReached) return <Navigate to={`/move/${move.phase}`} replace />;
+  const phase = parsed.data;
+
+  return (
+    <div className="flex flex-col gap-10">
+      <Stepper reached={move.phase} active={phase} hrefFor={(target) => `/move/${target}`} />
+      {phase === 'prepare' ? (
+        <PreparePhase move={move} />
+      ) : (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <HouseIcon />
+            </EmptyMedia>
+            <EmptyTitle>{phaseLabels[phase]}</EmptyTitle>
+            <EmptyDescription>This step is not available yet.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router/dom';
+import { Providers } from '@/app/providers';
 import { router } from '@/app/router';
 import '@/index.css';
 
@@ -9,6 +10,8 @@ if (!rootElement) throw new Error('Missing #root element in index.html');
 
 createRoot(rootElement).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <Providers>
+      <RouterProvider router={router} />
+    </Providers>
   </StrictMode>,
 );

@@ -1,8 +1,13 @@
-import { HouseIcon } from 'lucide-react';
-import { Link } from 'react-router';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { CircleAlertIcon } from 'lucide-react';
+import { Link, Outlet } from 'react-router';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrentMove } from '@/features/prepare/use-move';
+import { CreateMoveForm } from './create-move-form';
 
 export function MoveShellPage() {
+  const { data: move, isError, isPending } = useCurrentMove();
+
   return (
     <div className="min-h-dvh">
       <header className="border-b">
@@ -12,16 +17,22 @@ export function MoveShellPage() {
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-16">
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HouseIcon />
-            </EmptyMedia>
-            <EmptyTitle>No move yet</EmptyTitle>
-            <EmptyDescription>Your move-in steps will show up here.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      <main className="mx-auto max-w-5xl px-6 py-12">
+        {isPending && (
+          <div className="flex flex-col gap-3" aria-hidden="true">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-64 w-full rounded-xl" />
+          </div>
+        )}
+        {isError && (
+          <Alert variant="destructive">
+            <CircleAlertIcon />
+            <AlertTitle>Could not load your move</AlertTitle>
+            <AlertDescription>Check that the API is running, then refresh.</AlertDescription>
+          </Alert>
+        )}
+        {move === null && <CreateMoveForm />}
+        {move && <Outlet context={move} />}
       </main>
     </div>
   );

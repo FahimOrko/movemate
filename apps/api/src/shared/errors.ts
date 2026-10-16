@@ -1,6 +1,7 @@
 const statusByCode = {
   validation_error: 400,
   not_found: 404,
+  invalid_phase_transition: 409,
   internal_error: 500,
   db_unavailable: 503,
 } as const;

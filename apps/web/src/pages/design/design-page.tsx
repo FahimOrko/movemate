@@ -1,6 +1,10 @@
 import { CircleAlertIcon, HouseIcon, InfoIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { InteractiveBackground } from '@/components/interactive-background';
+import { ChecklistItem } from '@/components/checklist-item';
+import { CreateMoveFields } from '@/components/create-move-fields';
+import { Stepper } from '@/components/stepper';
+import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -231,6 +236,57 @@ export function DesignPage() {
               {variant}
             </Badge>
           ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection id="checkbox" title="Checkbox" description="Default, checked, disabled and error. Press Tab for the focus ring.">
+        <div className="flex flex-wrap items-center gap-6">
+          {[
+            { id: 'cb-default', label: 'Default' },
+            { id: 'cb-checked', label: 'Checked', defaultChecked: true },
+            { id: 'cb-disabled', label: 'Disabled', disabled: true },
+            { id: 'cb-disabled-checked', label: 'Disabled checked', disabled: true, defaultChecked: true },
+            { id: 'cb-error', label: 'Error', 'aria-invalid': true },
+          ].map(({ id, label, ...props }) => (
+            <div key={id} className="flex items-center gap-2">
+              <Checkbox id={id} {...props} />
+              <Label htmlFor={id}>{label}</Label>
+            </div>
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection id="stepper" title="Stepper" description="Reached phases are links, later phases are locked. Labels collapse to the active one below the lg breakpoint.">
+        <div className="flex flex-col gap-8">
+          {(['prepare', 'move_in', 'settle_in'] as const).map((reached) => (
+            <Stepper key={reached} reached={reached} active={reached} hrefFor={() => '/design#stepper'} />
+          ))}
+          <Stepper reached="move_in" active="before_photos" hrefFor={() => '/design#stepper'} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="checklist" title="Checklist item and tip card" description="Ticks persist. The pending state is disabled while a tick is saving.">
+        <div className="max-w-md divide-y">
+          <ChecklistItem title="Read and sign the lease" description="Check the deposit and notice period." checked={false} onCheckedChange={() => undefined} />
+          <ChecklistItem title="Pay the deposit and keep the receipt" checked onCheckedChange={() => undefined} />
+          <ChecklistItem title="Collect the keys" checked={false} disabled onCheckedChange={() => undefined} />
+        </div>
+        <div className="max-w-md">
+          <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">
+        <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid content-start gap-6">
+            <CreateMoveFields idPrefix="design-form-default" />
+          </div>
+          <div className="grid content-start gap-6">
+            <CreateMoveFields idPrefix="design-form-error" addressError="Enter the address you are moving into" />
+          </div>
+          <div className="grid content-start gap-6">
+            <CreateMoveFields idPrefix="design-form-disabled" disabled />
+          </div>
         </div>
       </DesignSection>
 

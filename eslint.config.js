@@ -18,6 +18,13 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
+    // A context reaches another context through its service, never its repository.
+    files: ['apps/api/src/contexts/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['../**/*.repository'], message: 'Call the other context’s service instead.' }] }],
+    },
+  },
+  {
     files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },

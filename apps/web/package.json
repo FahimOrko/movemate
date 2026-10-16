@@ -8,6 +8,8 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@movemate/contracts": "workspace:*",
+    "@tanstack/react-query": "^5.104.3",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.57.0",
