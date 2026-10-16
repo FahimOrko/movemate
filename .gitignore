@@ -1,0 +1,25 @@
+# Node
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.turbo/
+*.log
+npm-debug.log*
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Private uploads
+private-uploads/
+
+# Graphify cache
+graphify-out/cache/
+
+# OS / editor
+.DS_Store
+.idea/
