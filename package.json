@@ -1,0 +1,28 @@
+{
+  "name": "movemate",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "test": "pnpm -r test",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "db:up": "docker compose up -d --wait",
+    "db:generate": "pnpm --filter @movemate/api db:generate",
+    "db:migrate": "pnpm --filter @movemate/api db:migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "~10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2"
+  }
+}
