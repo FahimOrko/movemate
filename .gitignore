@@ -16,6 +16,7 @@ npm-debug.log*
 
 # Private uploads
 private-uploads/
+uploads/
 
 # Graphify cache
 graphify-out/cache/

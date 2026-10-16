@@ -3,6 +3,8 @@ import { HouseIcon } from 'lucide-react';
 import { Navigate, useOutletContext, useParams } from 'react-router';
 import { Stepper } from '@/components/stepper';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { BeforePhotosPhase } from '@/features/before-photos/before-photos-phase';
+import { MoveInPhase } from '@/features/move-in/move-in-phase';
 import { PreparePhase } from '@/features/prepare/prepare-phase';
 import { phaseLabels } from '@/lib/phases';
 
@@ -18,6 +20,10 @@ export function MovePhasePage() {
       <Stepper reached={move.phase} active={phase} hrefFor={(target) => `/move/${target}`} />
       {phase === 'prepare' ? (
         <PreparePhase move={move} />
+      ) : phase === 'before_photos' ? (
+        <BeforePhotosPhase move={move} />
+      ) : phase === 'move_in' ? (
+        <MoveInPhase move={move} />
       ) : (
         <Empty className="border">
           <EmptyHeader>

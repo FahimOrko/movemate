@@ -1,9 +1,10 @@
-import type { GuidanceProgress, PrepareGuidance } from '@movemate/contracts';
+import { guidanceProgressSchema, prepareGuidanceSchema, type GuidanceProgress } from '@movemate/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { z } from 'zod';
 import { api } from '@/lib/api';
 
 export function usePrepareGuidance() {
-  return useQuery({ queryKey: ['guidance', 'prepare'], queryFn: () => api.get<PrepareGuidance>('/guidance/prepare') });
+  return useQuery({ queryKey: ['guidance', 'prepare'], queryFn: () => api.get('/guidance/prepare', prepareGuidanceSchema) });
 }
 
 const progressKey = (moveId: string) => ['guidance', 'progress', moveId] as const;
@@ -11,7 +12,7 @@ const progressKey = (moveId: string) => ['guidance', 'progress', moveId] as cons
 export function useProgress(moveId: string) {
   return useQuery({
     queryKey: progressKey(moveId),
-    queryFn: () => api.get<GuidanceProgress[]>(`/moves/${moveId}/guidance`),
+    queryFn: () => api.get(`/moves/${moveId}/guidance`, z.array(guidanceProgressSchema)),
   });
 }
 
@@ -22,7 +23,7 @@ export function useSetProgress(moveId: string) {
   const key = progressKey(moveId);
   return useMutation({
     mutationFn: ({ itemKey, completed }: SetProgressInput) =>
-      api.patch<GuidanceProgress>(`/moves/${moveId}/guidance/${itemKey}`, { completed }),
+      api.patch(`/moves/${moveId}/guidance/${itemKey}`, guidanceProgressSchema, { completed }),
     onMutate: async ({ itemKey, completed }) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<GuidanceProgress[]>(key);

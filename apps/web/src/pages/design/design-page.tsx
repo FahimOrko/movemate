@@ -1,8 +1,12 @@
+import type { Photo, Room } from '@movemate/contracts';
 import { CircleAlertIcon, HouseIcon, InfoIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { ChecklistItem } from '@/components/checklist-item';
 import { CreateMoveFields } from '@/components/create-move-fields';
+import { PhotoGrid } from '@/components/photo-grid';
+import { PhotoUploader } from '@/components/photo-uploader';
+import { RoomSelect } from '@/components/room-select';
 import { Stepper } from '@/components/stepper';
 import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -94,6 +98,21 @@ const radiusScale = [
   { token: 'rounded-xl', className: 'rounded-xl' },
   { token: 'rounded-4xl', className: 'rounded-4xl' },
 ];
+
+const samplePhotos: Photo[] = [
+  { room: 'kitchen', file: 'kitchen' },
+  { room: 'kitchen', file: 'kitchen-2' },
+  { room: 'bedroom', file: 'bedroom' },
+].map(({ room, file }, index) => ({
+  id: `00000000-0000-4000-8000-00000000000${index}`,
+  moveId: '00000000-0000-4000-8000-000000000099',
+  stage: 'before',
+  room: room as Room,
+  width: 800,
+  height: 600,
+  createdAt: '2026-10-12T14:32:00.000Z',
+  url: `https://picsum.photos/seed/movemate-${file}/400/300`,
+}));
 
 const buttonVariants = ['default', 'secondary', 'ghost', 'destructive', 'link'] as const;
 const buttonSizes = ['sm', 'default', 'lg', 'xl'] as const;
@@ -274,6 +293,27 @@ export function DesignPage() {
         <div className="max-w-md">
           <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />
         </div>
+      </DesignSection>
+
+      <DesignSection id="room-select" title="Room select" description="Default, disabled. Opens with Enter or Space.">
+        <div className="grid max-w-md grid-cols-2 gap-4">
+          <RoomSelect value="kitchen" onValueChange={() => undefined} label="Room (default)" />
+          <RoomSelect value="bedroom" onValueChange={() => undefined} label="Room (disabled)" disabled />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="photo-uploader" title="Photo uploader" description="Choose or drop photos, label each, remove before upload. Add files to see the preview, room limit and upload states.">
+        <PhotoUploader existingCounts={{ kitchen: 3 }} upload={() => new Promise((resolve) => setTimeout(resolve, 1500))} />
+        <PhotoUploader existingCounts={{}} upload={() => Promise.reject(new Error('Upload failed'))} />
+        <div className="max-w-md">
+          <PhotoUploader existingCounts={{}} upload={() => Promise.resolve()} disabled />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="photo-grid" title="Photo grid" description="Grouped by room, with relabel and delete. Populated, disabled and empty.">
+        <PhotoGrid photos={samplePhotos} onRelabel={() => undefined} onDelete={() => undefined} />
+        <PhotoGrid photos={samplePhotos.slice(0, 1)} onRelabel={() => undefined} onDelete={() => undefined} disabled />
+        <PhotoGrid photos={[]} onRelabel={() => undefined} onDelete={() => undefined} />
       </DesignSection>
 
       <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">

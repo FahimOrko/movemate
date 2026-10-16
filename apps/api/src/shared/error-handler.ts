@@ -1,5 +1,6 @@
 import type { ErrorBody } from '@movemate/contracts';
 import type { ErrorRequestHandler } from 'express';
+import { MulterError } from 'multer';
 import { ZodError, z } from 'zod';
 import { AppError } from './errors';
 
@@ -16,6 +17,11 @@ function toErrorResponse(error: unknown): ErrorResponse {
   }
   if (error instanceof ZodError) {
     return errorResponse(400, 'validation_error', z.prettifyError(error));
+  }
+  if (error instanceof MulterError) {
+    return error.code === 'LIMIT_FILE_SIZE'
+      ? errorResponse(413, 'payload_too_large', 'The photo is too large')
+      : errorResponse(400, 'validation_error', 'Send exactly one photo in the "file" field');
   }
   if (isMalformedJsonBody(error)) {
     return errorResponse(400, 'validation_error', 'Request body is not valid JSON');

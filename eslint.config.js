@@ -17,13 +17,24 @@ export default tseslint.config(
     files: ['apps/api/**/*.ts', '**/*.config.{ts,js}'],
     languageOptions: { globals: globals.node },
   },
-  {
-    // A context reaches another context through its service, never its repository.
-    files: ['apps/api/src/contexts/**/*.ts'],
+  ...['move', 'guidance', 'photos'].map((context) => ({
+    // A context reaches another context through its service, never its repository or db/schema file.
+    files: [`apps/api/src/contexts/${context}/**/*.ts`],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [{ group: ['../**/*.repository'], message: 'Call the other context’s service instead.' }] }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['../**/*.repository'], message: 'Call the other context’s service instead.' },
+            {
+              group: ['**/db/schema/*', `!**/db/schema/${context}`],
+              message: 'Use only your own db/schema file; call the other context’s service instead.',
+            },
+          ],
+        },
+      ],
     },
-  },
+  })),
   {
     files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
