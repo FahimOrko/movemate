@@ -20,20 +20,46 @@ import { Spinner } from '@/components/ui/spinner';
 import { DesignSection } from './design-section';
 
 // Class names are written out in full so Tailwind can find them.
-const colorTokens = [
-  { name: 'background', swatch: 'bg-background' },
-  { name: 'foreground', swatch: 'bg-foreground' },
-  { name: 'card', swatch: 'bg-card' },
-  { name: 'primary', swatch: 'bg-primary' },
-  { name: 'primary-foreground', swatch: 'bg-primary-foreground' },
-  { name: 'secondary / muted', swatch: 'bg-secondary' },
-  { name: 'muted-foreground', swatch: 'bg-muted-foreground' },
-  { name: 'accent', swatch: 'bg-accent' },
-  { name: 'destructive', swatch: 'bg-destructive' },
-  { name: 'border', swatch: 'bg-border' },
-  { name: 'input', swatch: 'bg-input' },
-  { name: 'grid', swatch: 'bg-grid' },
+// Class names are written out in full so Tailwind can find them. Hex values are documentation of the tokens in index.css.
+type Swatch = { token: string; hex: string; swatch: string };
+
+const colorTokens: Swatch[] = [
+  { token: 'background', hex: '#FFFFFF', swatch: 'bg-background' },
+  { token: 'surface', hex: '#F5F5F7', swatch: 'bg-surface' },
+  { token: 'foreground', hex: '#1D1D1F', swatch: 'bg-foreground' },
+  { token: 'muted-foreground', hex: '#6E6E73', swatch: 'bg-muted-foreground' },
+  { token: 'border / grid', hex: '#D2D2D7', swatch: 'bg-border' },
+  { token: 'input', hex: '#86868B', swatch: 'bg-input' },
+  { token: 'primary', hex: '#0071E3', swatch: 'bg-primary' },
+  { token: 'primary-hover', hex: '#0077ED', swatch: 'bg-primary-hover' },
+  { token: 'primary-pressed', hex: '#006EDB', swatch: 'bg-primary-pressed' },
+  { token: 'ring', hex: '#0071E3 at 40%', swatch: 'bg-ring/40' },
 ];
+
+const statusTokens: Swatch[] = [
+  { token: 'success', hex: '#34C759', swatch: 'bg-success' },
+  { token: 'success-text', hex: '#1F7A38', swatch: 'bg-success-text' },
+  { token: 'warning', hex: '#FF9500', swatch: 'bg-warning' },
+  { token: 'warning-text', hex: '#A64B00', swatch: 'bg-warning-text' },
+  { token: 'destructive', hex: '#FF3B30', swatch: 'bg-destructive' },
+  { token: 'destructive-text', hex: '#C9000F', swatch: 'bg-destructive-text' },
+];
+
+function SwatchList({ swatches }: { swatches: Swatch[] }) {
+  return (
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {swatches.map(({ token, hex, swatch }) => (
+        <li key={token} className="flex items-center gap-3">
+          <span className={`size-10 shrink-0 rounded-lg border ${swatch}`} />
+          <span className="flex flex-col text-sm">
+            {token}
+            <code className="text-xs text-muted-foreground">{hex}</code>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const typeScale = [
   { token: 'text-display', className: 'text-display', sample: 'Move in with proof.' },
@@ -64,9 +90,10 @@ const radiusScale = [
   { token: 'rounded-4xl', className: 'rounded-4xl' },
 ];
 
-const buttonVariants = ['default', 'secondary', 'outline', 'ghost', 'destructive', 'link'] as const;
+const buttonVariants = ['default', 'secondary', 'ghost', 'destructive', 'link'] as const;
 const buttonSizes = ['sm', 'default', 'lg', 'xl'] as const;
-const badgeVariants = ['default', 'secondary', 'outline', 'destructive'] as const;
+const badgeVariants = ['default', 'secondary', 'outline'] as const;
+const statusBadgeVariants = ['success', 'warning', 'destructive'] as const;
 
 export function DesignPage() {
   return (
@@ -78,23 +105,23 @@ export function DesignPage() {
             Every token and component MoveMate uses, in each of its states.
           </p>
         </div>
-        <Button asChild variant="outline">
+        <Button asChild variant="secondary">
           <Link to="/">Back to MoveMate</Link>
         </Button>
       </header>
 
-      <DesignSection id="colors" title="Colors" description="Cool neutrals and one cobalt accent. Light theme only.">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {colorTokens.map((token) => (
-            <li key={token.name} className="flex items-center gap-3">
-              <span className={`size-10 shrink-0 rounded-lg border ${token.swatch}`} />
-              <span className="text-sm">{token.name}</span>
-            </li>
-          ))}
-        </ul>
+      <DesignSection id="colors" title="Colors" description="Apple's palette. Light theme only.">
+        <SwatchList swatches={colorTokens} />
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">
+            Status colors. Findings and errors only, never decoration. Use the fill for borders and icons and the text
+            variant for words, because the fills fail 4.5:1 on white.
+          </p>
+          <SwatchList swatches={statusTokens} />
+        </div>
       </DesignSection>
 
-      <DesignSection id="type" title="Typography" description="Geist. Three custom steps on top of Tailwind's base, sm and xs.">
+      <DesignSection id="type" title="Typography" description="System font stack, so Apple devices render SF. Three custom steps on top of Tailwind's base, sm and xs.">
         <ul className="flex flex-col gap-5">
           {typeScale.map((step) => (
             <li key={step.token} className="grid gap-1 sm:grid-cols-4 sm:items-baseline sm:gap-6">
@@ -105,7 +132,7 @@ export function DesignPage() {
         </ul>
       </DesignSection>
 
-      <DesignSection id="spacing" title="Spacing and radius" description="Tailwind's 4px spacing steps. Controls use rounded-lg, cards rounded-xl, badges are pills.">
+      <DesignSection id="spacing" title="Spacing and radius" description="Tailwind's 4px spacing steps. Inputs use rounded-lg (10px), cards rounded-xl (16px), buttons and badges are pills.">
         <ul className="flex flex-col gap-2">
           {spacingScale.map((space) => (
             <li key={space.step} className="flex items-center gap-4">
@@ -124,7 +151,7 @@ export function DesignPage() {
         </ul>
       </DesignSection>
 
-      <DesignSection id="buttons" title="Button" description="Hover any button to see its hover state.">
+      <DesignSection id="buttons" title="Button" description="Pills. Hover and press show primary-hover and primary-pressed. Press Tab to see the blue focus ring.">
         <div className="flex flex-wrap items-center gap-3">
           {buttonVariants.map((variant) => (
             <Button key={variant} variant={variant}>
@@ -145,8 +172,8 @@ export function DesignPage() {
             <Spinner data-icon="inline-start" />
             Saving
           </Button>
-          <Button variant="outline" disabled>
-            Disabled outline
+          <Button variant="secondary" disabled>
+            Disabled secondary
           </Button>
         </div>
       </DesignSection>
@@ -164,31 +191,42 @@ export function DesignPage() {
           <div className="grid gap-2">
             <Label htmlFor="design-error">With error</Label>
             <Input id="design-error" aria-invalid="true" aria-describedby="design-error-text" defaultValue="" />
-            <p id="design-error-text" className="text-sm text-destructive">
+            <p id="design-error-text" className="text-sm text-destructive-text">
               Enter the address you are moving into.
             </p>
           </div>
         </div>
       </DesignSection>
 
-      <DesignSection id="cards" title="Card">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Kitchen</CardTitle>
-            <CardDescription>4 before photos</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm">Check whether the counter edge near the sink is chipped.</CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm">
-              Add a check
-            </Button>
-          </CardFooter>
-        </Card>
+      <DesignSection id="cards" title="Card" description="White with a soft shadow, or the surface color with none.">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {(['default', 'surface'] as const).map((variant) => (
+            <Card key={variant} variant={variant}>
+              <CardHeader>
+                <CardTitle>Kitchen</CardTitle>
+                <CardDescription>4 before photos</CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm">Check whether the counter edge near the sink is chipped.</CardContent>
+              <CardFooter>
+                <Button variant="secondary" size="sm">
+                  Add a check
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </DesignSection>
 
-      <DesignSection id="badges" title="Badge">
+      <DesignSection id="badges" title="Badge" description="Status badges are for findings and errors only.">
         <div className="flex flex-wrap items-center gap-3">
           {badgeVariants.map((variant) => (
+            <Badge key={variant} variant={variant}>
+              {variant}
+            </Badge>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {statusBadgeVariants.map((variant) => (
             <Badge key={variant} variant={variant}>
               {variant}
             </Badge>
