@@ -33,23 +33,25 @@ export function RoomCard({ room, photos, checkCount, aiCheckCount = 0, onOpen, a
         <span className="relative block bg-surface">
           {cover && <img src={cover.url} alt={`${name} cover photo`} loading="lazy" className="aspect-4/3 w-full object-cover" />}
         </span>
-        <span className="flex flex-wrap items-center gap-2 p-3">
-          <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
-          {extra > 0 && <Badge variant="outline">{`+${extra} ${extra === 1 ? 'photo' : 'photos'}`}</Badge>}
-          {analyzing ? (
-            <Skeleton className="h-5 w-16 rounded-4xl" aria-hidden="true" />
-          ) : (
-            <Badge variant={failed ? 'destructive' : 'secondary'}>
-              {failed ? 'Failed' : checkCount === 0 ? 'No checks yet' : `${checkCount} ${checkCount === 1 ? 'check' : 'checks'}`}
-            </Badge>
-          )}
-          {!analyzing && !failed && aiCheckCount > 0 && (
-            <Badge variant="success">
-              <CheckIcon aria-hidden="true" />
-              Analyzed
-            </Badge>
-          )}
-          {analyzing && <span className="sr-only">Analyzing</span>}
+        <span className="flex flex-col gap-2 p-3">
+          <span className="font-medium wrap-break-word">{name}</span>
+          <span className="flex flex-wrap items-center gap-2">
+            {extra > 0 && <Badge variant="outline">{`+${extra} ${extra === 1 ? 'photo' : 'photos'}`}</Badge>}
+            {analyzing ? (
+              <Skeleton className="h-5 w-16 rounded-4xl" aria-hidden="true" />
+            ) : (
+              <Badge variant={failed ? 'destructive' : 'secondary'}>
+                {failed ? 'Failed' : checkCount === 0 ? 'No checks yet' : `${checkCount} ${checkCount === 1 ? 'check' : 'checks'}`}
+              </Badge>
+            )}
+            {!analyzing && !failed && aiCheckCount > 0 && (
+              <Badge variant="success">
+                <CheckIcon aria-hidden="true" />
+                Analyzed
+              </Badge>
+            )}
+            {analyzing && <span className="sr-only">Analyzing</span>}
+          </span>
         </span>
       </button>
       {failed && (

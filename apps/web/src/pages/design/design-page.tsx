@@ -665,7 +665,7 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="room-card" title="Room card" description="One per room with photos. The cover is the first photo. Default, Analyzed once the AI wrote checks for the room, loading while the AI works, failed with a per-room Try again, no checks yet and several photos. The whole card is a button.">
+      <DesignSection id="room-card" title="Room card" description="One per room with photos. The cover is the first photo. Default, Analyzed once the AI wrote checks for the room, loading while the AI works, failed with a per-room Try again, no checks yet and several photos. The footer has two rows: the full room name (wraps only if very long), then the badges, which wrap onto a new line when they do not fit. The whole card is a button.">
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <li><RoomCard room="kitchen" photos={samplePhotos.slice(0, 1)} checkCount={7} aiCheckCount={7} onOpen={() => undefined} /></li>
           <li><RoomCard room="bedroom" photos={samplePhotos.slice(2)} checkCount={0} analyzing onOpen={() => undefined} /></li>
