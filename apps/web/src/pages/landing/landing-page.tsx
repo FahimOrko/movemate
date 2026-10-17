@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "lucide-react";
 import { Link } from "react-router";
 import { InteractiveBackground } from "@/components/interactive-background";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 export function LandingPage() {
@@ -8,7 +9,7 @@ export function LandingPage() {
     <div className="relative isolate flex min-h-dvh flex-col overflow-hidden">
       <InteractiveBackground className="-z-10" />
       <header className="mx-auto w-full max-w-6xl px-6 py-6">
-        <span className="text-heading">MoveMate</span>
+        <Logo size={32} />
       </header>
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-6 pb-24">
         <div className="max-w-xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">

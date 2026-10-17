@@ -7,6 +7,7 @@ import { AiErrorAlert } from '@/components/ai-error-alert';
 import { EnlargeablePhoto } from '@/components/enlargeable-photo';
 import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
+import { Logo } from '@/components/logo';
 import { ChecklistItem } from '@/components/checklist-item';
 import { CreateMoveFields } from '@/components/create-move-fields';
 import { PhotoGrid } from '@/components/photo-grid';
@@ -304,7 +305,26 @@ export function DesignPage() {
         </Button>
       </header>
 
-      <DesignSection id="colors" title="Colors" description="Apple's palette. Light theme only.">
+      <DesignSection id="logo" title="Logo" description="A house with a check mark. Mark in primary, wordmark in foreground. Size is a prop in px.">
+        <div className="flex flex-wrap items-end gap-8">
+          {[16, 24, 32, 48, 64].map((size) => (
+            <div key={size} className="flex flex-col items-start gap-2">
+              <Logo variant="mark" size={size} />
+              <span className="text-sm text-muted-foreground">Mark {size}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-end gap-8">
+          {[16, 24, 32, 48, 64].map((size) => (
+            <div key={size} className="flex flex-col items-start gap-2">
+              <Logo size={size} />
+              <span className="text-sm text-muted-foreground">Wordmark {size}</span>
+            </div>
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection id="colors"title="Colors" description="Apple's palette. Light theme only.">
         <SwatchList swatches={colorTokens} />
         <div className="flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">
