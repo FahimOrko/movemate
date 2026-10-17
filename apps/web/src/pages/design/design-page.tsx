@@ -301,6 +301,22 @@ const designChecklist: GuidanceProgress[] = [
 const allHandled = designChecklist.map((entry): GuidanceProgress => ({ ...entry, status: entry.status === 'pending' || entry.status === 'no' ? 'done' : entry.status }));
 const noop = () => undefined;
 
+function CollapsiblePanelDemo({ initialChecklistCollapsed, initialRoomChecksCollapsed }: { initialChecklistCollapsed: boolean; initialRoomChecksCollapsed: boolean }) {
+  const [collapsed, setCollapsed] = useState(initialChecklistCollapsed);
+  const [roomChecksCollapsed, setRoomChecksCollapsed] = useState(initialRoomChecksCollapsed);
+  return (
+    <ChecklistPanel
+      entries={designChecklist}
+      onStatusChange={noop}
+      roomChecks={sampleChecks}
+      collapsed={collapsed}
+      onCollapsedChange={setCollapsed}
+      roomChecksCollapsed={roomChecksCollapsed}
+      onRoomChecksCollapsedChange={setRoomChecksCollapsed}
+    />
+  );
+}
+
 function StatusControlDemo({ label, initial, disabled }: { label: string; initial: ChecklistStatus; disabled?: boolean }) {
   const [status, setStatus] = useState(initial);
   return (
@@ -573,13 +589,19 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="checklist-panel" title="Move checklist panel and drawer" description="The side panel on lg and up, with the handled counter. Below lg the same panel opens from the trigger in a Sheet.">
+      <DesignSection id="checklist-panel" title="Move checklist panel and drawer" description="The side panel on lg and up, with the handled counter. It collapses to a compact bar with a progress line and done, N/A and left counts; Room checks has its own toggle and collapses independently, so the two sections can be in any combination (the app defaults to checklist open, Room checks closed). Both choices are remembered separately. The drawer trigger also shows what is left. Below lg the same panel opens from the trigger in a Sheet.">
         <div className="grid gap-10 md:grid-cols-2">
           <div className="max-w-sm">
             <ChecklistPanel entries={designChecklist} onStatusChange={noop} roomChecks={sampleChecks} />
           </div>
           <div className="max-w-sm">
             <ChecklistPanel entries={allHandled} onStatusChange={noop} />
+          </div>
+          <div className="max-w-sm">
+            <CollapsiblePanelDemo initialChecklistCollapsed={false} initialRoomChecksCollapsed />
+          </div>
+          <div className="max-w-sm">
+            <CollapsiblePanelDemo initialChecklistCollapsed initialRoomChecksCollapsed={false} />
           </div>
         </div>
         <div>
@@ -643,13 +665,13 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="room-card" title="Room card" description="One per room with photos. The cover is the first photo. Default, loading while the AI works, failed with a per-room Try again, no checks yet and several photos. The whole card is a button.">
+      <DesignSection id="room-card" title="Room card" description="One per room with photos. The cover is the first photo. Default, Analyzed once the AI wrote checks for the room, loading while the AI works, failed with a per-room Try again, no checks yet and several photos. The whole card is a button.">
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <li><RoomCard room="kitchen" photos={samplePhotos.slice(0, 1)} checkCount={7} onOpen={() => undefined} /></li>
+          <li><RoomCard room="kitchen" photos={samplePhotos.slice(0, 1)} checkCount={7} aiCheckCount={7} onOpen={() => undefined} /></li>
           <li><RoomCard room="bedroom" photos={samplePhotos.slice(2)} checkCount={0} analyzing onOpen={() => undefined} /></li>
           <li><RoomCard room="bathroom" photos={samplePhotos.slice(2)} checkCount={0} failed onRetry={() => undefined} onOpen={() => undefined} /></li>
           <li><RoomCard room="hallway" photos={samplePhotos.slice(2)} checkCount={0} onOpen={() => undefined} /></li>
-          <li><RoomCard room="living_room" photos={[...samplePhotos, ...samplePhotos.slice(0, 1)]} checkCount={1} onOpen={() => undefined} /></li>
+          <li><RoomCard room="living_room" photos={[...samplePhotos, ...samplePhotos.slice(0, 1)]} checkCount={1} aiCheckCount={1} onOpen={() => undefined} /></li>
         </ul>
       </DesignSection>
 

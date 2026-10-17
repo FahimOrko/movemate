@@ -62,6 +62,7 @@ export function BaselinePanel({ move }: { move: Move }) {
                 room={room}
                 photos={(photos.data ?? []).filter((photo) => photo.room === room)}
                 checkCount={(checks.data ?? []).filter((check) => check.room === room).length}
+                aiCheckCount={(checks.data ?? []).filter((check) => check.room === room && check.source === 'ai').length}
                 analyzing={isAnalyzing(room)}
                 failed={baseline.isSuccess && failedRooms.includes(room)}
                 onOpen={() => openCard(room)}

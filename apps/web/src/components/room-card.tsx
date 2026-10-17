@@ -1,5 +1,5 @@
 import { type Photo, type Room, roomLabels } from '@movemate/contracts';
-import { CircleAlertIcon } from 'lucide-react';
+import { CheckIcon, CircleAlertIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +9,8 @@ type RoomCardProps = {
   room: Room;
   photos: Photo[];
   checkCount: number;
+  /** Checks the AI wrote for this room; above zero the card shows Analyzed. */
+  aiCheckCount?: number;
   onOpen: () => void;
   /** Shows a placeholder badge while the AI works on this room. */
   analyzing?: boolean;
@@ -17,7 +19,7 @@ type RoomCardProps = {
   onRetry?: () => void;
 };
 
-export function RoomCard({ room, photos, checkCount, onOpen, analyzing, failed, onRetry }: RoomCardProps) {
+export function RoomCard({ room, photos, checkCount, aiCheckCount = 0, onOpen, analyzing, failed, onRetry }: RoomCardProps) {
   const cover = photos[0];
   const extra = photos.length - 1;
   const name = roomLabels[room];
@@ -39,6 +41,12 @@ export function RoomCard({ room, photos, checkCount, onOpen, analyzing, failed, 
           ) : (
             <Badge variant={failed ? 'destructive' : 'secondary'}>
               {failed ? 'Failed' : checkCount === 0 ? 'No checks yet' : `${checkCount} ${checkCount === 1 ? 'check' : 'checks'}`}
+            </Badge>
+          )}
+          {!analyzing && !failed && aiCheckCount > 0 && (
+            <Badge variant="success">
+              <CheckIcon aria-hidden="true" />
+              Analyzed
             </Badge>
           )}
           {analyzing && <span className="sr-only">Analyzing</span>}
