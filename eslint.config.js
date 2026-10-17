@@ -17,7 +17,7 @@ export default tseslint.config(
     files: ['apps/api/**/*.ts', '**/*.config.{ts,js}'],
     languageOptions: { globals: globals.node },
   },
-  ...['move', 'guidance', 'photos'].map((context) => ({
+  ...['move', 'guidance', 'photos', 'inspection'].map((context) => ({
     // A context reaches another context through its service, never its repository or db/schema file.
     files: [`apps/api/src/contexts/${context}/**/*.ts`],
     rules: {

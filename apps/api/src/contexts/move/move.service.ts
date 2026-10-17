@@ -6,6 +6,7 @@ import type { MoveEvent } from './move.types';
 // What each event unlocks. A row is added in the slice that raises the event.
 const eventTable: Record<MoveEvent, { requires: Phase | null; unlocks: Phase }> = {
   MoveCreated: { requires: null, unlocks: 'prepare' },
+  BeforePhotosAnalyzed: { requires: 'before_photos', unlocks: 'move_in' },
 };
 
 const advanceBlockedMessage: Partial<Record<Phase, string>> = {

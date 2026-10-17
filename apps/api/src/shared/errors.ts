@@ -3,6 +3,8 @@ const statusByCode = {
   not_found: 404,
   invalid_phase_transition: 409,
   payload_too_large: 413,
+  ai_failure: 502,
+  ai_not_configured: 503,
   internal_error: 500,
   db_unavailable: 503,
 } as const;

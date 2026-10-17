@@ -11,6 +11,8 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: process.env.TEST_DATABASE_URL ?? '',
+      OPENROUTER_API_KEY: 'test-key',
+      OPENROUTER_VISION_MODEL: 'test/vision-model',
       UPLOAD_DIR: fs.mkdtempSync(path.join(os.tmpdir(), 'movemate-uploads-')),
     },
     globalSetup: ['./src/test/global-setup.ts'],

@@ -107,3 +107,7 @@ export async function getFilePath(id: string): Promise<string> {
   if (!absolutePath.startsWith(root + path.sep)) throw new AppError('not_found', 'Photo not found');
   return absolutePath;
 }
+
+export async function readFile(id: string): Promise<Buffer> {
+  return fs.readFile(await getFilePath(id));
+}

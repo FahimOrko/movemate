@@ -1,1 +1,1 @@
-export type MoveEvent = 'MoveCreated';
+export type MoveEvent = 'MoveCreated' | 'BeforePhotosAnalyzed';

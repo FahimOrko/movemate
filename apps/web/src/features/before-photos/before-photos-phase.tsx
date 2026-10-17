@@ -1,4 +1,5 @@
 import type { Move } from '@movemate/contracts';
+import { BaselinePanel } from './baseline-panel';
 import { PhotosPanel } from '@/features/photos/photos-panel';
 
 export function BeforePhotosPhase({ move }: { move: Move }) {
@@ -13,6 +14,7 @@ export function BeforePhotosPhase({ move }: { move: Move }) {
         </p>
       </div>
       <PhotosPanel moveId={move.id} stage="before" />
+      <BaselinePanel move={move} />
     </section>
   );
 }

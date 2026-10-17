@@ -1,10 +1,9 @@
-import { MAX_PHOTOS_PER_ROOM, type Room } from '@movemate/contracts';
+import { MAX_PHOTOS_PER_ROOM, type Room, roomLabels } from '@movemate/contracts';
 import { ImagePlusIcon, XIcon } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
 import { RoomSelect } from '@/components/room-select';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { roomLabels } from '@/lib/rooms';
 import { cn } from '@/lib/utils';
 
 type Draft = { id: string; file: File; previewUrl: string; room: Room; error?: string };

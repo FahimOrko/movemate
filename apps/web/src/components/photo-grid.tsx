@@ -1,9 +1,8 @@
-import { roomSchema, type Photo, type Room } from '@movemate/contracts';
+import { roomSchema, type Photo, type Room, roomLabels } from '@movemate/contracts';
 import { ImageIcon, Trash2Icon } from 'lucide-react';
 import { RoomSelect } from '@/components/room-select';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { roomLabels } from '@/lib/rooms';
 
 type PhotoGridProps = {
   photos: Photo[];

@@ -1,6 +1,5 @@
-import { roomSchema, type Room } from '@movemate/contracts';
+import { roomSchema, type Room, roomLabels } from '@movemate/contracts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { roomLabels } from '@/lib/rooms';
 
 type RoomSelectProps = {
   value: Room;

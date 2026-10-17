@@ -1,11 +1,13 @@
-import type { Photo, Room } from '@movemate/contracts';
-import { CircleAlertIcon, HouseIcon, InfoIcon } from 'lucide-react';
+import type { Photo, Room, RoomCheck } from '@movemate/contracts';
+import { CircleAlertIcon, HouseIcon, InfoIcon, SparklesIcon } from 'lucide-react';
 import { Link } from 'react-router';
+import { AiErrorAlert } from '@/components/ai-error-alert';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { ChecklistItem } from '@/components/checklist-item';
 import { CreateMoveFields } from '@/components/create-move-fields';
 import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
+import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
 import { Stepper } from '@/components/stepper';
 import { TipCard } from '@/components/tip-card';
@@ -112,6 +114,20 @@ const samplePhotos: Photo[] = [
   height: 600,
   createdAt: '2026-10-12T14:32:00.000Z',
   url: `https://picsum.photos/seed/movemate-${file}/400/300`,
+}));
+
+const sampleChecks: RoomCheck[] = (
+  [
+    { source: 'ai', text: 'Check whether the countertop edge left of the sink has chips or stains.' },
+    { source: 'ai', text: 'Check whether the oven door seal appears intact along the lower edge.' },
+    { source: 'user', text: 'Ask about the dishwasher filter.' },
+  ] as const
+).map((check, index) => ({
+  ...check,
+  id: `00000000-0000-4000-8000-0000000001${index}0`,
+  moveId: '00000000-0000-4000-8000-000000000099',
+  room: 'kitchen',
+  createdAt: '2026-10-12T14:32:00.000Z',
 }));
 
 const buttonVariants = ['default', 'secondary', 'ghost', 'destructive', 'link'] as const;
@@ -314,6 +330,35 @@ export function DesignPage() {
         <PhotoGrid photos={samplePhotos} onRelabel={() => undefined} onDelete={() => undefined} />
         <PhotoGrid photos={samplePhotos.slice(0, 1)} onRelabel={() => undefined} onDelete={() => undefined} disabled />
         <PhotoGrid photos={[]} onRelabel={() => undefined} onDelete={() => undefined} />
+      </DesignSection>
+
+      <DesignSection id="room-checks" title="Room check list" description="Per room: AI and your own checks, remove, add. Populated, analyzing, empty, disabled and add error. Submit an empty field to see the error.">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <RoomCheckList room="kitchen" checks={sampleChecks} onAdd={() => new Promise((resolve) => setTimeout(resolve, 800))} onDelete={() => undefined} />
+          <RoomCheckList room="bedroom" checks={[]} analyzing onAdd={() => Promise.resolve()} onDelete={() => undefined} />
+          <RoomCheckList room="bathroom" checks={[]} onAdd={() => Promise.reject(new Error('Could not add the check'))} onDelete={() => undefined} />
+          <RoomCheckList room="hallway" checks={sampleChecks.slice(0, 1)} disabled onAdd={() => Promise.resolve()} onDelete={() => undefined} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="ai-error" title="AI error alert and analyze button" description="Shown when the AI fails. Retry is hidden when AI is not configured.">
+        <AiErrorAlert title="The AI could not analyze your photos" message="The AI rate limit was reached. Try again later or add checks by hand." onRetry={() => undefined} />
+        <AiErrorAlert title="The AI could not analyze your photos" message="The AI took too long to answer." onRetry={() => undefined} retrying />
+        <AiErrorAlert title="AI is not set up" message="Add your checks by hand below, then continue." />
+        <div className="flex flex-wrap items-center gap-3">
+          <Button>
+            <SparklesIcon data-icon="inline-start" />
+            Analyze photos
+          </Button>
+          <Button disabled aria-busy="true">
+            <Spinner data-icon="inline-start" />
+            Analyzing
+          </Button>
+          <Button disabled>
+            <SparklesIcon data-icon="inline-start" />
+            Analyze photos
+          </Button>
+        </div>
       </DesignSection>
 
       <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">

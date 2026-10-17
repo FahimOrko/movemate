@@ -53,8 +53,8 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 ## Slice 3: Phase 2 baseline analysis
 **Contracts:** `inspection.ts` (RoomCheck DTO, add check `{ room, text 1..300 }`).
 **DB:** `db/schema/inspection.ts` (room_checks); migration `0002`.
-**API:** `shared/ai/openrouter.client.ts` (`completeJson({ system, text, images, schema })`: base64 JPEG data URLs, `response_format: json_schema` from `z.toJSONSchema`, `provider.require_parameters: true`, `AbortSignal.timeout`, one retry on invalid JSON, otherwise `AppError('ai_failure')` 502, logs model and duration). `contexts/inspection/*` + `inspection.prompts.ts` (rules from SPEC §8). Baseline: before photos grouped by room (first 4 each), rooms analyzed in parallel, all-or-nothing; replaces `source=ai` checks and keeps user checks; raises BeforePhotosAnalyzed. env: OPENROUTER_API_KEY, OPENROUTER_BASE_URL, OPENROUTER_VISION_MODEL, OPENROUTER_TIMEOUT_MS. photos.service exposes `listByStage` and `readFile`.
-**Endpoints:** `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`.
+**API:** `shared/ai/openrouter.client.ts` (`completeJson({ system, text, images, schema })`: base64 JPEG data URLs, `response_format: json_schema` from `z.toJSONSchema`, `provider.require_parameters: true`, `AbortSignal.timeout`, one retry on invalid JSON, otherwise `AppError('ai_failure')` 502, logs model and duration). `contexts/inspection/*` + `inspection.prompts.ts` (rules from SPEC §8). Baseline: before photos grouped by room (first 4 each), rooms analyzed one after another, rooms that succeed are kept and failed rooms are returned; replaces `source=ai` checks and keeps user checks; raises BeforePhotosAnalyzed. env: OPENROUTER_API_KEY and OPENROUTER_VISION_MODEL (both optional; without them AI routes return 503 `ai_not_configured`), OPENROUTER_TIMEOUT_MS. No `provider.require_parameters`, no base URL var. photos.service exposes `listByStage` and `readFile`.
+**Endpoints:** `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `DELETE /room-checks/:id`.
 **Web:** `features/before-photos` (uploader, Analyze button with long-running loading state, checks per room, add-check form, 502 Alert explaining manual fallback, Continue). Add RoomCheckList and the error and loading states to /design.
 **Tests:** openrouter.client with fetch stubbed (valid; invalid then valid; invalid twice gives 502; timeout gives 502; no image data in logs); inspection.service with the client mocked (grouping, max 4, keeps user checks, no partial writes on failure, raises event); routes (200, 409 before phase, 502, add check 201/400).
 **Done when:** before photos produce a per-room check list.
@@ -111,7 +111,7 @@ Own `contract` context: PDF upload, text extraction, one AI job flagging deposit
 9. **Stock photos vs. "hero only" landing.** §11's landing-page stock photos conflict with §3. → No photos on the landing page; the canvas is the visual.
 10. **AI behavior:**
     - The model must support images + `json_schema`. → Set `provider.require_parameters: true` and choose the model in env.
-    - Baseline: if any room fails, the whole run fails, and the manual fallback applies.
+    - Baseline: a failed room does not undo the others; the response lists `failedRooms` and the manual fallback always applies.
     - Re-running compare replaces findings and clears the user's answers. → The button label says so.
 11. **Demo photos block Slice 4's DoD.** They need the same room shot twice with one planted change. → Shoot them before Slice 4.
 12. **Smaller gaps:**

@@ -2,7 +2,7 @@ import { moveSchema, type CreateMove } from '@movemate/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
-const currentMoveKey = ['move', 'current'] as const;
+export const currentMoveKey = ['move', 'current'] as const;
 
 export function useCurrentMove() {
   return useQuery({ queryKey: currentMoveKey, queryFn: () => api.get('/moves/current', moveSchema.nullable()) });

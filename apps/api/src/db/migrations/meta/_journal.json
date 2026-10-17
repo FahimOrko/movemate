@@ -15,6 +15,13 @@
       "when": 1792185395952,
       "tag": "0001_aberrant_next_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792260241572,
+      "tag": "0002_hard_mole_man",
+      "breakpoints": true
     }
   ]
 }

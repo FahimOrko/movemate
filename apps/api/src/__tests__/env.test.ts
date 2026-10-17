@@ -24,3 +24,18 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...validEnv, PORT: 'abc' })).toThrow(/PORT/);
   });
 });
+
+describe('parseEnv OpenRouter settings', () => {
+  it('starts without any OpenRouter variable', () => {
+    const env = parseEnv(validEnv);
+    expect(env.OPENROUTER_API_KEY).toBeUndefined();
+    expect(env.OPENROUTER_VISION_MODEL).toBeUndefined();
+    expect(env.OPENROUTER_TIMEOUT_MS).toBe(45000);
+  });
+
+  it('treats empty values as unset', () => {
+    const env = parseEnv({ ...validEnv, OPENROUTER_API_KEY: '', OPENROUTER_VISION_MODEL: '' });
+    expect(env.OPENROUTER_API_KEY).toBeUndefined();
+    expect(env.OPENROUTER_VISION_MODEL).toBeUndefined();
+  });
+});

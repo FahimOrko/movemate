@@ -4,6 +4,16 @@ export const rooms = ['kitchen', 'living_room', 'bedroom', 'bathroom', 'hallway'
 export const roomSchema = z.enum(rooms);
 export type Room = z.infer<typeof roomSchema>;
 
+export const roomLabels: Record<Room, string> = {
+  kitchen: 'Kitchen',
+  living_room: 'Living room',
+  bedroom: 'Bedroom',
+  bathroom: 'Bathroom',
+  hallway: 'Hallway',
+  balcony: 'Balcony',
+  other: 'Other',
+};
+
 export const photoStages = ['before', 'move_in'] as const;
 export const photoStageSchema = z.enum(photoStages);
 export type PhotoStage = z.infer<typeof photoStageSchema>;
