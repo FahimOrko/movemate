@@ -37,8 +37,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { DesignSection } from './design-section';
 
 // Class names are written out in full so Tailwind can find them.
@@ -448,6 +450,27 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
+      <DesignSection id="table" title="Table and separator" description="Label and value rows with a divider between rows, and a separator between two blocks.">
+        <Card>
+          <CardContent>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="text-muted-foreground">Rent</TableCell>
+                  <TableCell>890 € / month</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-muted-foreground">Size</TableCell>
+                  <TableCell>42 m²</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            <Separator className="my-4" />
+            <p className="text-sm text-muted-foreground">Content below a separator.</p>
+          </CardContent>
+        </Card>
+      </DesignSection>
+
       <DesignSection id="checkbox" title="Checkbox" description="Default, checked, disabled and error. Press Tab for the focus ring.">
         <div className="flex flex-wrap items-center gap-6">
           {[
@@ -594,6 +617,7 @@ export function DesignPage() {
         <div className="flex flex-wrap gap-4">
           <EnlargeablePhoto photo={samplePhotos[0] as Photo} label="Before photo of the kitchen" />
           <EnlargeablePhoto photo={sampleMoveInPhotos[0] as Photo} label="Move-in photo of the kitchen" />
+          <EnlargeablePhoto photo={sampleMoveInPhotos[0] as Photo} label="Large photo of the kitchen" className="w-full max-w-sm" />
         </div>
         <div className="grid gap-6 lg:grid-cols-2">
           <AddFindingForm room="kitchen" onAdd={() => new Promise((resolve) => setTimeout(resolve, 800))} />
