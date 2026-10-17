@@ -10,7 +10,6 @@ import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { Logo } from '@/components/logo';
 import { ChecklistDrawer } from '@/components/checklist-drawer';
-import { ChecklistNaNote } from '@/components/checklist-na-note';
 import { ChecklistPanel } from '@/components/checklist-panel';
 import { ChecklistRow } from '@/components/checklist-row';
 import { StatusControl } from '@/components/status-control';
@@ -26,8 +25,9 @@ import { RoomSelect } from '@/components/room-select';
 import { StartOverDialog } from '@/components/start-over-dialog';
 import { Stepper, type StepState } from '@/components/stepper';
 import { DiscountBadge } from '@/components/discount-badge';
-import { ProviderHeroCard } from '@/components/provider-hero-card';
-import { ProviderOptionList } from '@/components/provider-option-list';
+import { InsuranceInfoPopover } from '@/components/insurance-info-popover';
+import { ProviderCategoryList } from '@/components/provider-category-list';
+import { PARTNER_TAG } from '@/features/settle-in/partner-tag';
 import { SettleInProgress } from '@/components/settle-in-progress';
 import { SummaryView } from '@/components/summary-view';
 import { TipCard } from '@/components/tip-card';
@@ -295,6 +295,11 @@ const zeroIssueReport: Report = {
 };
 
 const designDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
+const electricityOptions = [
+  { key: 'a', name: 'Electricity Provider A' },
+  { key: 'b', name: 'Electricity Provider B' },
+];
+const ifOption = { key: 'insurance-if', name: 'If', url: 'https://example.com/if-insurance', discount: designDiscount, tag: PARTNER_TAG };
 const designChecklist: GuidanceProgress[] = [
   { key: 'sign-lease', category: 'Before you move', title: 'Read and sign the lease', description: 'Check the deposit and notice period.', status: 'pending', locked: false, providerName: null },
   { key: 'deposit', category: 'Before you move', title: 'Pay the deposit and keep the receipt', status: 'done', locked: false, providerName: null },
@@ -590,7 +595,6 @@ export function DesignPage() {
           <ChecklistRow title="Order an internet connection (unlocked)" status="pending" linked onStatusChange={noop} />
           <ChecklistRow title="Arrange electricity (provider chosen)" status="done" linked providerName="Electricity Provider A" onStatusChange={noop} />
           <ChecklistRow title="Arrange electricity (included in rent)" status="na" linked onStatusChange={noop} />
-          <ChecklistNaNote />
         </div>
         <div className="max-w-md">
           <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />
@@ -617,32 +621,41 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="provider-hero-card" title="Provider hero card" description="The highlighted insurer: offer with a copyable code, three short points, a quote link that opens in a new tab and a Select toggle. Shown default, selected, copied and without a configured url (no quote link).">
-        <div className="flex max-w-2xl flex-col gap-6">
-          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} onSelect={() => undefined} />
-          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} selected onSelect={() => undefined} />
-          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} defaultCopied onSelect={() => undefined} />
-          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" discount={designDiscount} onSelect={() => undefined} />
+      <DesignSection id="provider-category-list" title="Provider category list" description="One flat radiogroup per category in a single bordered container. The whole row is the click target, a second click clears the choice and arrow keys move and select. The last row is always Not needed (N/A). Shown default, selected and N/A selected.">
+        <div className="flex max-w-xl flex-col gap-10">
+          <ProviderCategoryList label="Electricity default" options={electricityOptions} selectedKey={null} notNeeded={false} onChoose={noop} onToggleNotNeeded={noop} />
+          <ProviderCategoryList label="Electricity selected" options={electricityOptions} selectedKey="b" notNeeded={false} onChoose={noop} onToggleNotNeeded={noop} />
+          <ProviderCategoryList label="Electricity N/A selected" options={electricityOptions} selectedKey={null} notNeeded onChoose={noop} onToggleNotNeeded={noop} />
         </div>
       </DesignSection>
 
-      <DesignSection id="provider-option-list" title="Provider option list" description="One radio-style list per category. The whole row is clickable, a second click clears the choice, arrow keys move and select. Shown default, selected, compact (Other options) and with the N/A note.">
-        <div className="flex max-w-2xl flex-col gap-6">
-          <ProviderOptionList label="Electricity default" options={[{ key: 'a', name: 'Electricity Provider A' }, { key: 'b', name: 'Electricity Provider B' }]} selectedKey={null} onChoose={() => undefined} />
-          <ProviderOptionList label="Internet selected" options={[{ key: 'a', name: 'Internet Provider A' }, { key: 'b', name: 'Internet Provider B' }]} selectedKey="b" onChoose={() => undefined} />
-          <ProviderOptionList label="Other options compact" options={[{ key: 'a', name: 'Insurer A' }, { key: 'b', name: 'Insurer B' }]} selectedKey="a" compact onChoose={() => undefined} />
-          <div className="flex flex-col gap-3">
-            <ChecklistNaNote />
-            <ProviderOptionList label="With N/A note" options={[{ key: 'a', name: 'Electricity Provider A' }]} selectedKey={null} onChoose={() => undefined} />
+      <DesignSection id="provider-if-row" title="If row" description="The highlighted insurer with a quiet partner tag. A small discount badge opens a popover on hover, focus or tap (closed, open, copied), and a quiet quote link opens in a new tab. Without a configured url the link is hidden.">
+        <div className="flex max-w-xl flex-col gap-10">
+          <ProviderCategoryList label="If closed" options={[ifOption]} selectedKey={null} notNeeded={false} onChoose={noop} onToggleNotNeeded={noop} />
+          <div className="pb-36">
+            <ProviderCategoryList label="If selected, popover open" options={[ifOption]} selectedKey="insurance-if" notNeeded={false} onChoose={noop} onToggleNotNeeded={noop} />
+          </div>
+          <div className="pb-36">
+            <DiscountBadge discount={designDiscount} defaultOpen defaultCopied />
+          </div>
+          <ProviderCategoryList label="If without url" options={[{ ...ifOption, url: null }]} selectedKey={null} notNeeded={false} onChoose={noop} onToggleNotNeeded={noop} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="insurance-info-popover" title="Insurance info popover" description="The info icon next to the Home insurance heading. Three neutral points; nothing promises coverage. Closed and open.">
+        <div className="flex items-start gap-8">
+          <InsuranceInfoPopover />
+          <div className="pb-56">
+            <InsuranceInfoPopover defaultOpen />
           </div>
         </div>
       </DesignSection>
 
-      <DesignSection id="settle-in-progress" title="Settle in progress" description="The progress line under the Settle in title and above Finish. Nothing, some and all categories chosen.">
+      <DesignSection id="settle-in-progress" title="Settle in progress" description="The progress line under the Settle in title. A category is handled when a provider is chosen or N/A is selected.">
         <div className="flex flex-col gap-4">
-          <SettleInProgress chosen={0} total={3} />
-          <SettleInProgress chosen={2} total={3} />
-          <SettleInProgress chosen={3} total={3} />
+          <SettleInProgress handled={0} total={3} />
+          <SettleInProgress handled={2} total={3} />
+          <SettleInProgress handled={3} total={3} />
         </div>
       </DesignSection>
 

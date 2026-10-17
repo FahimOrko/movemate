@@ -54,16 +54,17 @@ export async function setProgress(moveId: string, itemKey: string, status: Check
   if (!item) throw new AppError('not_found', 'Checklist item not found');
   if (isLocked(item, move.phase)) throw new AppError('invalid_phase_transition', 'Available once you reach Settle in');
   await repository.upsert(moveId, itemKey, status);
+  if (item.linkedCategory && status === 'na') await repository.deleteSelection(moveId, item.linkedCategory);
   const progress = (await listProgress(moveId)).find((entry) => entry.key === itemKey);
   if (!progress) throw new AppError('not_found', 'Checklist item not found');
   return progress;
 }
 
-// A manual N/A always wins; clearing only undoes a done that the selection could have set.
+// Choosing a provider overrides N/A; clearing only undoes a done that the selection could have set.
 async function syncLinkedItem(moveId: string, category: ProviderCategory, selected: boolean): Promise<void> {
   const itemKey = linkedItemKeys[category];
   const current = (await repository.listByMove(moveId)).find((row) => row.itemKey === itemKey)?.status ?? 'pending';
-  if (selected && current !== 'na') await repository.upsert(moveId, itemKey, 'done');
+  if (selected) await repository.upsert(moveId, itemKey, 'done');
   if (!selected && current === 'done') await repository.upsert(moveId, itemKey, 'pending');
 }
 

@@ -28,9 +28,9 @@ export function CopyCodeButton({ code, defaultCopied = false }: { code: string; 
   );
 }
 
-type DiscountBadgeProps = { discount: ProviderDiscount; defaultOpen?: boolean };
+type DiscountBadgeProps = { discount: ProviderDiscount; defaultOpen?: boolean; defaultCopied?: boolean };
 
-export function DiscountBadge({ discount, defaultOpen = false }: DiscountBadgeProps) {
+export function DiscountBadge({ discount, defaultOpen = false, defaultCopied = false }: DiscountBadgeProps) {
   const [open, setOpen] = useState(defaultOpen);
   const closeTimer = useRef<number>(undefined);
 
@@ -52,11 +52,11 @@ export function DiscountBadge({ discount, defaultOpen = false }: DiscountBadgePr
       </PopoverTrigger>
       <PopoverContent onMouseEnter={show} onMouseLeave={hideSoon} onOpenAutoFocus={(event) => event.preventDefault()}>
         <p>
-          MoveMate users get {discount.percent}% off for {discountDuration(discount.durationMonths)}
+          {discount.percent}% off for {discountDuration(discount.durationMonths)}
         </p>
         <div className="flex items-center justify-between gap-3">
-          <code className="rounded-md bg-muted px-2 py-1 font-mono text-sm">{discount.code}</code>
-          <CopyCodeButton code={discount.code} />
+          <code className="font-mono text-sm">{discount.code}</code>
+          <CopyCodeButton code={discount.code} defaultCopied={defaultCopied} />
         </div>
       </PopoverContent>
     </Popover>

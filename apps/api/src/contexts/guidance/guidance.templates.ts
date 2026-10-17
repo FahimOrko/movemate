@@ -79,6 +79,11 @@ export const prepareTips: Tip[] = [
     title: 'Photograph before you unpack',
     body: 'Take your move-in photos before boxes arrive, so the rooms are easy to see.',
   },
+  {
+    key: 'tip-home-insurance',
+    title: 'Arrange home insurance before your first night',
+    body: 'Check what a policy covers and when it starts, so you know where you stand from day one.',
+  },
 ];
 
 export const insuranceExplainer: InsuranceExplainer = {

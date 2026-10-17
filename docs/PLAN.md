@@ -94,9 +94,9 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 
 ## Settle in checklist link
 **Contracts:** `linkedItemKeys` (category to item key), `linkedCategory` on template items, `locked` and `providerName` on `guidanceProgressSchema`, `countOpenPrepare(entries)` (ignores linked items). No migration.
-**API:** `guidance.templates.ts` adds `get-home-insurance` and a "Settle in" group (Utilities becomes "Admin"). `listProgress` computes `locked` from `moveService.getById(...).phase`; `setProgress` returns 409 on a locked item; `setSelection` syncs the linked item (provider saved: done unless N/A; cleared: pending only from done).
-**Web:** `checklist-row` gets locked / linked / provider states, `status-control` sets `aria-disabled`, new `checklist-na-note` shown in Settle in; the stepper's Prepare uses `countOpenPrepare`; selection changes invalidate the checklist and summary. All states on /design.
-**Tests:** `guidance.linked.test.ts` (locked by phase, 409, works after settle_in, sync both ways, N/A wins, Prepare ignores linked items, existing keys kept).
+**API:** `guidance.templates.ts` adds `get-home-insurance` and a "Settle in" group (Utilities becomes "Admin"). `listProgress` computes `locked` from `moveService.getById(...).phase`; `setProgress` returns 409 on a locked item; `setSelection` syncs the linked item (provider saved: done, also over N/A; cleared: pending only from done). `setProgress` with `na` on a linked item clears that category's selection. Prepare tips gain `tip-home-insurance`.
+**Web:** `checklist-row` gets locked / linked / provider states, `status-control` sets `aria-disabled`, the "Choose in Settle in" link is hidden on the Settle in screen; the stepper's Prepare uses `countOpenPrepare`; selection changes invalidate the checklist and summary. All states on /design.
+**Tests:** `guidance.linked.test.ts` (locked by phase, 409, works after settle_in, sync both ways, provider over N/A sets done, N/A clears the selection, Prepare ignores linked items, existing keys kept).
 **Done when:** choosing a provider ticks the Move checklist item; `pnpm check` is green.
 
 ## Slice 7: Demo hardening
@@ -134,3 +134,7 @@ Contract analysis is an **optional step the user can skip**; the move flow works
     - The photos context's dependency isn't listed. → photos → move.
     - `GET /moves/current` with no move. → `200 { data: null }`, since that's the normal first visit.
     - The spec asks for no web unit tests. → Browser verification instead.
+
+## Settle in redesign
+**Web:** `features/settle-in` is three flat lists (Home insurance, Electricity, Internet) from `provider-category-list` and `provider-row`, each ending in "Not needed (N/A)" (selected when the linked item is `na`; it goes through the checklist PATCH). `insurance-info-popover` holds the explainer; `discount-badge` carries the offer; `settle-in-progress` shows "n of 3 handled". Hero card, offer block and N/A note are removed. All states on /design.
+**Done when:** N/A and provider choices keep the Move checklist in sync; `pnpm check` is green.

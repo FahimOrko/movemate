@@ -1,9 +1,11 @@
 import type { ChecklistStatus } from '@movemate/contracts';
 import { CheckIcon, InfoIcon } from 'lucide-react';
 import { useId, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { StatusControl } from '@/components/status-control';
 import { cn } from '@/lib/utils';
+
+const settleInPath = '/move/settle_in';
 
 type ChecklistRowProps = {
   title: string;
@@ -23,6 +25,7 @@ type ChecklistRowProps = {
 export function ChecklistRow({ title, description, status, onStatusChange, disabled, linked, locked, providerName, defaultExpanded = false }: ChecklistRowProps) {
   const descriptionId = useId();
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const onSettleIn = useLocation().pathname === settleInPath;
   return (
     <div className={cn('py-2.5', (status === 'na' || locked) && 'opacity-60')}>
       <div className="flex items-center justify-between gap-3">
@@ -49,12 +52,14 @@ export function ChecklistRow({ title, description, status, onStatusChange, disab
         <StatusControl value={status} onChange={onStatusChange} label={title} disabled={disabled || locked} />
       </div>
       {locked && <p className="mt-1 text-sm text-muted-foreground">You can choose this later in Settle in</p>}
-      {linked && !locked && (
+      {linked && !locked && (providerName || !onSettleIn) && (
         <p className="mt-1 text-sm text-muted-foreground">
           {providerName && <span className="mr-2 font-medium text-foreground">{providerName}</span>}
-          <Link to="/move/settle_in" className="rounded-sm underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40">
-            Choose in Settle in
-          </Link>
+          {!onSettleIn && (
+            <Link to={settleInPath} className="rounded-sm underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40">
+              Choose in Settle in
+            </Link>
+          )}
         </p>
       )}
       {description && expanded && (

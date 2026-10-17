@@ -45,10 +45,11 @@ Business goal: the final phase connects the user to providers they need after mo
   - Report is a frozen snapshot at generation time
 - **Phase 5: Settle in** (business value, templated)
   - Providers by category: electricity, internet, home insurance
-  - Short explanation of why home insurance matters when moving in
-  - If highlighted: "MoveMate users get a discount with If." Button links to `IF_INSURANCE_URL`
+  - Each category is one flat single-select list with a last row "Not needed (N/A)". A category is handled when a provider is chosen or N/A is selected; the screen shows "n of 3 handled".
+  - The short home insurance explainer is an info popover next to the Home insurance heading (neutral wording, no coverage promises). The Prepare planning tips also include "Arrange home insurance before your first night".
+  - If is highlighted by a small discount badge (popover: percent, duration and copyable code, all from the API constants) and a quiet "Get a quote" link to `IF_INSURANCE_URL` (hidden when unset).
   - Other providers listed by name only. No prices anywhere.
-  - **Sync with the Move checklist** (in guidance): saving a provider sets the linked item to `done`; clearing it sets the item back to `pending` only if it is `done` (N/A and No stay). A manual answer wins: if the item is N/A, selecting a provider still saves the choice but the item stays N/A, and Settle in shows "Marked N/A in your Move checklist" on that category.
+  - **Sync with the Move checklist** (in guidance, server enforced): saving a provider sets the linked item to `done`, also when it was `na`; clearing it sets the item back to `pending` only if it is `done` (N/A and No stay). Selecting the N/A row, or setting the linked item to `na` from the Move checklist, clears that category's provider selection. Settle in shows the N/A row selected whenever the linked item is `na`. On Settle in the checklist panel hides the "Choose in Settle in" link and keeps the provider name.
 - **Summary**: shows a checklist reminder first. "Still open" lists pending and No items with the same Yes / No / N/A control so the user can answer there. "Handled" (Yes and N/A) is a collapsed group. Print shows every item with its status and no controls.
 
 ## 4. Stack

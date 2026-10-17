@@ -86,16 +86,34 @@ describe('linked checklist items', () => {
     expect(await statusOf(id, linkedItemKeys.internet)).toBe('no');
   });
 
-  it('lets a manual N/A win over selecting and clearing a provider', async () => {
+  it('sets the item to done when a provider is chosen over N/A', async () => {
     const id = await moveAt('settle_in');
     await service.setProgress(id, electricity, 'na');
 
     await service.setSelection(id, 'electricity', 'electricity-a');
-    expect(await statusOf(id, electricity)).toBe('na');
+
+    expect(await statusOf(id, electricity)).toBe('done');
     expect((await service.getSelection(id)).electricity).toBe('electricity-a');
+  });
+
+  it('keeps N/A when the selection is cleared', async () => {
+    const id = await moveAt('settle_in');
+    await service.setProgress(id, electricity, 'na');
 
     await service.setSelection(id, 'electricity', null);
+
     expect(await statusOf(id, electricity)).toBe('na');
+  });
+
+  it('clears the provider selection when the linked item is set to N/A', async () => {
+    const id = await moveAt('settle_in');
+    await service.setSelection(id, 'internet', 'internet-b');
+    await service.setSelection(id, 'electricity', 'electricity-b');
+
+    await service.setProgress(id, linkedItemKeys.internet, 'na');
+
+    expect(await statusOf(id, linkedItemKeys.internet)).toBe('na');
+    expect(await service.getSelection(id)).toMatchObject({ internet: null, electricity: 'electricity-b' });
   });
 });
 

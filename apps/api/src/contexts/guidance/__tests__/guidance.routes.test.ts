@@ -16,6 +16,7 @@ describe('guidance routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.checklist.length).toBeGreaterThan(0);
     expect(res.body.data.tips.length).toBeGreaterThan(0);
+    expect(res.body.data.tips).toContainEqual(expect.objectContaining({ title: 'Arrange home insurance before your first night' }));
   });
 
   it('GET defaults every template item to pending', async () => {
