@@ -1,4 +1,4 @@
-import type { PhotoStage, Room } from '@movemate/contracts';
+import { MAX_PHOTOS_PER_ROOM, type PhotoStage, type Room } from '@movemate/contracts';
 import { CircleAlertIcon } from 'lucide-react';
 import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
@@ -34,7 +34,7 @@ export function PhotosPanel({ moveId, stage, uploadOnly }: { moveId: string; sta
 
   return (
     <div className={uploadOnly ? 'flex flex-col gap-4' : 'flex flex-col gap-10'}>
-      <PhotoUploader existingCounts={counts} upload={(file, room) => upload.mutateAsync({ file, room })} />
+      <PhotoUploader existingCounts={counts} maxPerRoom={MAX_PHOTOS_PER_ROOM[stage]} upload={(file, room) => upload.mutateAsync({ file, room })} />
       {actionError && (
         <Alert variant="destructive">
           <CircleAlertIcon />

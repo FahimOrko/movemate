@@ -1,4 +1,4 @@
-import { MAX_PHOTOS_PER_ROOM, type Room, roomLabels } from '@movemate/contracts';
+import { type Room, roomLabels } from '@movemate/contracts';
 import { ImagePlusIcon, XIcon } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
 import { RoomSelect } from '@/components/room-select';
@@ -10,13 +10,14 @@ type Draft = { id: string; file: File; previewUrl: string; room: Room; error?: s
 
 type PhotoUploaderProps = {
   existingCounts: Partial<Record<Room, number>>;
+  maxPerRoom: number;
   upload: (file: File, room: Room) => Promise<unknown>;
   disabled?: boolean;
 };
 
 const acceptedTypes = 'image/jpeg,image/png,image/webp';
 
-export function PhotoUploader({ existingCounts, upload, disabled }: PhotoUploaderProps) {
+export function PhotoUploader({ existingCounts, maxPerRoom, upload, disabled }: PhotoUploaderProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -56,7 +57,7 @@ export function PhotoUploader({ existingCounts, upload, disabled }: PhotoUploade
 
   const queuedPerRoom = new Map<Room, number>();
   for (const draft of drafts) queuedPerRoom.set(draft.room, (queuedPerRoom.get(draft.room) ?? 0) + 1);
-  const fullRooms = [...queuedPerRoom].filter(([room, queued]) => queued + (existingCounts[room] ?? 0) > MAX_PHOTOS_PER_ROOM);
+  const fullRooms = [...queuedPerRoom].filter(([room, queued]) => queued + (existingCounts[room] ?? 0) > maxPerRoom);
 
   async function uploadAll() {
     setIsUploading(true);
@@ -140,7 +141,7 @@ export function PhotoUploader({ existingCounts, upload, disabled }: PhotoUploade
           </ul>
           {fullRooms.length > 0 && (
             <p role="alert" className="text-sm text-warning-text">
-              {fullRooms.map(([room]) => roomLabels[room]).join(', ')}: at most {MAX_PHOTOS_PER_ROOM} photos per room. Move some to another room.
+              {fullRooms.map(([room]) => roomLabels[room]).join(', ')}: at most {maxPerRoom} photos per room. Move some to another room.
             </p>
           )}
           <div>

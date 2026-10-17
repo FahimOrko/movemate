@@ -35,8 +35,13 @@ Business goal: the final phase connects the user to providers they need after mo
   - Upload listing/viewing photos in one place, label each by room
   - AI analyzes them per room and produces "what to check on move-in day"
   - User can add their own checks
+  - Re-running the analysis replaces only checks the user has not answered yet (`pending` AI checks). Answered AI checks and the user's own checks stay
+  - Up to 4 before photos per room
 - **Phase 3: Move-in photos**
-  - Upload photos again, labeled by room
+  - Upload photos again, labeled by room (up to 8 per room)
+  - Answer each room check: `ok`, `problem` (a note of 1 to 500 characters and up to 3 photos) or `na`. Answering needs phase `move_in`. A problem becomes a finding (`source = user`, `resolution = issue`) linked to the check; switching the answer away from problem deletes it
+  - Add your own issue in any room, with or without photos: a note and up to 3 move-in photos of that room. Each room has one list of problems, and all of them live in `findings`
+  - Photos attached to a user problem are details, not room views, so the AI compare skips them
   - AI compares before vs move-in per room, producing findings: `looks_good` / `changed` / `unclear`
   - User resolves each finding: confirm OK, confirm issue, or write a custom answer
 - **Phase 4: Report** (main user value)
@@ -119,9 +124,9 @@ movemate/
 - **moves**: id, address, move_date (nullable), phase (`prepare | before_photos | move_in | report | settle_in`), created_at, updated_at
 - **guidance_progress**: id, move_id, item_key, status (`pending | done | no | na`; a missing row means `pending`), updated_at
 - **photos**: id, move_id, stage (`before | move_in`), room, file_path, width, height, created_at
-- **room_checks**: id, move_id, room, text, source (`ai | user`), created_at
-- **findings**: id, move_id, room, room_check_id (nullable), ai_status (`looks_good | changed | unclear`), ai_summary, confidence (`low | medium | high`), resolution (`pending | ok | issue | custom`), user_note, created_at, updated_at
-- **finding_photos**: finding_id, photo_id
+- **room_checks**: id, move_id, room, text, source (`ai | user`), status (`pending | ok | problem | na`, default `pending`), created_at
+- **findings**: id, move_id, room, room_check_id (nullable; set null when the check is deleted, so a user problem stays as a standalone issue), source (`ai | user`), ai_status (`looks_good | changed | unclear`), ai_summary, confidence (`low | medium | high`), resolution (`pending | ok | issue | custom`), user_note, created_at, updated_at
+- **finding_photos**: finding_id, photo_id (links go when the photo or the finding is deleted; the finding stays when only the photo goes)
 - **reports**: id, move_id, snapshot (jsonb), generated_at
 
 Rooms enum: `kitchen | living_room | bedroom | bathroom | hallway | balcony | other`.
@@ -135,8 +140,8 @@ All under `/api`. Success `{ data }`, error `{ error: { code, message } }`.
 - `GET /health`
 - move: `POST /moves`, `GET /moves/current`, `POST /moves/:id/advance`
 - guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance` (every template item with its status, `linkedCategory`, `locked` and `providerName` for linked items), `PATCH /moves/:id/guidance/:itemKey` (body `{ status }`, upsert; 404 unknown move or key, 400 invalid status, 409 for a locked linked item). `PUT /moves/:id/providers/selection/:category` also updates the linked checklist item (sync rule above)
-- photos: `POST /moves/:id/photos` (multipart: file, stage, room), `GET /moves/:id/photos?stage=`, `PATCH /photos/:id` (relabel), `DELETE /photos/:id`, `GET /photos/:id/file`
-- inspection: `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `POST /moves/:id/inspection/compare`, `GET /moves/:id/findings`, `PATCH /findings/:id`
+- photos: `POST /moves/:id/photos` (multipart: file, stage, room; caps per room: 4 `before`, 8 `move_in`, 400 beyond), `GET /moves/:id/photos?stage=`, `PATCH /photos/:id` (relabel), `DELETE /photos/:id`, `GET /photos/:id/file`
+- inspection: `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `PATCH /room-checks/:id` (body `{ status: "pending" | "ok" | "na" }` or `{ status: "problem", note, photoIds? }`; 400 invalid body or photos, 404 unknown check, 409 below `move_in`; a problem edits its one linked user finding), `DELETE /room-checks/:id`, `POST /moves/:id/inspection/compare`, `GET /moves/:id/findings`, `POST /moves/:id/findings` (body `{ room, note, photoIds? }`, any room), `PATCH /findings/:id`, `DELETE /findings/:id`. `GET /moves/:id/room-checks` returns each check's status and its problem (note and photo urls). `photoIds` must be this move's `move_in` photos of the same room, at most 3, otherwise 400. A finding linked to a check cannot be resolved or deleted directly (409): change the check's answer instead
 - report: `POST /moves/:id/reports`, `GET /reports/:id`, `GET /moves/:id/summary` (also returns the live checklist split into open and handled)
 
 Status codes: 400 validation, 404 missing, 409 invalid phase transition, 413 upload too large, 502 AI failure, 500 unexpected. Never return stack traces or upstream payloads.
@@ -146,7 +151,7 @@ Status codes: 400 validation, 404 missing, 409 invalid phase transition, 413 upl
 Two jobs, both with the vision model.
 
 - **Baseline**: before photos of one room (max 4) -> list of checks for move-in day
-- **Compare**: before + move-in photos of one room (max 4 each) + that room's checks -> findings
+- **Compare**: before + move-in photos of one room (max 4 each) + that room's checks -> findings. Move-in photos attached to user findings are skipped first, then the first 4 of the rest are used. A room with no before photos, or with no move-in photos left, is skipped (`skippedRooms`)
 
 Rules for both prompts:
 

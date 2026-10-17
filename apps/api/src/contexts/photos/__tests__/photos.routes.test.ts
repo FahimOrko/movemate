@@ -93,6 +93,16 @@ describe('photo upload', () => {
     expect((await request(app).get(`/api/moves/${id}/photos`)).body.data).toHaveLength(5);
   });
 
+  it('allows 8 move-in photos per room and rejects the 9th', async () => {
+    const id = await createMove('move_in');
+    for (let i = 0; i < 8; i++) expect((await post(id, await png(), 'a.png', { stage: 'move_in', room: 'kitchen' })).status).toBe(201);
+
+    const ninth = await post(id, await png(), 'a.png', { stage: 'move_in', room: 'kitchen' });
+
+    expect(ninth.status).toBe(400);
+    expect(ninth.body.error.message).toMatch(/at most 8/);
+  });
+
   it('returns 404 for an unknown move and 409 before the stage is unlocked', async () => {
     expect((await post(unknownId, await png())).status).toBe(404);
     const early = await createMove('prepare');

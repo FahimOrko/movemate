@@ -1,5 +1,5 @@
 import { pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { aiStatuses, checkSources, confidences, resolutions, rooms } from '@movemate/contracts';
+import { aiStatuses, checkSources, confidences, resolutions, roomCheckStatuses, rooms } from '@movemate/contracts';
 import { moves } from './move';
 import { photos } from './photos';
 
@@ -11,6 +11,7 @@ export const roomChecks = pgTable('room_checks', {
   room: text({ enum: rooms }).notNull(),
   text: text().notNull(),
   source: text({ enum: checkSources }).notNull(),
+  status: text({ enum: roomCheckStatuses }).notNull().default('pending'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

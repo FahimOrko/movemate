@@ -7,12 +7,25 @@ export type CheckSource = z.infer<typeof checkSourceSchema>;
 
 export const MAX_CHECK_LENGTH = 300;
 
+export const roomCheckStatuses = ['pending', 'ok', 'problem', 'na'] as const;
+export const roomCheckStatusSchema = z.enum(roomCheckStatuses);
+export type RoomCheckStatus = z.infer<typeof roomCheckStatusSchema>;
+
+export const roomCheckProblemSchema = z.object({
+  findingId: z.uuid(),
+  note: z.string(),
+  photos: z.array(photoSchema),
+});
+export type RoomCheckProblem = z.infer<typeof roomCheckProblemSchema>;
+
 export const roomCheckSchema = z.object({
   id: z.uuid(),
   moveId: z.uuid(),
   room: roomSchema,
   text: z.string(),
   source: checkSourceSchema,
+  status: roomCheckStatusSchema,
+  problem: roomCheckProblemSchema.nullable(),
   createdAt: z.iso.datetime(),
 });
 export type RoomCheck = z.infer<typeof roomCheckSchema>;
@@ -80,7 +93,14 @@ export const resolveFindingSchema = z.discriminatedUnion('resolution', [
 ]);
 export type ResolveFinding = z.infer<typeof resolveFindingSchema>;
 
-export const createFindingSchema = z.object({ room: roomSchema, note: noteSchema });
+export const MAX_PROBLEM_PHOTOS = 3;
+
+const photoIdsSchema = z
+  .array(z.uuid())
+  .max(MAX_PROBLEM_PHOTOS, `Attach at most ${MAX_PROBLEM_PHOTOS} photos`)
+  .refine((ids) => new Set(ids).size === ids.length, 'Attach each photo once');
+
+export const createFindingSchema = z.object({ room: roomSchema, note: noteSchema, photoIds: photoIdsSchema.optional() });
 export type CreateFinding = z.infer<typeof createFindingSchema>;
 
 export const compareResultSchema = z.object({
@@ -89,3 +109,11 @@ export const compareResultSchema = z.object({
   skippedRooms: z.array(roomSchema),
 });
 export type CompareResult = z.infer<typeof compareResultSchema>;
+
+export const answerRoomCheckSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('pending') }),
+  z.object({ status: z.literal('ok') }),
+  z.object({ status: z.literal('na') }),
+  z.object({ status: z.literal('problem'), note: noteSchema, photoIds: photoIdsSchema.optional() }),
+]);
+export type AnswerRoomCheck = z.infer<typeof answerRoomCheckSchema>;

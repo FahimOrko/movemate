@@ -6,6 +6,7 @@ export const inspectionRouter = Router();
 inspectionRouter.post('/moves/:id/inspection/baseline', controller.runBaseline);
 inspectionRouter.get('/moves/:id/room-checks', controller.list);
 inspectionRouter.post('/moves/:id/room-checks', controller.add);
+inspectionRouter.patch('/room-checks/:id', controller.answer);
 inspectionRouter.delete('/room-checks/:id', controller.remove);
 inspectionRouter.post('/moves/:id/inspection/compare', controller.runCompare);
 inspectionRouter.get('/moves/:id/findings', controller.listFindings);

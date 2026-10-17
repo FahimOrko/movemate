@@ -1,4 +1,4 @@
-import type { ChecklistStatus, Finding, GuidanceProgress, Photo, Report, Room, RoomCheck } from '@movemate/contracts';
+import { MAX_PHOTOS_PER_ROOM, type ChecklistStatus, type Finding, type GuidanceProgress, type Photo, type Report, type Room, type RoomCheck } from '@movemate/contracts';
 import { CircleAlertIcon, FileTextIcon, HouseIcon, InfoIcon, PrinterIcon, RefreshCwIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -155,6 +155,8 @@ const sampleChecks: RoomCheck[] = (
   id: `00000000-0000-4000-8000-0000000001${index}0`,
   moveId: '00000000-0000-4000-8000-000000000099',
   room: 'kitchen',
+  status: 'pending',
+  problem: null,
   createdAt: '2026-10-12T14:32:00.000Z',
 }));
 
@@ -680,10 +682,10 @@ export function DesignPage() {
       </DesignSection>
 
       <DesignSection id="photo-uploader" title="Photo uploader" description="Choose or drop photos, label each, remove before upload. Add files to see the preview, room limit and upload states.">
-        <PhotoUploader existingCounts={{ kitchen: 3 }} upload={() => new Promise((resolve) => setTimeout(resolve, 1500))} />
-        <PhotoUploader existingCounts={{}} upload={() => Promise.reject(new Error('Upload failed'))} />
+        <PhotoUploader maxPerRoom={MAX_PHOTOS_PER_ROOM.before} existingCounts={{ kitchen: 3 }} upload={() => new Promise((resolve) => setTimeout(resolve, 1500))} />
+        <PhotoUploader maxPerRoom={MAX_PHOTOS_PER_ROOM.before} existingCounts={{}} upload={() => Promise.reject(new Error('Upload failed'))} />
         <div className="max-w-md">
-          <PhotoUploader existingCounts={{}} upload={() => Promise.resolve()} disabled />
+          <PhotoUploader maxPerRoom={MAX_PHOTOS_PER_ROOM.before} existingCounts={{}} upload={() => Promise.resolve()} disabled />
         </div>
       </DesignSection>
 

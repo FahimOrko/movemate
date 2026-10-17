@@ -135,6 +135,15 @@ Contract analysis is an **optional step the user can skip**; the move flow works
     - `GET /moves/current` with no move. → `200 { data: null }`, since that's the normal first visit.
     - The spec asks for no web unit tests. → Browser verification instead.
 
+## Slice A: room check answers
+**Idea:** each room has one list of problems, all in `findings` (AI findings, room-check problems, the user's own issues). Report and Summary are unchanged. Unanswered checks block nothing. Answering raises no event, since it changes no phase.
+**Contracts:** `MAX_PHOTOS_PER_ROOM` is now `{ before: 4, move_in: 8 }`; `roomCheckStatuses`, `RoomCheck` gains `status` and `problem`, `answerRoomCheckSchema`, `MAX_PROBLEM_PHOTOS`; `createFindingSchema` gains `photoIds`.
+**DB:** `room_checks.status` (text, default `pending`). Migration `0007_room_check_status`; existing rows become `pending`.
+**API:** `PATCH /room-checks/:id` (needs phase ≥ `move_in`). A problem creates or edits its one linked user finding; any other answer deletes it, and AI findings sharing the check are never touched. `photos.service.assertAttachable` checks that photoIds are this move's `move_in` photos of the room. `POST /moves/:id/findings` takes `photoIds` and works for any room. Compare drops photos attached to user findings before grouping and keeps the first 4 of the rest. The baseline re-run replaces only `pending` AI checks. `PATCH`/`DELETE /findings/:id` return 409 for a user finding linked to a check.
+**Web:** only what typechecks: `PhotoUploader` takes `maxPerRoom`, sample checks on /design gain the new fields.
+**Tests:** migration default, PATCH each status, note required, one linked finding created then updated, leaving problem removes only the user finding, 409/404, check delete keeps the finding, photoIds validation, GET shows the problem, compare ignores attached photos, caps 4/8, baseline re-run keeps answered and user checks, user finding in a room with no photos.
+**Done when:** `pnpm check` is green and the migration is applied to the dev DB.
+
 ## Settle in redesign
 **Web:** `features/settle-in` is three flat lists (Home insurance, Electricity, Internet) from `provider-category-list` and `provider-row`, each ending in "Not needed (N/A)" (selected when the linked item is `na`; it goes through the checklist PATCH). `insurance-info-popover` holds the explainer; `discount-badge` carries the offer; `settle-in-progress` shows "n of 3 handled". Hero card, offer block and N/A note are removed. All states on /design.
 **Done when:** N/A and provider choices keep the Move checklist in sync; `pnpm check` is green.

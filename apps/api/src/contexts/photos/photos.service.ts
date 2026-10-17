@@ -51,8 +51,9 @@ async function normalizeImage(buffer: Buffer) {
 }
 
 async function assertRoomHasSpace(moveId: string, stage: PhotoStage, room: Room): Promise<void> {
-  if ((await repository.countInRoom(moveId, stage, room)) >= MAX_PHOTOS_PER_ROOM) {
-    throw new AppError('validation_error', `A room can have at most ${MAX_PHOTOS_PER_ROOM} photos per stage`);
+  const max = MAX_PHOTOS_PER_ROOM[stage];
+  if ((await repository.countInRoom(moveId, stage, room)) >= max) {
+    throw new AppError('validation_error', `A room can have at most ${max} photos per stage`);
   }
 }
 
@@ -75,6 +76,15 @@ export async function upload(moveId: string, stage: PhotoStage, room: Room, buff
 export async function listByStage(moveId: string, stage?: PhotoStage): Promise<Photo[]> {
   await moveService.getById(moveId);
   return (await repository.listPhotos(moveId, stage)).map(toPhoto);
+}
+
+// Photos on a problem must be this move's move-in photos of the problem's room.
+export async function assertAttachable(moveId: string, room: Room, photoIds: string[]): Promise<void> {
+  if (photoIds.length === 0) return;
+  const valid = new Set((await listByStage(moveId, 'move_in')).filter((photo) => photo.room === room).map((photo) => photo.id));
+  if (!photoIds.every((id) => valid.has(id))) {
+    throw new AppError('validation_error', 'Attach move-in photos of this room from this move');
+  }
 }
 
 export async function relabel(id: string, room: Room): Promise<Photo> {

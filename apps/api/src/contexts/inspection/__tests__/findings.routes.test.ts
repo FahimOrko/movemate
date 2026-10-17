@@ -92,3 +92,42 @@ describe('findings routes', () => {
     await request(app).post(`/api/moves/${id}/findings`).send({ room: 'kitchen', note: 'x' }).expect(409);
   });
 });
+
+describe('POST /moves/:id/findings with photos', () => {
+  const post = (moveId: string, body: object) => request(app).post(`/api/moves/${moveId}/findings`).send(body);
+
+  it('stores photo links in a room with no before photos', async () => {
+    const id = await createMove(2);
+    const photo = await uploadPhoto(id, 'bathroom', 'move_in');
+
+    const res = await post(id, { room: 'bathroom', note: 'Cracked tile', photoIds: [photo] }).expect(201);
+
+    expect(res.body.data).toMatchObject({ source: 'user', resolution: 'issue' });
+    expect(res.body.data.moveInPhotos.map((p: { id: string }) => p.id)).toEqual([photo]);
+  });
+
+  it('works in a room with no photos at all', async () => {
+    const id = await createMove(2);
+    await post(id, { room: 'balcony', note: 'Railing is loose' }).expect(201);
+  });
+
+  it('rejects photos of the wrong room or stage and more than 3', async () => {
+    const id = await createMove(2);
+    const wrongRoom = await uploadPhoto(id, 'kitchen', 'move_in');
+    const wrongStage = await uploadPhoto(id, 'bathroom', 'before');
+    const four = [await uploadPhoto(id, 'bathroom', 'move_in'), await uploadPhoto(id, 'bathroom', 'move_in'), await uploadPhoto(id, 'bathroom', 'move_in'), await uploadPhoto(id, 'bathroom', 'move_in')];
+    for (const photoIds of [[wrongRoom], [wrongStage], four]) await post(id, { room: 'bathroom', note: 'x', photoIds }).expect(400);
+  });
+
+  it('keeps the finding when its photo is deleted', async () => {
+    const id = await createMove(2);
+    const photo = await uploadPhoto(id, 'bathroom', 'move_in');
+    await post(id, { room: 'bathroom', note: 'Cracked tile', photoIds: [photo] }).expect(201);
+
+    await request(app).delete(`/api/photos/${photo}`).expect(204);
+
+    const list = (await request(app).get(`/api/moves/${id}/findings`)).body.data;
+    expect(list).toHaveLength(1);
+    expect(list[0].moveInPhotos).toEqual([]);
+  });
+});

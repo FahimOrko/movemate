@@ -18,7 +18,7 @@ export const photoStages = ['before', 'move_in'] as const;
 export const photoStageSchema = z.enum(photoStages);
 export type PhotoStage = z.infer<typeof photoStageSchema>;
 
-export const MAX_PHOTOS_PER_ROOM = 4;
+export const MAX_PHOTOS_PER_ROOM = { before: 4, move_in: 8 } as const satisfies Record<PhotoStage, number>;
 
 export const photoSchema = z.object({
   id: z.uuid(),

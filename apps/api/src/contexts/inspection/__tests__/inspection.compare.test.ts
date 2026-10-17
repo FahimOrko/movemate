@@ -224,3 +224,36 @@ describe('runCompare replacing and failing', () => {
     expect((await service.listFindings(id))[0]).toMatchObject({ roomCheckId: null, checkText: null });
   });
 });
+
+describe('runCompare and photos attached to user findings', () => {
+  it('skips them and still takes the first 4 of the other move-in photos', async () => {
+    const id = await createMove(2);
+    await uploadPhoto(id, 'kitchen', 'before');
+    const moveInIds: string[] = [];
+    for (let i = 0; i < 6; i++) moveInIds.push(await uploadPhoto(id, 'kitchen', 'move_in'));
+    await service.addFinding(id, { room: 'kitchen', note: 'Close-up of a chip', photoIds: [moveInIds[0] ?? '', moveInIds[2] ?? ''] });
+    ai.mockResolvedValue(raw([{ status: 'changed', move_in_photo_indexes: [2, 5] }]));
+
+    const result = await service.runCompare(id);
+
+    expect(ai.mock.calls[0]?.[0].images).toHaveLength(5);
+    expect(ai.mock.calls[0]?.[0].text).toContain('Image 1 is the BEFORE photo. Images 2 to 5 are MOVE-IN photos.');
+    const aiFinding = result.findings.find((f) => f.source === 'ai');
+    expect(aiFinding?.moveInPhotos.map((p) => p.id)).toEqual([moveInIds[1], moveInIds[5]]);
+  });
+
+  it('skips a room whose only move-in photo is attached to a user finding', async () => {
+    const id = await createMove(2);
+    await uploadPhoto(id, 'kitchen', 'before');
+    await uploadPhoto(id, 'bedroom', 'before');
+    const detail = await uploadPhoto(id, 'kitchen', 'move_in');
+    await uploadPhoto(id, 'bedroom', 'move_in');
+    await service.addFinding(id, { room: 'kitchen', note: 'Close-up', photoIds: [detail] });
+    ai.mockResolvedValue(raw([]));
+
+    const result = await service.runCompare(id);
+
+    expect(ai).toHaveBeenCalledTimes(1);
+    expect(result.skippedRooms).toEqual(['kitchen']);
+  });
+});

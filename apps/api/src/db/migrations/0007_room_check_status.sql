@@ -1,0 +1,1 @@
+ALTER TABLE "room_checks" ADD COLUMN "status" text DEFAULT 'pending' NOT NULL;

@@ -1,4 +1,4 @@
-import type { AiStatus, CheckSource, Confidence, Resolution, Room } from '@movemate/contracts';
+import type { AiStatus, CheckSource, Confidence, Resolution, Room, RoomCheckStatus } from '@movemate/contracts';
 import { and, asc, eq } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { findingPhotos, findings, roomChecks } from '../../db/schema/inspection';
@@ -24,15 +24,20 @@ export async function insertCheck(moveId: string, room: Room, text: string, sour
   return row;
 }
 
+export async function findCheckById(id: string): Promise<RoomCheckRow | undefined> {
+  const [row] = await db.select().from(roomChecks).where(eq(roomChecks.id, id));
+  return row;
+}
+
 export async function deleteCheck(id: string): Promise<RoomCheckRow | undefined> {
   const [row] = await db.delete(roomChecks).where(eq(roomChecks.id, id)).returning();
   return row;
 }
 
-// Never touches user-written checks.
+// Replaces only checks the user has not answered yet. Answered AI checks and user-written checks stay.
 export async function replaceAiChecks(moveId: string, room: Room, texts: string[]): Promise<void> {
   await db.transaction(async (tx) => {
-    await tx.delete(roomChecks).where(and(eq(roomChecks.moveId, moveId), eq(roomChecks.room, room), eq(roomChecks.source, 'ai')));
+    await tx.delete(roomChecks).where(and(eq(roomChecks.moveId, moveId), eq(roomChecks.room, room), eq(roomChecks.source, 'ai'), eq(roomChecks.status, 'pending')));
     if (texts.length > 0) await tx.insert(roomChecks).values(texts.map((text) => ({ moveId, room, text, source: 'ai' as const })));
   });
 }
@@ -81,10 +86,55 @@ export async function replaceAiFindings(moveId: string, room: Room, drafts: AiFi
   });
 }
 
-export async function insertUserFinding(moveId: string, room: Room, note: string): Promise<FindingRow> {
-  const [row] = await db.insert(findings).values({ moveId, room, source: 'user', resolution: 'issue', userNote: note }).returning();
+export type ProblemInput = { note: string; photoIds: string[] };
+
+export function listUserFindingPhotoIds(moveId: string): Promise<string[]> {
+  return db
+    .select({ photoId: findingPhotos.photoId })
+    .from(findingPhotos)
+    .innerJoin(findings, eq(findings.id, findingPhotos.findingId))
+    .where(and(eq(findings.moveId, moveId), eq(findings.source, 'user')))
+    .then((rows) => rows.map((row) => row.photoId));
+}
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+async function setPhotoLinks(tx: Tx, findingId: string, photoIds: string[]): Promise<void> {
+  await tx.delete(findingPhotos).where(eq(findingPhotos.findingId, findingId));
+  if (photoIds.length > 0) await tx.insert(findingPhotos).values(photoIds.map((photoId) => ({ findingId, photoId })));
+}
+
+async function insertUserFindingIn(tx: Tx, moveId: string, room: Room, roomCheckId: string | null, problem: ProblemInput): Promise<FindingRow> {
+  const [row] = await tx
+    .insert(findings)
+    .values({ moveId, room, roomCheckId, source: 'user', resolution: 'issue', userNote: problem.note })
+    .returning();
   if (!row) throw new Error('Insert returned no row');
+  await setPhotoLinks(tx, row.id, problem.photoIds);
   return row;
+}
+
+export function insertUserFinding(moveId: string, room: Room, problem: ProblemInput): Promise<FindingRow> {
+  return db.transaction((tx) => insertUserFindingIn(tx, moveId, room, null, problem));
+}
+
+// The user finding linked to a check is its problem. AI findings that share the check are never touched.
+export async function answerCheck(check: RoomCheckRow, status: RoomCheckStatus, problem?: ProblemInput): Promise<RoomCheckRow> {
+  return db.transaction(async (tx) => {
+    const [updated] = await tx.update(roomChecks).set({ status }).where(eq(roomChecks.id, check.id)).returning();
+    if (!updated) throw new Error('Update returned no row');
+    const linked = and(eq(findings.roomCheckId, check.id), eq(findings.source, 'user'));
+    const [existing] = await tx.select().from(findings).where(linked);
+    if (!problem) {
+      await tx.delete(findings).where(linked);
+    } else if (existing) {
+      await tx.update(findings).set({ userNote: problem.note, updatedAt: new Date() }).where(eq(findings.id, existing.id));
+      await setPhotoLinks(tx, existing.id, problem.photoIds);
+    } else {
+      await insertUserFindingIn(tx, check.moveId, check.room, check.id, problem);
+    }
+    return updated;
+  });
 }
 
 export async function updateResolution(id: string, resolution: Resolution, userNote: string | null): Promise<FindingRow | undefined> {

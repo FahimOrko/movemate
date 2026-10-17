@@ -1,4 +1,4 @@
-import { createFindingSchema, createRoomCheckSchema, resolveFindingSchema, roomSelectionSchema } from '@movemate/contracts';
+import { answerRoomCheckSchema, createFindingSchema, createRoomCheckSchema, resolveFindingSchema, roomSelectionSchema } from '@movemate/contracts';
 import type { Request, Response } from 'express';
 import { moveIdParamsSchema } from '../move/move.schemas';
 import { checkIdParamsSchema, findingIdParamsSchema } from './inspection.schemas';
@@ -18,6 +18,11 @@ export async function list(req: Request, res: Response) {
 export async function add(req: Request, res: Response) {
   const { id } = moveIdParamsSchema.parse(req.params);
   res.status(201).json({ data: await service.addCheck(id, createRoomCheckSchema.parse(req.body)) });
+}
+
+export async function answer(req: Request, res: Response) {
+  const { id } = checkIdParamsSchema.parse(req.params);
+  res.json({ data: await service.answerCheck(id, answerRoomCheckSchema.parse(req.body)) });
 }
 
 export async function remove(req: Request, res: Response) {

@@ -3,6 +3,7 @@ import {
   type AiStatus,
   type BaselineResult,
   type CompareResult,
+  type AnswerRoomCheck,
   type CreateFinding,
   type CreateRoomCheck,
   type Finding,
@@ -20,20 +21,54 @@ import * as repository from './inspection.repository';
 import { baselineOutputSchema, compareOutputSchema, type CompareOutput } from './inspection.schemas';
 import { MAX_AI_CHECKS_PER_ROOM, MAX_AI_FINDINGS_PER_ROOM, MAX_BASELINE_PHOTOS, MAX_COMPARE_PHOTOS_PER_STAGE } from './inspection.types';
 
-function toRoomCheck(row: repository.RoomCheckRow): RoomCheck {
+function toRoomCheck(row: repository.RoomCheckRow, problem: RoomCheck['problem'] = null): RoomCheck {
   return {
     id: row.id,
     moveId: row.moveId,
     room: row.room,
     text: row.text,
     source: row.source,
+    status: row.status,
+    problem,
     createdAt: row.createdAt.toISOString(),
   };
 }
 
+function linkedPhotos(links: repository.FindingPhotoLink[], photoById: Map<string, Photo>, findingId: string): Photo[] {
+  return links
+    .filter((link) => link.findingId === findingId)
+    .map((link) => photoById.get(link.photoId))
+    .filter((photo): photo is Photo => photo !== undefined);
+}
+
 export async function listChecks(moveId: string): Promise<RoomCheck[]> {
   await moveService.getById(moveId);
-  return (await repository.listByMove(moveId)).map(toRoomCheck);
+  const [checks, rows, links, photos] = await Promise.all([
+    repository.listByMove(moveId),
+    repository.listFindings(moveId),
+    repository.listFindingPhotoLinks(moveId),
+    photosService.listByStage(moveId),
+  ]);
+  const photoById = new Map(photos.map((photo) => [photo.id, photo]));
+  return checks.map((check) => {
+    const finding = rows.find((row) => row.source === 'user' && row.roomCheckId === check.id);
+    const problem = finding
+      ? { findingId: finding.id, note: finding.userNote ?? '', photos: linkedPhotos(links, photoById, finding.id) }
+      : null;
+    return toRoomCheck(check, problem);
+  });
+}
+
+export async function answerCheck(id: string, input: AnswerRoomCheck): Promise<RoomCheck> {
+  const check = await repository.findCheckById(id);
+  if (!check) throw new AppError('not_found', 'Check not found');
+  await moveService.assertPhaseReached(check.moveId, 'move_in');
+  const photoIds = input.status === 'problem' ? (input.photoIds ?? []) : [];
+  if (input.status === 'problem') await photosService.assertAttachable(check.moveId, check.room, photoIds);
+  await repository.answerCheck(check, input.status, input.status === 'problem' ? { note: input.note, photoIds } : undefined);
+  const answered = (await listChecks(check.moveId)).find((candidate) => candidate.id === id);
+  if (!answered) throw new AppError('not_found', 'Check not found');
+  return answered;
 }
 
 export async function addCheck(moveId: string, input: CreateRoomCheck): Promise<RoomCheck> {
@@ -145,10 +180,7 @@ export async function listFindings(moveId: string): Promise<Finding[]> {
   const photoById = new Map(photos.map((photo) => [photo.id, photo]));
   const checkTextById = new Map(checks.map((check) => [check.id, check.text]));
   const linked = (findingId: string, stage: Photo['stage']) =>
-    links
-      .filter((link) => link.findingId === findingId)
-      .map((link) => photoById.get(link.photoId))
-      .filter((photo): photo is Photo => photo?.stage === stage);
+    linkedPhotos(links, photoById, findingId).filter((photo) => photo.stage === stage);
 
   return rows.map((row) => ({
     id: row.id,
@@ -172,8 +204,10 @@ export async function listFindings(moveId: string): Promise<Finding[]> {
 export async function runCompare(moveId: string, onlyRooms?: Room[]): Promise<CompareResult> {
   await moveService.assertPhaseReached(moveId, 'move_in');
   const photos = await photosService.listByStage(moveId);
+  // Photos the user attached to their own problems are close-ups and details, not room views, so the AI skips them.
+  const userPhotoIds = new Set(await repository.listUserFindingPhotoIds(moveId));
   const before = groupByRoom(photos.filter((photo) => photo.stage === 'before'));
-  const moveIn = groupByRoom(photos.filter((photo) => photo.stage === 'move_in'));
+  const moveIn = groupByRoom(photos.filter((photo) => photo.stage === 'move_in' && !userPhotoIds.has(photo.id)));
   const photoRooms = new Set([...before.keys(), ...moveIn.keys()]);
   const comparable = [...photoRooms].filter((room) => before.has(room) && moveIn.has(room));
   const rooms = comparable.filter((room) => !onlyRooms || onlyRooms.includes(room));
@@ -197,8 +231,16 @@ async function findingById(moveId: string, id: string): Promise<Finding> {
   return finding;
 }
 
+// A check's problem follows the check's answer, so it is changed there.
+function assertNotCheckProblem(row: repository.FindingRow): void {
+  if (row.source === 'user' && row.roomCheckId) {
+    throw new AppError('invalid_phase_transition', 'Change the room check answer instead');
+  }
+}
+
 export async function resolveFinding(id: string, input: ResolveFinding): Promise<Finding> {
   const row = await getFindingRow(id);
+  assertNotCheckProblem(row);
   const note = input.resolution === 'ok' ? null : (input.note ?? row.userNote);
   const updated = await repository.updateResolution(id, input.resolution, note);
   if (!updated) throw new AppError('not_found', 'Finding not found');
@@ -208,12 +250,15 @@ export async function resolveFinding(id: string, input: ResolveFinding): Promise
 
 export async function addFinding(moveId: string, input: CreateFinding): Promise<Finding> {
   await moveService.assertPhaseReached(moveId, 'move_in');
-  const row = await repository.insertUserFinding(moveId, input.room, input.note);
+  const photoIds = input.photoIds ?? [];
+  await photosService.assertAttachable(moveId, input.room, photoIds);
+  const row = await repository.insertUserFinding(moveId, input.room, { note: input.note, photoIds });
   return findingById(moveId, row.id);
 }
 
 export async function deleteFinding(id: string): Promise<void> {
   const row = await getFindingRow(id);
   if (row.source === 'ai') throw new AppError('invalid_phase_transition', 'AI findings cannot be deleted. Answer them instead');
+  assertNotCheckProblem(row);
   await repository.deleteFinding(id);
 }

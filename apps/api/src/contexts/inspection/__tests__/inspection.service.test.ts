@@ -59,6 +59,20 @@ describe('runBaseline', () => {
     expect(texts(result.checks).sort()).toEqual(['my own check', 'new ai']);
   });
 
+  it('keeps answered AI checks and replaces pending ones on a rerun', async () => {
+    const id = await createMove(2);
+    await uploadBefore(id, 'kitchen');
+    ai.mockResolvedValueOnce({ checks: ['answered ai', 'pending ai'] }).mockResolvedValueOnce({ checks: ['new ai'] });
+    const first = await service.runBaseline(id);
+    const answered = first.checks.find((check) => check.text === 'answered ai');
+    await service.answerCheck(answered?.id ?? '', { status: 'ok' });
+    await service.addCheck(id, { room: 'kitchen', text: 'my own check' });
+
+    const result = await service.runBaseline(id);
+
+    expect(texts(result.checks).sort()).toEqual(['answered ai', 'my own check', 'new ai']);
+  });
+
   it('keeps the rooms that worked, reports the failed ones and raises no event', async () => {
     const id = await createMove();
     await uploadBefore(id, 'kitchen');
