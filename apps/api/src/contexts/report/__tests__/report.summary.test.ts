@@ -17,7 +17,7 @@ const snapshot: ReportSnapshot = {
   disclaimer: 'd',
 };
 
-const item = (key: string, status: GuidanceProgress['status']): GuidanceProgress => ({ key, category: 'c', title: key, status });
+const item = (key: string, status: GuidanceProgress['status']): GuidanceProgress => ({ key, category: 'c', title: key, status, locked: false, providerName: null });
 const checklist = [item('a', 'done'), item('b', 'pending'), item('c', 'na'), item('d', 'no')];
 
 describe('buildSummary', () => {

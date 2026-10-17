@@ -1,4 +1,4 @@
-import { isHandled, phaseOrder, phaseSchema, type Move } from '@movemate/contracts';
+import { countOpenPrepare, phaseOrder, phaseSchema, type Move } from '@movemate/contracts';
 import { Navigate, useOutletContext, useParams } from 'react-router';
 import { Stepper } from '@/components/stepper';
 import { ChecklistSidebar } from '@/features/checklist/checklist-sidebar';
@@ -18,7 +18,7 @@ export function MovePhasePage() {
   const isReached = parsed.success && phaseOrder.indexOf(parsed.data) <= phaseOrder.indexOf(move.phase);
   if (!parsed.success || !isReached) return <Navigate to={`/move/${move.phase}`} replace />;
   const phase = parsed.data;
-  const openCount = checklist.data ? checklist.data.filter((entry) => !isHandled(entry.status)).length : null;
+  const openCount = checklist.data ? countOpenPrepare(checklist.data) : null;
 
   return (
     <div className="flex flex-col gap-10">

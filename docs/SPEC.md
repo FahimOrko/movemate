@@ -27,8 +27,10 @@ Business goal: the final phase connects the user to providers they need after mo
 - **Phase 1: Prepare** (templated, no AI)
   - Common move-in checklist. Each item gets an answer: Yes, No or N/A (persisted; no answer is "pending"). Handled = Yes or N/A. Pressing the active answer again resets it to pending.
   - The checklist is a side panel in every phase (a "Checklist (5 of 8)" drawer below the lg breakpoint). It never blocks a phase or the Continue button.
+  - **Linked items**: electricity, internet and home insurance are checklist items linked to the provider categories (`linkedCategory`; one constant map category to item key, `linkedItemKeys`). They sit in a "Settle in" group at the bottom ("Utilities" is now "Admin"). Existing keys `set-up-electricity` and `set-up-internet` are reused, so saved answers survive; `get-home-insurance` is new.
+  - **Locked rule**: while `moves.phase` is before `settle_in`, linked items are `locked`. The server rejects PATCH on them with 409 `invalid_phase_transition` ("Available once you reach Settle in"). Locked rows are greyed with disabled answers and the visible hint "You can choose this later in Settle in"; saved answers still show. Once unlocked, a linked row shows a "Choose in Settle in" link and the chosen provider name. The user may still answer N/A manually (for example electricity included in the rent).
   - Move planning tips
-- **Stepper completion**: a phase shows complete (green check), attention (amber warning with an accessible label), locked or upcoming, derived from data. Prepare is complete only when every checklist item is handled. If the user moved past it with items still pending or answered No, it shows attention ("3 items still open"). Attention never blocks navigation. Other phases keep their order-based behavior for now.
+- **Stepper completion**: a phase shows complete (green check), attention (amber warning with an accessible label), locked or upcoming, derived from data. Prepare is complete only when every non-linked checklist item is handled (linked items are ignored, since they are only answerable in Settle in; the panel counter, collapsed bar and drawer badge still count all items). If the user moved past it with items still pending or answered No, it shows attention ("3 items still open"). Attention never blocks navigation. Other phases keep their order-based behavior for now.
 - **Phase 2: Before photos**
   - Upload listing/viewing photos in one place, label each by room
   - AI analyzes them per room and produces "what to check on move-in day"
@@ -46,6 +48,7 @@ Business goal: the final phase connects the user to providers they need after mo
   - Short explanation of why home insurance matters when moving in
   - If highlighted: "MoveMate users get a discount with If." Button links to `IF_INSURANCE_URL`
   - Other providers listed by name only. No prices anywhere.
+  - **Sync with the Move checklist** (in guidance): saving a provider sets the linked item to `done`; clearing it sets the item back to `pending` only if it is `done` (N/A and No stay). A manual answer wins: if the item is N/A, selecting a provider still saves the choice but the item stays N/A, and Settle in shows "Marked N/A in your Move checklist" on that category.
 - **Summary**: shows a checklist reminder first. "Still open" lists pending and No items with the same Yes / No / N/A control so the user can answer there. "Handled" (Yes and N/A) is a collapsed group. Print shows every item with its status and no controls.
 
 ## 4. Stack
@@ -130,7 +133,7 @@ All under `/api`. Success `{ data }`, error `{ error: { code, message } }`.
 
 - `GET /health`
 - move: `POST /moves`, `GET /moves/current`, `POST /moves/:id/advance`
-- guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance` (every template item with its status), `PATCH /moves/:id/guidance/:itemKey` (body `{ status }`, upsert; 404 unknown move or key, 400 invalid status)
+- guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance` (every template item with its status, `linkedCategory`, `locked` and `providerName` for linked items), `PATCH /moves/:id/guidance/:itemKey` (body `{ status }`, upsert; 404 unknown move or key, 400 invalid status, 409 for a locked linked item). `PUT /moves/:id/providers/selection/:category` also updates the linked checklist item (sync rule above)
 - photos: `POST /moves/:id/photos` (multipart: file, stage, room), `GET /moves/:id/photos?stage=`, `PATCH /photos/:id` (relabel), `DELETE /photos/:id`, `GET /photos/:id/file`
 - inspection: `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `POST /moves/:id/inspection/compare`, `GET /moves/:id/findings`, `PATCH /findings/:id`
 - report: `POST /moves/:id/reports`, `GET /reports/:id`, `GET /moves/:id/summary` (also returns the live checklist split into open and handled)

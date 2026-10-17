@@ -1,4 +1,4 @@
-import type { ChecklistItem, InsuranceExplainer, Provider, ProviderDiscount, Tip } from '@movemate/contracts';
+import { linkedItemKeys, type ChecklistItem, type InsuranceExplainer, type Provider, type ProviderDiscount, type Tip } from '@movemate/contracts';
 
 export const prepareChecklist: ChecklistItem[] = [
   {
@@ -20,19 +20,8 @@ export const prepareChecklist: ChecklistItem[] = [
     description: 'Popular dates fill up weeks ahead, especially at the end of the month.',
   },
   {
-    key: 'set-up-electricity',
-    category: 'Utilities',
-    title: 'Arrange electricity from your move-in date',
-  },
-  {
-    key: 'set-up-internet',
-    category: 'Utilities',
-    title: 'Order an internet connection',
-    description: 'Installation can take a couple of weeks.',
-  },
-  {
     key: 'update-address',
-    category: 'Utilities',
+    category: 'Admin',
     title: 'Update your address',
     description: 'Tell the population register, your bank, employer and post.',
   },
@@ -46,6 +35,26 @@ export const prepareChecklist: ChecklistItem[] = [
     category: 'Moving day',
     title: 'Read the electricity and water meters',
     description: 'Take a photo of each meter on the day you arrive.',
+  },
+  {
+    key: linkedItemKeys.electricity,
+    category: 'Settle in',
+    title: 'Arrange electricity from your move-in date',
+    linkedCategory: 'electricity',
+  },
+  {
+    key: linkedItemKeys.internet,
+    category: 'Settle in',
+    title: 'Order an internet connection',
+    description: 'Installation can take a couple of weeks.',
+    linkedCategory: 'internet',
+  },
+  {
+    key: linkedItemKeys.home_insurance,
+    category: 'Settle in',
+    title: 'Get home insurance',
+    description: 'The landlord’s insurance does not cover your belongings.',
+    linkedCategory: 'home_insurance',
   },
 ];
 

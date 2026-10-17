@@ -1,12 +1,14 @@
 import type { Move, ProviderCategory } from '@movemate/contracts';
 import { ArrowRightIcon, CircleAlertIcon, ShieldCheckIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
+import { ChecklistNaNote } from '@/components/checklist-na-note';
 import { ProviderCard } from '@/components/provider-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { useChecklist } from '@/features/checklist/use-checklist';
 import { useAdvanceMove } from '@/features/prepare/use-move';
 import { providerCategoryLabels } from '@/lib/provider-categories';
 import { useProviderSelection, useSetProviderSelection, useSettleInGuidance } from './use-settle-in';
@@ -16,6 +18,7 @@ export function SettleInPhase({ move }: { move: Move }) {
   const guidance = useSettleInGuidance();
   const selection = useProviderSelection(move.id);
   const setSelection = useSetProviderSelection(move.id);
+  const checklist = useChecklist(move.id);
   const advance = useAdvanceMove();
 
   if (guidance.isError || selection.isError) {
@@ -55,6 +58,7 @@ export function SettleInPhase({ move }: { move: Move }) {
       {(Object.keys(providerCategoryLabels) as ProviderCategory[]).map((category) => (
         <div key={category} className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">{providerCategoryLabels[category]}</h2>
+          {checklist.data?.some((entry) => entry.linkedCategory === category && entry.status === 'na') && <ChecklistNaNote />}
           <div className="grid gap-3 sm:grid-cols-2">
             {providers
               .filter((provider) => provider.category === category)

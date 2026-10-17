@@ -1,10 +1,22 @@
 import { z } from 'zod';
 
+export const providerCategories = ['electricity', 'internet', 'home_insurance'] as const;
+export const providerCategorySchema = z.enum(providerCategories);
+export type ProviderCategory = z.infer<typeof providerCategorySchema>;
+
+/** The checklist item that mirrors each provider category. Single source for the link. */
+export const linkedItemKeys: Record<ProviderCategory, string> = {
+  electricity: 'set-up-electricity',
+  internet: 'set-up-internet',
+  home_insurance: 'get-home-insurance',
+};
+
 export const checklistItemSchema = z.object({
   key: z.string(),
   category: z.string(),
   title: z.string(),
   description: z.string().optional(),
+  linkedCategory: providerCategorySchema.optional(),
 });
 export type ChecklistItem = z.infer<typeof checklistItemSchema>;
 
@@ -29,15 +41,22 @@ export function isHandled(status: ChecklistStatus): boolean {
   return status === 'done' || status === 'na';
 }
 
-export const guidanceProgressSchema = checklistItemSchema.extend({ status: checklistStatusSchema });
+export const guidanceProgressSchema = checklistItemSchema.extend({
+  status: checklistStatusSchema,
+  /** Linked items stay locked until the move reaches Settle in. */
+  locked: z.boolean(),
+  /** Name of the provider chosen in Settle in, for linked items. */
+  providerName: z.string().nullable(),
+});
 export type GuidanceProgress = z.infer<typeof guidanceProgressSchema>;
+
+/** Prepare ignores linked items: they are completed in Settle in, not before. */
+export function countOpenPrepare(entries: Pick<GuidanceProgress, 'status' | 'linkedCategory'>[]): number {
+  return entries.filter((entry) => !entry.linkedCategory && !isHandled(entry.status)).length;
+}
 
 export const setProgressSchema = z.object({ status: checklistStatusSchema });
 export type SetProgress = z.infer<typeof setProgressSchema>;
-
-export const providerCategories = ['electricity', 'internet', 'home_insurance'] as const;
-export const providerCategorySchema = z.enum(providerCategories);
-export type ProviderCategory = z.infer<typeof providerCategorySchema>;
 
 export const providerDiscountSchema = z.object({
   percent: z.number(),

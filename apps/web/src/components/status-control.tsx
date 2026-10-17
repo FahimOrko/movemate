@@ -28,6 +28,7 @@ export function StatusControl({ value, onChange, label, disabled }: StatusContro
             variant={pressed ? 'default' : 'secondary'}
             aria-pressed={pressed}
             disabled={disabled}
+            aria-disabled={disabled || undefined}
             onClick={() => onChange(pressed ? 'pending' : status)}
           >
             {text}

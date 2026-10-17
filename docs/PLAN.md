@@ -92,6 +92,13 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 **Tests:** migration backfill mapping (temp-table run of the 0006 SQL), PATCH each status 200, invalid status 400, unknown key and move 404, GET defaults to pending, `isHandled`, summary builder open and handled split, summary route includes the live checklist.
 **Done when:** answering items in any phase updates the panel, the stepper's Prepare marker and the Summary reminder together; `pnpm check` is green.
 
+## Settle in checklist link
+**Contracts:** `linkedItemKeys` (category to item key), `linkedCategory` on template items, `locked` and `providerName` on `guidanceProgressSchema`, `countOpenPrepare(entries)` (ignores linked items). No migration.
+**API:** `guidance.templates.ts` adds `get-home-insurance` and a "Settle in" group (Utilities becomes "Admin"). `listProgress` computes `locked` from `moveService.getById(...).phase`; `setProgress` returns 409 on a locked item; `setSelection` syncs the linked item (provider saved: done unless N/A; cleared: pending only from done).
+**Web:** `checklist-row` gets locked / linked / provider states, `status-control` sets `aria-disabled`, new `checklist-na-note` shown in Settle in; the stepper's Prepare uses `countOpenPrepare`; selection changes invalidate the checklist and summary. All states on /design.
+**Tests:** `guidance.linked.test.ts` (locked by phase, 409, works after settle_in, sync both ways, N/A wins, Prepare ignores linked items, existing keys kept).
+**Done when:** choosing a provider ticks the Move checklist item; `pnpm check` is green.
+
 ## Slice 7: Demo hardening
 **Files:** `apps/api/src/db/seed.ts` + `pnpm db:seed` (resets the dev DB and creates a demo move with before and move-in photos from `demo-assets/` through photos.service), `demo-assets/*.jpg`.
 **Work:** audit loading, empty and error states on every page (all registered on /design); visual polish; rehearse the recording (fallback: if AI is slow, use the manual-check path).

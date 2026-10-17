@@ -121,6 +121,9 @@ export function ChecklistPanel({
                 key={item.key}
                 title={item.title}
                 description={item.description}
+                linked={item.linkedCategory !== undefined}
+                locked={item.locked}
+                providerName={item.providerName}
                 status={item.status}
                 onStatusChange={(status) => onStatusChange(item.key, status)}
               />

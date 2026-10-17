@@ -10,6 +10,7 @@ import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { Logo } from '@/components/logo';
 import { ChecklistDrawer } from '@/components/checklist-drawer';
+import { ChecklistNaNote } from '@/components/checklist-na-note';
 import { ChecklistPanel } from '@/components/checklist-panel';
 import { ChecklistRow } from '@/components/checklist-row';
 import { StatusControl } from '@/components/status-control';
@@ -293,10 +294,10 @@ const zeroIssueReport: Report = {
 
 const designDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
 const designChecklist: GuidanceProgress[] = [
-  { key: 'sign-lease', category: 'Before you move', title: 'Read and sign the lease', description: 'Check the deposit and notice period.', status: 'pending' },
-  { key: 'deposit', category: 'Before you move', title: 'Pay the deposit and keep the receipt', status: 'done' },
-  { key: 'keys', category: 'Before you move', title: 'Collect the keys', status: 'no' },
-  { key: 'parking', category: 'After you arrive', title: 'Ask about a parking permit', status: 'na' },
+  { key: 'sign-lease', category: 'Before you move', title: 'Read and sign the lease', description: 'Check the deposit and notice period.', status: 'pending', locked: false, providerName: null },
+  { key: 'deposit', category: 'Before you move', title: 'Pay the deposit and keep the receipt', status: 'done', locked: false, providerName: null },
+  { key: 'keys', category: 'Before you move', title: 'Collect the keys', status: 'no', locked: false, providerName: null },
+  { key: 'parking', category: 'After you arrive', title: 'Ask about a parking permit', status: 'na', locked: false, providerName: null },
 ];
 const allHandled = designChecklist.map((entry): GuidanceProgress => ({ ...entry, status: entry.status === 'pending' || entry.status === 'no' ? 'done' : entry.status }));
 const noop = () => undefined;
@@ -583,6 +584,11 @@ export function DesignPage() {
           <ChecklistRow title="Ask about a parking permit" status="na" onStatusChange={noop} />
           <ChecklistRow title="Book the moving van" description="Compare two or three quotes and book early." status="pending" defaultExpanded onStatusChange={noop} />
           <ChecklistRow title="Disabled while saving" status="pending" disabled onStatusChange={noop} />
+          <ChecklistRow title="Get home insurance (locked)" status="pending" linked locked onStatusChange={noop} />
+          <ChecklistRow title="Order an internet connection (unlocked)" status="pending" linked onStatusChange={noop} />
+          <ChecklistRow title="Arrange electricity (provider chosen)" status="done" linked providerName="Electricity Provider A" onStatusChange={noop} />
+          <ChecklistRow title="Arrange electricity (included in rent)" status="na" linked onStatusChange={noop} />
+          <ChecklistNaNote />
         </div>
         <div className="max-w-md">
           <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />

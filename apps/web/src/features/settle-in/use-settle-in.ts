@@ -30,6 +30,12 @@ export function useSetProviderSelection(moveId: string) {
       return { previous };
     },
     onError: (_error, _input, context) => queryClient.setQueryData(key, context?.previous),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
+    onSettled: () =>
+      // The selection also moves the linked checklist item, so refresh the checklist and summary.
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: key }),
+        queryClient.invalidateQueries({ queryKey: ['guidance', 'progress', moveId] }),
+        queryClient.invalidateQueries({ queryKey: ['summary', moveId] }),
+      ]),
   });
 }

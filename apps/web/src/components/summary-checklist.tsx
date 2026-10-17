@@ -16,6 +16,9 @@ function Rows({ entries, onStatusChange }: { entries: GuidanceProgress[]; onStat
           title={entry.title}
           description={entry.description}
           status={entry.status}
+          linked={entry.linkedCategory !== undefined}
+          locked={entry.locked}
+          providerName={entry.providerName}
           onStatusChange={(status) => onStatusChange(entry.key, status)}
         />
       ))}
