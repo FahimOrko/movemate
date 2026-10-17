@@ -1,7 +1,7 @@
 import { linkedItemKeys, type Move, type ProviderCategory } from '@movemate/contracts';
 import { ArrowRightIcon, CircleAlertIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import { InsuranceInfoPopover } from '@/components/insurance-info-popover';
+import { InsuranceExplainer } from '@/components/insurance-explainer';
 import { ProviderCategoryList } from '@/components/provider-category-list';
 import { SettleInProgress } from '@/components/settle-in-progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -61,10 +61,8 @@ export function SettleInPhase({ move }: { move: Move }) {
       </div>
       {categoryOrder.map((category) => (
         <div key={category} className="flex flex-col gap-3">
-          <div className="flex items-center gap-1">
-            <h2 className="text-lg font-medium">{providerCategoryLabels[category]}</h2>
-            {category === 'home_insurance' && <InsuranceInfoPopover />}
-          </div>
+          <h2 className="text-lg font-medium">{providerCategoryLabels[category]}</h2>
+          {category === 'home_insurance' && <InsuranceExplainer />}
           <ProviderCategoryList
             label={providerCategoryLabels[category]}
             options={providers.filter((provider) => provider.category === category).map((provider) => ({ ...provider, tag: provider.highlighted ? PARTNER_TAG : undefined }))}

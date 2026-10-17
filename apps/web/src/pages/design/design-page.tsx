@@ -25,7 +25,7 @@ import { RoomSelect } from '@/components/room-select';
 import { StartOverDialog } from '@/components/start-over-dialog';
 import { Stepper, type StepState } from '@/components/stepper';
 import { DiscountBadge } from '@/components/discount-badge';
-import { InsuranceInfoPopover } from '@/components/insurance-info-popover';
+import { InsuranceExplainer } from '@/components/insurance-explainer';
 import { ProviderCategoryList } from '@/components/provider-category-list';
 import { PARTNER_TAG } from '@/features/settle-in/partner-tag';
 import { SettleInProgress } from '@/components/settle-in-progress';
@@ -642,12 +642,9 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="insurance-info-popover" title="Insurance info popover" description="The info icon next to the Home insurance heading. Three neutral points; nothing promises coverage. Closed and open.">
-        <div className="flex items-start gap-8">
-          <InsuranceInfoPopover />
-          <div className="pb-56">
-            <InsuranceInfoPopover defaultOpen />
-          </div>
+      <DesignSection id="insurance-explainer" title="Insurance explainer" description="Always visible under the Home insurance heading, above the options. A calm surface with a lead line and three neutral points; nothing promises coverage.">
+        <div className="max-w-xl">
+          <InsuranceExplainer />
         </div>
       </DesignSection>
 
