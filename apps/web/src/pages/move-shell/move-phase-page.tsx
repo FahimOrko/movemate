@@ -1,13 +1,11 @@
 import { phaseOrder, phaseSchema, type Move } from '@movemate/contracts';
-import { HouseIcon } from 'lucide-react';
 import { Navigate, useOutletContext, useParams } from 'react-router';
 import { Stepper } from '@/components/stepper';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { BeforePhotosPhase } from '@/features/before-photos/before-photos-phase';
 import { MoveInPhase } from '@/features/move-in/move-in-phase';
+import { SettleInPhase } from '@/features/settle-in/settle-in-phase';
 import { ReportPhase } from '@/features/report/report-phase';
 import { PreparePhase } from '@/features/prepare/prepare-phase';
-import { phaseLabels } from '@/lib/phases';
 
 export function MovePhasePage() {
   const move = useOutletContext<Move>();
@@ -30,15 +28,7 @@ export function MovePhasePage() {
       ) : phase === 'report' ? (
         <ReportPhase move={move} />
       ) : (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HouseIcon />
-            </EmptyMedia>
-            <EmptyTitle>{phaseLabels[phase]}</EmptyTitle>
-            <EmptyDescription>This step is not available yet.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <SettleInPhase />
       )}
     </div>
   );

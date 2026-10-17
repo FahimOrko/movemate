@@ -15,6 +15,7 @@ import { ReportView } from '@/components/report-view';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
 import { Stepper } from '@/components/stepper';
+import { ProviderCard } from '@/components/provider-card';
 import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -444,6 +445,14 @@ export function DesignPage() {
         </div>
         <div className="max-w-md">
           <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="provider-card" title="Provider card" description="Default lists a provider by name. Highlighted adds the discount line and a link that opens in a new tab. Without a configured url the link is not shown.">
+        <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
+          <ProviderCard name="Helen" />
+          <ProviderCard name="If" highlighted url="https://example.com/if-insurance" />
+          <ProviderCard name="If" highlighted />
         </div>
       </DesignSection>
 

@@ -1,11 +1,20 @@
-import type { GuidanceProgress, PrepareGuidance } from '@movemate/contracts';
+import type { GuidanceProgress, PrepareGuidance, SettleInGuidance } from '@movemate/contracts';
+import { env } from '../../env';
 import { AppError } from '../../shared/errors';
 import * as moveService from '../move/move.service';
 import * as repository from './guidance.repository';
-import { prepareChecklist, prepareTips } from './guidance.templates';
+import { insuranceExplainer, prepareChecklist, prepareTips, providerTemplates } from './guidance.templates';
 
 export function getPrepareGuidance(): PrepareGuidance {
   return { checklist: prepareChecklist, tips: prepareTips };
+}
+
+export function getProviders(): SettleInGuidance {
+  const providers = providerTemplates.map((provider) => ({
+    ...provider,
+    url: provider.highlighted ? (env.IF_INSURANCE_URL ?? null) : null,
+  }));
+  return { explainer: insuranceExplainer, providers };
 }
 
 export async function listProgress(moveId: string): Promise<GuidanceProgress[]> {

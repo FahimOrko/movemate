@@ -39,3 +39,17 @@ describe('parseEnv OpenRouter settings', () => {
     expect(env.OPENROUTER_VISION_MODEL).toBeUndefined();
   });
 });
+
+describe('parseEnv IF_INSURANCE_URL', () => {
+  it('starts without it', () => {
+    expect(parseEnv(validEnv).IF_INSURANCE_URL).toBeUndefined();
+  });
+
+  it('treats an empty value as unset', () => {
+    expect(parseEnv({ ...validEnv, IF_INSURANCE_URL: '' }).IF_INSURANCE_URL).toBeUndefined();
+  });
+
+  it('rejects a value that is not a url', () => {
+    expect(() => parseEnv({ ...validEnv, IF_INSURANCE_URL: 'not a url' })).toThrow(/IF_INSURANCE_URL/);
+  });
+});

@@ -8,6 +8,10 @@ export function getPrepareGuidance(_req: Request, res: Response) {
   res.json({ data: service.getPrepareGuidance() });
 }
 
+export function getProviders(_req: Request, res: Response) {
+  res.json({ data: service.getProviders() });
+}
+
 export async function listProgress(req: Request, res: Response) {
   const { id } = moveIdParamsSchema.parse(req.params);
   res.json({ data: await service.listProgress(id) });

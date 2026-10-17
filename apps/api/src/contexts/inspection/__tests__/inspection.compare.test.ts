@@ -94,6 +94,17 @@ describe('runCompare photo index mapping', () => {
     expect(ai.mock.calls[0]?.[0].text).toContain('1. Check whether the oven door closes');
   });
 
+  it('keeps the order the model returned across repeated runs', async () => {
+    const { id } = await kitchenMove();
+    const returned = Array.from({ length: 6 }, (_, index) => ({ status: 'changed' as const, summary: `Finding ${index}` }));
+    ai.mockResolvedValue(raw(returned));
+
+    for (let run = 0; run < 20; run++) {
+      const { findings } = await service.runCompare(id);
+      expect(findings.map((f) => f.aiSummary)).toEqual(returned.map((f) => f.summary));
+    }
+  });
+
   it('orders changed first, drops looks_good without a check, cuts to 8 and shortens long summaries', async () => {
     const { id } = await kitchenMove();
     await service.addCheck(id, { room: 'kitchen', text: 'Check whether the sink is chipped' });

@@ -59,11 +59,13 @@ export async function replaceAiFindings(moveId: string, room: Room, drafts: AiFi
   await db.transaction(async (tx) => {
     await tx.delete(findings).where(and(eq(findings.moveId, moveId), eq(findings.room, room), eq(findings.source, 'ai')));
     if (drafts.length === 0) return;
+    const now = Date.now();
     const inserted = await tx
       .insert(findings)
       .values(
-        drafts.map(({ roomCheckId, aiStatus, aiSummary, confidence }) => ({
+        drafts.map(({ roomCheckId, aiStatus, aiSummary, confidence }, index) => ({
           moveId,
+          createdAt: new Date(now + index), // 1 ms apart so listing keeps the order the model returned
           room,
           roomCheckId,
           source: 'ai' as const,

@@ -1,4 +1,4 @@
-import type { ChecklistItem, Tip } from '@movemate/contracts';
+import type { ChecklistItem, InsuranceExplainer, Provider, Tip } from '@movemate/contracts';
 
 export const prepareChecklist: ChecklistItem[] = [
   {
@@ -70,4 +70,22 @@ export const prepareTips: Tip[] = [
     title: 'Photograph before you unpack',
     body: 'Take your move-in photos before boxes arrive, so the rooms are easy to see.',
   },
+];
+
+export const insuranceExplainer: InsuranceExplainer = {
+  title: 'Why home insurance matters when you move in',
+  body: 'The landlord’s insurance covers the building, not your belongings. Home insurance covers your things against fire, water damage and theft, and usually covers damage you cause to the apartment. Arrange it before your first night, so you are covered from day one.',
+};
+
+// The highlighted provider's url is filled in by the service from env.
+export const providerTemplates: Omit<Provider, 'url'>[] = [
+  { key: 'electricity-helen', category: 'electricity', name: 'Helen', highlighted: false },
+  { key: 'electricity-fortum', category: 'electricity', name: 'Fortum', highlighted: false },
+  { key: 'electricity-vattenfall', category: 'electricity', name: 'Vattenfall', highlighted: false },
+  { key: 'internet-elisa', category: 'internet', name: 'Elisa', highlighted: false },
+  { key: 'internet-telia', category: 'internet', name: 'Telia', highlighted: false },
+  { key: 'internet-dna', category: 'internet', name: 'DNA', highlighted: false },
+  { key: 'insurance-if', category: 'home_insurance', name: 'If', highlighted: true },
+  { key: 'insurance-lahitapiola', category: 'home_insurance', name: 'LocalTapiola', highlighted: false },
+  { key: 'insurance-pohjola', category: 'home_insurance', name: 'OP', highlighted: false },
 ];
