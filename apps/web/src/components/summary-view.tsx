@@ -1,12 +1,13 @@
-import type { ProviderCategory, ProviderDiscount, ReportSummary } from '@movemate/contracts';
+import type { ChecklistStatus, ProviderCategory, ProviderDiscount, ReportSummary } from '@movemate/contracts';
 import { Link } from 'react-router';
+import { SummaryChecklist } from '@/components/summary-checklist';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/format';
 import { providerCategoryLabels } from '@/lib/provider-categories';
 
 export type ChosenProvider = { category: ProviderCategory; name: string; discount: ProviderDiscount | null };
 
-type SummaryViewProps = { summary: ReportSummary; chosen: ChosenProvider[]; reportHref: string };
+type SummaryViewProps = { summary: ReportSummary; chosen: ChosenProvider[]; reportHref: string; onChecklistStatusChange: (itemKey: string, status: ChecklistStatus) => void };
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
@@ -17,7 +18,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function SummaryView({ summary, chosen, reportHref }: SummaryViewProps) {
+export function SummaryView({ summary, chosen, reportHref, onChecklistStatusChange }: SummaryViewProps) {
   return (
     <article aria-labelledby="summary-title" className="flex flex-col gap-8">
       <header>
@@ -27,6 +28,8 @@ export function SummaryView({ summary, chosen, reportHref }: SummaryViewProps) {
         <p className="mt-2 text-base">{summary.address}</p>
         {summary.moveDate && <p className="text-sm text-muted-foreground">Move date {formatDate(summary.moveDate)}</p>}
       </header>
+
+      <SummaryChecklist checklist={summary.checklist} onStatusChange={onChecklistStatusChange} />
 
       <Card variant="surface">
         <CardHeader>

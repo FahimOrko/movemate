@@ -84,6 +84,14 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 **Tests:** providers route (If is highlighted with the env URL, only If is highlighted, no price-like fields).
 **Done when:** the If button opens the configured URL.
 
+## Checklist upgrade
+**Contracts:** `guidance.ts`: `checklistStatuses` (`pending | done | no | na`), `isHandled(status)` (done or na); `guidanceProgressSchema` is now the template item plus `status`; `setProgressSchema` is `{ status }`. `reportSummarySchema` gains `checklist: { open, handled }`.
+**DB:** `guidance_progress.completed` replaced by `status` (text, default `pending`). Migration `0006_checklist_status` adds `status`, backfills `completed = true` to `done` (false stays `pending`), then drops `completed`.
+**API:** `GET /moves/:id/guidance` returns every template item with its status (pending when there is no row). `PATCH /moves/:id/guidance/:itemKey` takes `{ status }` (upsert; 404 unknown move or key; 400 invalid status). `report.getSummary` reads the live checklist through `guidance.service` (new dependency report to guidance) and `buildSummary` splits open (pending, no) from handled (done, na).
+**Web:** the checklist leaves the Prepare page and lives in the move shell (`features/checklist`): side panel on lg+, "Checklist (n of m)" Sheet drawer below lg, one `useChecklist` query shared by the panel, stepper and Summary. New components: `status-control`, `checklist-row` (info icon expands the description), `checklist-panel`, `checklist-drawer`, `summary-checklist`, shadcn `sheet`. `checklist-item` is removed. The stepper takes explicit `steps` (complete, attention, locked, upcoming) from `phase-steps.ts`; only Prepare is wired to attention. Summary shows "Still open" first and a collapsed "Handled" group; print lists all items with their status. All registered on /design.
+**Tests:** migration backfill mapping (temp-table run of the 0006 SQL), PATCH each status 200, invalid status 400, unknown key and move 404, GET defaults to pending, `isHandled`, summary builder open and handled split, summary route includes the live checklist.
+**Done when:** answering items in any phase updates the panel, the stepper's Prepare marker and the Summary reminder together; `pnpm check` is green.
+
 ## Slice 7: Demo hardening
 **Files:** `apps/api/src/db/seed.ts` + `pnpm db:seed` (resets the dev DB and creates a demo move with before and move-in photos from `demo-assets/` through photos.service), `demo-assets/*.jpg`.
 **Work:** audit loading, empty and error states on every page (all registered on /design); visual polish; rehearse the recording (fallback: if AI is slow, use the manual-check path).

@@ -1,24 +1,24 @@
-import type { ProviderCategory } from '@movemate/contracts';
+import type { ChecklistStatus, ProviderCategory } from '@movemate/contracts';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { guidanceProgress, providerSelections } from '../../db/schema/guidance';
 
 export async function listByMove(moveId: string) {
   return db
-    .select({ itemKey: guidanceProgress.itemKey, completed: guidanceProgress.completed })
+    .select({ itemKey: guidanceProgress.itemKey, status: guidanceProgress.status })
     .from(guidanceProgress)
     .where(eq(guidanceProgress.moveId, moveId));
 }
 
-export async function upsert(moveId: string, itemKey: string, completed: boolean) {
+export async function upsert(moveId: string, itemKey: string, status: ChecklistStatus) {
   const [row] = await db
     .insert(guidanceProgress)
-    .values({ moveId, itemKey, completed })
+    .values({ moveId, itemKey, status })
     .onConflictDoUpdate({
       target: [guidanceProgress.moveId, guidanceProgress.itemKey],
-      set: { completed, updatedAt: new Date() },
+      set: { status, updatedAt: new Date() },
     })
-    .returning({ itemKey: guidanceProgress.itemKey, completed: guidanceProgress.completed });
+    .returning({ itemKey: guidanceProgress.itemKey, status: guidanceProgress.status });
   if (!row) throw new Error('Upsert returned no row');
   return row;
 }

@@ -19,8 +19,8 @@ export async function listProgress(req: Request, res: Response) {
 
 export async function setProgress(req: Request, res: Response) {
   const { id, itemKey } = progressParamsSchema.parse(req.params);
-  const { completed } = setProgressSchema.parse(req.body);
-  res.json({ data: await service.setProgress(id, itemKey, completed) });
+  const { status } = setProgressSchema.parse(req.body);
+  res.json({ data: await service.setProgress(id, itemKey, status) });
 }
 
 export async function getSelection(req: Request, res: Response) {

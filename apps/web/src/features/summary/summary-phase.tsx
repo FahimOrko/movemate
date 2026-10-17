@@ -4,6 +4,7 @@ import { SummaryView, type ChosenProvider } from '@/components/summary-view';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSetChecklistStatus } from '@/features/checklist/use-checklist';
 import { useProviderSelection, useSettleInGuidance } from '@/features/settle-in/use-settle-in';
 import { useSummary } from './use-summary';
 
@@ -11,6 +12,7 @@ export function SummaryPhase({ move }: { move: Move }) {
   const summary = useSummary(move.id);
   const selection = useProviderSelection(move.id);
   const guidance = useSettleInGuidance();
+  const setStatus = useSetChecklistStatus(move.id);
 
   if (summary.isError || selection.isError || guidance.isError) {
     return (
@@ -37,7 +39,12 @@ export function SummaryPhase({ move }: { move: Move }) {
 
   return (
     <section className="flex flex-col gap-8">
-      <SummaryView summary={summary.data} chosen={chosen} reportHref="/move/report" />
+      <SummaryView
+        summary={summary.data}
+        chosen={chosen}
+        reportHref="/move/report"
+        onChecklistStatusChange={(itemKey, status) => setStatus.mutate({ itemKey, status })}
+      />
       <div className="print:hidden">
         <Button onClick={() => window.print()}>
           <PrinterIcon data-icon="inline-start" />

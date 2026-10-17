@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { guidanceProgressSchema } from './guidance';
 import { aiStatusSchema, resolutionSchema } from './inspection';
 import { photoSchema, roomSchema } from './photos';
 
@@ -55,5 +56,6 @@ export const reportSummarySchema = z.object({
   roomsDocumented: z.number(),
   counts: z.object({ ok: z.number(), issues: z.number(), custom: z.number() }),
   watchListDueDate: z.iso.date().nullable(),
+  checklist: z.object({ open: z.array(guidanceProgressSchema), handled: z.array(guidanceProgressSchema) }),
 });
 export type ReportSummary = z.infer<typeof reportSummarySchema>;

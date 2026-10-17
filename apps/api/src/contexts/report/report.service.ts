@@ -1,5 +1,6 @@
 import type { Report, ReportSummary } from '@movemate/contracts';
 import { AppError } from '../../shared/errors';
+import * as guidanceService from '../guidance/guidance.service';
 import * as inspectionService from '../inspection/inspection.service';
 import * as moveService from '../move/move.service';
 import * as photosService from '../photos/photos.service';
@@ -42,5 +43,5 @@ export async function getLatest(moveId: string): Promise<Report> {
 
 export async function getSummary(moveId: string): Promise<ReportSummary> {
   const report = await getLatest(moveId);
-  return buildSummary(report.id, report.snapshot);
+  return buildSummary(report.id, report.snapshot, await guidanceService.listProgress(moveId));
 }

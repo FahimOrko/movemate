@@ -21,13 +21,18 @@ export const prepareGuidanceSchema = z.object({
 });
 export type PrepareGuidance = z.infer<typeof prepareGuidanceSchema>;
 
-export const guidanceProgressSchema = z.object({
-  itemKey: z.string(),
-  completed: z.boolean(),
-});
+export const checklistStatuses = ['pending', 'done', 'no', 'na'] as const;
+export const checklistStatusSchema = z.enum(checklistStatuses);
+export type ChecklistStatus = z.infer<typeof checklistStatusSchema>;
+
+export function isHandled(status: ChecklistStatus): boolean {
+  return status === 'done' || status === 'na';
+}
+
+export const guidanceProgressSchema = checklistItemSchema.extend({ status: checklistStatusSchema });
 export type GuidanceProgress = z.infer<typeof guidanceProgressSchema>;
 
-export const setProgressSchema = z.object({ completed: z.boolean() });
+export const setProgressSchema = z.object({ status: checklistStatusSchema });
 export type SetProgress = z.infer<typeof setProgressSchema>;
 
 export const providerCategories = ['electricity', 'internet', 'home_insurance'] as const;

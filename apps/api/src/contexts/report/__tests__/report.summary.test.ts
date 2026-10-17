@@ -1,4 +1,4 @@
-import type { ReportSnapshot } from '@movemate/contracts';
+import type { GuidanceProgress, ReportSnapshot } from '@movemate/contracts';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { app, createMove, uploadPhoto } from '../../inspection/__tests__/helpers';
@@ -17,9 +17,12 @@ const snapshot: ReportSnapshot = {
   disclaimer: 'd',
 };
 
+const item = (key: string, status: GuidanceProgress['status']): GuidanceProgress => ({ key, category: 'c', title: key, status });
+const checklist = [item('a', 'done'), item('b', 'pending'), item('c', 'na'), item('d', 'no')];
+
 describe('buildSummary', () => {
   it('counts rooms and findings by resolution and takes the due date from the watch list', () => {
-    expect(buildSummary('r1', snapshot)).toEqual({
+    expect(buildSummary('r1', snapshot, checklist)).toEqual({
       reportId: 'r1',
       address: 'Aurakatu 12',
       moveDate: '2026-01-15',
@@ -27,11 +30,12 @@ describe('buildSummary', () => {
       roomsDocumented: 2,
       counts: { ok: 2, issues: 1, custom: 1 },
       watchListDueDate: '2026-02-14',
+      checklist: { open: [item('b', 'pending'), item('d', 'no')], handled: [item('a', 'done'), item('c', 'na')] },
     });
   });
 
   it('has a null due date for an empty watch list', () => {
-    expect(buildSummary('r1', { ...snapshot, watchList: [] }).watchListDueDate).toBeNull();
+    expect(buildSummary('r1', { ...snapshot, watchList: [] }, []).watchListDueDate).toBeNull();
   });
 });
 
@@ -46,5 +50,7 @@ describe('GET /moves/:id/summary', () => {
 
     const res = await request(app).get(`/api/moves/${id}/summary`).expect(200);
     expect(res.body.data).toMatchObject({ reportId: report.id, address: 'Aurakatu 12', counts: { ok: 0, issues: 0, custom: 0 } });
+    expect(res.body.data.checklist.open.length).toBeGreaterThan(0);
+    expect(res.body.data.checklist.handled).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import type { Finding, Photo, Report, Room, RoomCheck } from '@movemate/contracts';
+import type { ChecklistStatus, Finding, GuidanceProgress, Photo, Report, Room, RoomCheck } from '@movemate/contracts';
 import { CircleAlertIcon, FileTextIcon, HouseIcon, InfoIcon, PrinterIcon, RefreshCwIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -9,7 +9,10 @@ import { HeaderNav } from '@/components/header-nav';
 import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { Logo } from '@/components/logo';
-import { ChecklistItem } from '@/components/checklist-item';
+import { ChecklistDrawer } from '@/components/checklist-drawer';
+import { ChecklistPanel } from '@/components/checklist-panel';
+import { ChecklistRow } from '@/components/checklist-row';
+import { StatusControl } from '@/components/status-control';
 import { CreateMoveFields } from '@/components/create-move-fields';
 import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
@@ -18,7 +21,7 @@ import { ReportView } from '@/components/report-view';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
 import { StartOverDialog } from '@/components/start-over-dialog';
-import { Stepper } from '@/components/stepper';
+import { Stepper, type StepState } from '@/components/stepper';
 import { DiscountBadge } from '@/components/discount-badge';
 import { ProviderCard } from '@/components/provider-card';
 import { SummaryView } from '@/components/summary-view';
@@ -281,6 +284,43 @@ const zeroIssueReport: Report = {
 };
 
 const designDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
+const designChecklist: GuidanceProgress[] = [
+  { key: 'sign-lease', category: 'Before you move', title: 'Read and sign the lease', description: 'Check the deposit and notice period.', status: 'pending' },
+  { key: 'deposit', category: 'Before you move', title: 'Pay the deposit and keep the receipt', status: 'done' },
+  { key: 'keys', category: 'Before you move', title: 'Collect the keys', status: 'no' },
+  { key: 'parking', category: 'After you arrive', title: 'Ask about a parking permit', status: 'na' },
+];
+const allHandled = designChecklist.map((entry): GuidanceProgress => ({ ...entry, status: entry.status === 'pending' || entry.status === 'no' ? 'done' : entry.status }));
+const noop = () => undefined;
+
+function StatusControlDemo({ label, initial, disabled }: { label: string; initial: ChecklistStatus; disabled?: boolean }) {
+  const [status, setStatus] = useState(initial);
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <StatusControl value={status} onChange={setStatus} label={label} disabled={disabled} />
+    </div>
+  );
+}
+
+const stepperExamples: { caption: string; active: 'prepare' | 'before_photos' | 'move_in'; steps: Record<'prepare' | 'before_photos' | 'move_in' | 'report' | 'settle_in' | 'summary', StepState> }[] = [
+  {
+    caption: 'Current: Prepare is open, later phases are locked.',
+    active: 'prepare',
+    steps: { prepare: { state: 'upcoming' }, before_photos: { state: 'locked' }, move_in: { state: 'locked' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
+  },
+  {
+    caption: 'Complete: every checklist item handled.',
+    active: 'before_photos',
+    steps: { prepare: { state: 'complete' }, before_photos: { state: 'upcoming' }, move_in: { state: 'locked' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
+  },
+  {
+    caption: 'Attention: hover or focus Prepare for "3 items still open". It is still a link.',
+    active: 'move_in',
+    steps: { prepare: { state: 'attention', label: '3 items still open' }, before_photos: { state: 'complete' }, move_in: { state: 'upcoming' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
+  },
+];
+
 const designSummary = {
   reportId: '00000000-0000-4000-8000-000000000000',
   address: 'Aurakatu 12, Turku',
@@ -289,6 +329,7 @@ const designSummary = {
   roomsDocumented: 4,
   counts: { ok: 9, issues: 2, custom: 1 },
   watchListDueDate: '2026-12-01',
+  checklist: { open: designChecklist.filter((entry) => entry.status === 'pending' || entry.status === 'no'), handled: designChecklist.filter((entry) => entry.status === 'done' || entry.status === 'na') },
 };
 
 export function DesignPage() {
@@ -489,23 +530,52 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="stepper" title="Stepper" description="Reached phases are links, later phases are locked. Labels collapse to the active one below the lg breakpoint.">
+      <DesignSection id="stepper" title="Stepper" description="Current, complete (green check), attention (amber warning, never blocks) and locked. Labels collapse to the active one below the lg breakpoint.">
         <div className="flex flex-col gap-8">
-          {(['prepare', 'move_in', 'summary'] as const).map((reached) => (
-            <Stepper key={reached} reached={reached} active={reached} hrefFor={() => '/design#stepper'} />
+          {stepperExamples.map(({ caption, active, steps }) => (
+            <div key={caption} className="flex flex-col gap-3">
+              <Stepper active={active} steps={steps} hrefFor={() => '/design#stepper'} />
+              <p className="text-sm text-muted-foreground">{caption}</p>
+            </div>
           ))}
-          <Stepper reached="move_in" active="before_photos" hrefFor={() => '/design#stepper'} />
         </div>
       </DesignSection>
 
-      <DesignSection id="checklist" title="Checklist item and tip card" description="Ticks persist. The pending state is disabled while a tick is saving.">
-        <div className="max-w-md divide-y">
-          <ChecklistItem title="Read and sign the lease" description="Check the deposit and notice period." checked={false} onCheckedChange={() => undefined} />
-          <ChecklistItem title="Pay the deposit and keep the receipt" checked onCheckedChange={() => undefined} />
-          <ChecklistItem title="Collect the keys" checked={false} disabled onCheckedChange={() => undefined} />
+      <DesignSection id="status-control" title="Status control" description="Yes, No and N/A. Pressing the active option resets to not answered. Pending, each answer and disabled. Press Tab for the focus ring.">
+        <div className="flex max-w-md flex-col gap-4">
+          <StatusControlDemo label="Not answered" initial="pending" />
+          <StatusControlDemo label="Yes" initial="done" />
+          <StatusControlDemo label="No" initial="no" />
+          <StatusControlDemo label="N/A" initial="na" />
+          <StatusControlDemo label="Disabled" initial="done" disabled />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="checklist" title="Checklist row and tip card" description="One line per item. Yes shows a check and strikethrough, No an amber marker, N/A greys out. The info icon expands the description inline.">
+        <div className="max-w-xl divide-y">
+          <ChecklistRow title="Read and sign the lease" description="Check the deposit and notice period." status="pending" onStatusChange={noop} />
+          <ChecklistRow title="Pay the deposit and keep the receipt" status="done" onStatusChange={noop} />
+          <ChecklistRow title="Collect the keys" status="no" onStatusChange={noop} />
+          <ChecklistRow title="Ask about a parking permit" status="na" onStatusChange={noop} />
+          <ChecklistRow title="Book the moving van" description="Compare two or three quotes and book early." status="pending" defaultExpanded onStatusChange={noop} />
+          <ChecklistRow title="Disabled while saving" status="pending" disabled onStatusChange={noop} />
         </div>
         <div className="max-w-md">
           <TipCard title="Label boxes by room" body="Write the destination room on every box so movers can place them straight away." />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="checklist-panel" title="Checklist panel and drawer" description="The side panel on lg and up, with the handled counter. Below lg the same panel opens from the trigger in a Sheet.">
+        <div className="grid gap-10 md:grid-cols-2">
+          <div className="max-w-sm">
+            <ChecklistPanel entries={designChecklist} onStatusChange={noop} />
+          </div>
+          <div className="max-w-sm">
+            <ChecklistPanel entries={allHandled} onStatusChange={noop} />
+          </div>
+        </div>
+        <div>
+          <ChecklistDrawer entries={designChecklist} onStatusChange={noop} />
         </div>
       </DesignSection>
 
@@ -528,10 +598,10 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers.">
+      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers, and with open and handled checklist groups.">
         <div className="flex flex-col gap-10">
-          <SummaryView summary={designSummary} reportHref="/design#summary" chosen={[{ category: 'internet', name: 'Internet Provider B', discount: null }, { category: 'home_insurance', name: 'If', discount: designDiscount }]} />
-          <SummaryView summary={{ ...designSummary, moveDate: null, watchListDueDate: null }} reportHref="/design#summary" chosen={[]} />
+          <SummaryView summary={designSummary} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[{ category: 'internet', name: 'Internet Provider B', discount: null }, { category: 'home_insurance', name: 'If', discount: designDiscount }]} />
+          <SummaryView summary={{ ...designSummary, moveDate: null, watchListDueDate: null, checklist: { open: [], handled: allHandled } }} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[]} />
         </div>
       </DesignSection>
 

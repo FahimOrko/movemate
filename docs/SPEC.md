@@ -25,8 +25,10 @@ Business goal: the final phase connects the user to providers they need after mo
   - One CTA ("Start my move") to the main app
   - The main app after the landing page uses shadcn components styled with the tokens from /design
 - **Phase 1: Prepare** (templated, no AI)
-  - Common move-in checklist (tickable, persisted)
+  - Common move-in checklist. Each item gets an answer: Yes, No or N/A (persisted; no answer is "pending"). Handled = Yes or N/A. Pressing the active answer again resets it to pending.
+  - The checklist is a side panel in every phase (a "Checklist (5 of 8)" drawer below the lg breakpoint). It never blocks a phase or the Continue button.
   - Move planning tips
+- **Stepper completion**: a phase shows complete (green check), attention (amber warning with an accessible label), locked or upcoming, derived from data. Prepare is complete only when every checklist item is handled. If the user moved past it with items still pending or answered No, it shows attention ("3 items still open"). Attention never blocks navigation. Other phases keep their order-based behavior for now.
 - **Phase 2: Before photos**
   - Upload listing/viewing photos in one place, label each by room
   - AI analyzes them per room and produces "what to check on move-in day"
@@ -44,6 +46,7 @@ Business goal: the final phase connects the user to providers they need after mo
   - Short explanation of why home insurance matters when moving in
   - If highlighted: "MoveMate users get a discount with If." Button links to `IF_INSURANCE_URL`
   - Other providers listed by name only. No prices anywhere.
+- **Summary**: shows a checklist reminder first. "Still open" lists pending and No items with the same Yes / No / N/A control so the user can answer there. "Handled" (Yes and N/A) is a collapsed group. Print shows every item with its status and no controls.
 
 ## 4. Stack
 
@@ -80,7 +83,7 @@ DDD for modeling and naming. Layered code inside each context.
 ### Rules
 
 - A context may call another context's **service**, never its repository or tables
-- Dependencies flow one way: `inspection -> photos, move` and `report -> inspection, photos, move`. `guidance` depends on `move` only.
+- Dependencies flow one way: `inspection -> photos, move` and `report -> inspection, photos, guidance, move`. `guidance` depends on `move` only.
 - Domain events are names for state changes (`MoveCreated`, `BeforePhotosAnalyzed`, `MoveInCompared`, `FindingResolved`, `ReportGenerated`, `ProviderLinkOpened`). They drive phase transitions on the move. No event bus.
 - Phase transitions are validated in `move` service (e.g. cannot compare without move-in photos). Stepper allows going back to any reached phase.
 
@@ -110,7 +113,7 @@ movemate/
 ## 6. Data model
 
 - **moves**: id, address, move_date (nullable), phase (`prepare | before_photos | move_in | report | settle_in`), created_at, updated_at
-- **guidance_progress**: id, move_id, item_key, completed, updated_at
+- **guidance_progress**: id, move_id, item_key, status (`pending | done | no | na`; a missing row means `pending`), updated_at
 - **photos**: id, move_id, stage (`before | move_in`), room, file_path, width, height, created_at
 - **room_checks**: id, move_id, room, text, source (`ai | user`), created_at
 - **findings**: id, move_id, room, room_check_id (nullable), ai_status (`looks_good | changed | unclear`), ai_summary, confidence (`low | medium | high`), resolution (`pending | ok | issue | custom`), user_note, created_at, updated_at
@@ -127,10 +130,10 @@ All under `/api`. Success `{ data }`, error `{ error: { code, message } }`.
 
 - `GET /health`
 - move: `POST /moves`, `GET /moves/current`, `POST /moves/:id/advance`
-- guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance`, `PATCH /moves/:id/guidance/:itemKey`
+- guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance` (every template item with its status), `PATCH /moves/:id/guidance/:itemKey` (body `{ status }`, upsert; 404 unknown move or key, 400 invalid status)
 - photos: `POST /moves/:id/photos` (multipart: file, stage, room), `GET /moves/:id/photos?stage=`, `PATCH /photos/:id` (relabel), `DELETE /photos/:id`, `GET /photos/:id/file`
 - inspection: `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `POST /moves/:id/inspection/compare`, `GET /moves/:id/findings`, `PATCH /findings/:id`
-- report: `POST /moves/:id/reports`, `GET /reports/:id`
+- report: `POST /moves/:id/reports`, `GET /reports/:id`, `GET /moves/:id/summary` (also returns the live checklist split into open and handled)
 
 Status codes: 400 validation, 404 missing, 409 invalid phase transition, 413 upload too large, 502 AI failure, 500 unexpected. Never return stack traces or upstream payloads.
 

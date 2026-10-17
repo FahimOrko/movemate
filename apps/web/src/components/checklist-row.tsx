@@ -1,0 +1,52 @@
+import type { ChecklistStatus } from '@movemate/contracts';
+import { CheckIcon, InfoIcon } from 'lucide-react';
+import { useId, useState } from 'react';
+import { StatusControl } from '@/components/status-control';
+import { cn } from '@/lib/utils';
+
+type ChecklistRowProps = {
+  title: string;
+  description?: string;
+  status: ChecklistStatus;
+  onStatusChange: (status: ChecklistStatus) => void;
+  disabled?: boolean;
+  /** Starts with the description open. */
+  defaultExpanded?: boolean;
+};
+
+export function ChecklistRow({ title, description, status, onStatusChange, disabled, defaultExpanded = false }: ChecklistRowProps) {
+  const descriptionId = useId();
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  return (
+    <div className={cn('py-2.5', status === 'na' && 'opacity-60')}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {status === 'done' && <CheckIcon className="size-4 shrink-0 text-success-text" aria-hidden="true" />}
+          {status === 'no' && <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />}
+          <span className={cn('text-sm', (status === 'done' || status === 'na') && 'text-muted-foreground', status === 'done' && 'line-through')}>
+            {title}
+            {status === 'no' && <span className="sr-only"> (answered no)</span>}
+          </span>
+          {description && (
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={descriptionId}
+              aria-label={`More about ${title}`}
+              onClick={() => setExpanded((open) => !open)}
+              className="shrink-0 rounded-full p-1 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
+            >
+              <InfoIcon className="size-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+        <StatusControl value={status} onChange={onStatusChange} label={title} disabled={disabled} />
+      </div>
+      {description && expanded && (
+        <p id={descriptionId} className="mt-1.5 text-sm text-muted-foreground">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+}

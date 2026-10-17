@@ -1,4 +1,4 @@
-import type { GuidanceProgress, PrepareGuidance, ProviderCategory, ProviderSelection, SettleInGuidance } from '@movemate/contracts';
+import type { ChecklistStatus, GuidanceProgress, PrepareGuidance, ProviderCategory, ProviderSelection, SettleInGuidance } from '@movemate/contracts';
 import { env } from '../../env';
 import { AppError } from '../../shared/errors';
 import * as moveService from '../move/move.service';
@@ -20,15 +20,16 @@ export function getProviders(): SettleInGuidance {
 
 export async function listProgress(moveId: string): Promise<GuidanceProgress[]> {
   await moveService.getById(moveId);
-  return repository.listByMove(moveId);
+  const statuses = new Map((await repository.listByMove(moveId)).map((row) => [row.itemKey, row.status]));
+  return prepareChecklist.map((item) => ({ ...item, status: statuses.get(item.key) ?? 'pending' }));
 }
 
-export async function setProgress(moveId: string, itemKey: string, completed: boolean): Promise<GuidanceProgress> {
+export async function setProgress(moveId: string, itemKey: string, status: ChecklistStatus): Promise<GuidanceProgress> {
   await moveService.getById(moveId);
-  if (!prepareChecklist.some((item) => item.key === itemKey)) {
-    throw new AppError('not_found', 'Checklist item not found');
-  }
-  return repository.upsert(moveId, itemKey, completed);
+  const item = prepareChecklist.find((candidate) => candidate.key === itemKey);
+  if (!item) throw new AppError('not_found', 'Checklist item not found');
+  const row = await repository.upsert(moveId, itemKey, status);
+  return { ...item, status: row.status };
 }
 
 export async function getSelection(moveId: string): Promise<ProviderSelection> {

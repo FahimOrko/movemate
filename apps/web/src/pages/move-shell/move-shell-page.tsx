@@ -14,7 +14,7 @@ export function MoveShellPage() {
   return (
     <div className="min-h-dvh">
       <header className="border-b print:hidden">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2 sm:gap-4">
             <Link to="/" aria-label="MoveMate home">
               <Logo variant="mark" size={24} className="sm:hidden" />
@@ -25,7 +25,7 @@ export function MoveShellPage() {
           <StartOverButton />
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-12 print:p-0">
+      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 print:p-0">
         {isPending && (
           <div className="flex flex-col gap-3" aria-hidden="true">
             <Skeleton className="h-8 w-full" />

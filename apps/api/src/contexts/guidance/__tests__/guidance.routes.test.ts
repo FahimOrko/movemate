@@ -18,36 +18,44 @@ describe('guidance routes', () => {
     expect(res.body.data.tips.length).toBeGreaterThan(0);
   });
 
-  it('PATCH toggles an item and the tick persists', async () => {
+  it('GET defaults every template item to pending', async () => {
     const id = await createMove();
-    expect((await request(app).get(`/api/moves/${id}/guidance`)).body.data).toEqual([]);
 
-    const patch = await request(app).patch(`/api/moves/${id}/guidance/sign-lease`).send({ completed: true });
+    const res = await request(app).get(`/api/moves/${id}/guidance`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body.data.every((item: { status: string }) => item.status === 'pending')).toBe(true);
+  });
+
+  it.each(['done', 'no', 'na', 'pending'])('PATCH status %s returns 200 and persists', async (status) => {
+    const id = await createMove();
+
+    const patch = await request(app).patch(`/api/moves/${id}/guidance/sign-lease`).send({ status });
 
     expect(patch.status).toBe(200);
-    expect(patch.body.data).toEqual({ itemKey: 'sign-lease', completed: true });
-    expect((await request(app).get(`/api/moves/${id}/guidance`)).body.data).toEqual([
-      { itemKey: 'sign-lease', completed: true },
-    ]);
+    expect(patch.body.data).toMatchObject({ key: 'sign-lease', status });
+    const list = (await request(app).get(`/api/moves/${id}/guidance`)).body.data;
+    expect(list.find((item: { key: string }) => item.key === 'sign-lease').status).toBe(status);
   });
 
   it('PATCH returns 404 for an unknown item key and an unknown move', async () => {
     const id = await createMove();
 
-    expect((await request(app).patch(`/api/moves/${id}/guidance/nope`).send({ completed: true })).status).toBe(404);
+    expect((await request(app).patch(`/api/moves/${id}/guidance/nope`).send({ status: 'done' })).status).toBe(404);
     expect(
       (
         await request(app)
           .patch('/api/moves/00000000-0000-4000-8000-000000000000/guidance/sign-lease')
-          .send({ completed: true })
+          .send({ status: 'done' })
       ).status,
     ).toBe(404);
   });
 
-  it('PATCH returns 400 for a bad body', async () => {
+  it.each([{ status: 'yes' }, { completed: true }, {}])('PATCH returns 400 for the body %j', async (body) => {
     const id = await createMove();
 
-    const res = await request(app).patch(`/api/moves/${id}/guidance/sign-lease`).send({ completed: 'yes' });
+    const res = await request(app).patch(`/api/moves/${id}/guidance/sign-lease`).send(body);
 
     expect(res.status).toBe(400);
   });
