@@ -18,7 +18,9 @@ import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
 import { ReportIssue } from '@/components/report-issue';
 import { ReportView } from '@/components/report-view';
+import { RoomCard } from '@/components/room-card';
 import { RoomCheckList } from '@/components/room-check-list';
+import { RoomChecksSection } from '@/components/room-checks-section';
 import { RoomSelect } from '@/components/room-select';
 import { StartOverDialog } from '@/components/start-over-dialog';
 import { Stepper, type StepState } from '@/components/stepper';
@@ -46,6 +48,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { DesignSection } from './design-section';
+import { RoomDialogDemo } from './room-dialog-demo';
 
 // Class names are written out in full so Tailwind can find them.
 // Class names are written out in full so Tailwind can find them. Hex values are documentation of the tokens in index.css.
@@ -132,6 +135,11 @@ const samplePhotos: Photo[] = [
   createdAt: '2026-10-12T14:32:00.000Z',
   url: `https://picsum.photos/seed/movemate-${file}/400/300`,
 }));
+
+const designDialogPhotos: Photo[] = [
+  ...samplePhotos,
+  { ...(samplePhotos[0] as Photo), id: '00000000-0000-4000-8000-000000000003', room: 'hallway', url: 'https://picsum.photos/seed/movemate-hallway/400/300' },
+];
 
 const sampleChecks: RoomCheck[] = (
   [
@@ -310,7 +318,7 @@ const stepperExamples: { caption: string; active: 'prepare' | 'before_photos' | 
     steps: { prepare: { state: 'upcoming' }, before_photos: { state: 'locked' }, move_in: { state: 'locked' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
   },
   {
-    caption: 'Complete: every checklist item handled.',
+    caption: 'Complete: every move checklist item handled.',
     active: 'before_photos',
     steps: { prepare: { state: 'complete' }, before_photos: { state: 'upcoming' }, move_in: { state: 'locked' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
   },
@@ -551,7 +559,7 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="checklist" title="Checklist row and tip card" description="One line per item. Yes shows a check and strikethrough, No an amber marker, N/A greys out. The info icon expands the description inline.">
+      <DesignSection id="checklist" title="Move checklist row and tip card" description="One line per item. Yes shows a check and strikethrough, No an amber marker, N/A greys out. The info icon expands the description inline.">
         <div className="max-w-xl divide-y">
           <ChecklistRow title="Read and sign the lease" description="Check the deposit and notice period." status="pending" onStatusChange={noop} />
           <ChecklistRow title="Pay the deposit and keep the receipt" status="done" onStatusChange={noop} />
@@ -565,10 +573,10 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="checklist-panel" title="Checklist panel and drawer" description="The side panel on lg and up, with the handled counter. Below lg the same panel opens from the trigger in a Sheet.">
+      <DesignSection id="checklist-panel" title="Move checklist panel and drawer" description="The side panel on lg and up, with the handled counter. Below lg the same panel opens from the trigger in a Sheet.">
         <div className="grid gap-10 md:grid-cols-2">
           <div className="max-w-sm">
-            <ChecklistPanel entries={designChecklist} onStatusChange={noop} />
+            <ChecklistPanel entries={designChecklist} onStatusChange={noop} roomChecks={sampleChecks} />
           </div>
           <div className="max-w-sm">
             <ChecklistPanel entries={allHandled} onStatusChange={noop} />
@@ -598,7 +606,7 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers, and with open and handled checklist groups.">
+      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers, and with open and handled move checklist groups.">
         <div className="flex flex-col gap-10">
           <SummaryView summary={designSummary} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[{ category: 'internet', name: 'Internet Provider B', discount: null }, { category: 'home_insurance', name: 'If', discount: designDiscount }]} />
           <SummaryView summary={{ ...designSummary, moveDate: null, watchListDueDate: null, checklist: { open: [], handled: allHandled } }} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[]} />
@@ -626,12 +634,41 @@ export function DesignPage() {
         <PhotoGrid photos={[]} onRelabel={() => undefined} onDelete={() => undefined} />
       </DesignSection>
 
-      <DesignSection id="room-checks" title="Room check list" description="Per room: AI and your own checks, remove, add. Populated, analyzing, empty, disabled and add error. Submit an empty field to see the error.">
+      <DesignSection id="room-checks" title="Room checks list" description="The right side of an open room card: AI and your own checks, remove, add. Populated, analyzing, empty, disabled and add error. Submit an empty field to see the error.">
         <div className="grid gap-6 lg:grid-cols-2">
           <RoomCheckList room="kitchen" checks={sampleChecks} onAdd={() => new Promise((resolve) => setTimeout(resolve, 800))} onDelete={() => undefined} />
           <RoomCheckList room="bedroom" checks={[]} analyzing onAdd={() => Promise.resolve()} onDelete={() => undefined} />
           <RoomCheckList room="bathroom" checks={[]} onAdd={() => Promise.reject(new Error('Could not add the check'))} onDelete={() => undefined} />
           <RoomCheckList room="hallway" checks={sampleChecks.slice(0, 1)} disabled onAdd={() => Promise.resolve()} onDelete={() => undefined} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="room-card" title="Room card" description="One per room with photos. The cover is the first photo. Default, loading while the AI works, failed with a per-room Try again, no checks yet and several photos. The whole card is a button.">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <li><RoomCard room="kitchen" photos={samplePhotos.slice(0, 1)} checkCount={7} onOpen={() => undefined} /></li>
+          <li><RoomCard room="bedroom" photos={samplePhotos.slice(2)} checkCount={0} analyzing onOpen={() => undefined} /></li>
+          <li><RoomCard room="bathroom" photos={samplePhotos.slice(2)} checkCount={0} failed onRetry={() => undefined} onOpen={() => undefined} /></li>
+          <li><RoomCard room="hallway" photos={samplePhotos.slice(2)} checkCount={0} onOpen={() => undefined} /></li>
+          <li><RoomCard room="living_room" photos={[...samplePhotos, ...samplePhotos.slice(0, 1)]} checkCount={1} onOpen={() => undefined} /></li>
+        </ul>
+      </DesignSection>
+
+      <DesignSection id="room-dialog" title="Room card dialog" description="Opens a room as a split view: photos on the left, room checks on the right. Full screen below lg, and the photo stacks on top. Arrow buttons or the left and right arrow keys move between rooms, and they are hidden for a single room. Escape closes.">
+        <div className="flex flex-wrap gap-3">
+          <RoomDialogDemo label="Open with three rooms" rooms={['kitchen', 'bedroom', 'hallway']} photos={designDialogPhotos} checks={sampleChecks} />
+          <RoomDialogDemo label="Open while analyzing" rooms={['bedroom']} photos={designDialogPhotos} checks={[]} analyzing />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="room-checks-section" title="Room checks in the side panel" description="Read-only and collapsed by default, under the move checklist. One row per room with its count. A room opens that room's card on Before photos, from any phase. Hidden when there are no room checks.">
+        <div className="grid gap-10 md:grid-cols-2">
+          <div className="max-w-sm">
+            <RoomChecksSection checks={[...sampleChecks, ...sampleChecks.slice(0, 1).map((check) => ({ ...check, id: '00000000-0000-4000-8000-000000000199', room: 'bedroom' as const }))]} />
+          </div>
+          <div className="max-w-sm">
+            <p className="text-sm text-muted-foreground">With no room checks the section is not rendered.</p>
+            <RoomChecksSection checks={[]} />
+          </div>
         </div>
       </DesignSection>
 

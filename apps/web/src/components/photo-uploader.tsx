@@ -85,13 +85,13 @@ export function PhotoUploader({ existingCounts, upload, disabled }: PhotoUploade
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
         className={cn(
-          'flex flex-col items-center gap-3 rounded-xl border border-dashed bg-surface p-8 text-center transition-colors',
+          'flex flex-wrap items-center gap-3 rounded-xl border border-dashed bg-surface px-4 py-3 transition-colors',
           isDragging && 'border-primary bg-card',
           disabled && 'opacity-50',
         )}
       >
-        <ImagePlusIcon className="size-6 text-muted-foreground" aria-hidden="true" />
-        <p className="text-sm text-muted-foreground">Drop photos here, or choose files. JPEG, PNG or WebP.</p>
+        <ImagePlusIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <p className="min-w-0 flex-1 text-sm text-muted-foreground">Drop photos here, or choose files. JPEG, PNG or WebP.</p>
         <input
           ref={inputRef}
           id={inputId}

@@ -3,7 +3,6 @@ import { Trash2Icon } from 'lucide-react';
 import { useId, useState, type FormEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,14 +43,13 @@ export function RoomCheckList({ room, checks, onAdd, onDelete, analyzing, disabl
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{roomLabels[room]}</CardTitle>
-        <CardDescription>
-          {analyzing ? 'Reading the photos' : `${checks.length} ${checks.length === 1 ? 'check' : 'checks'}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      <div>
+        <h3 className="text-heading">Room checks</h3>
+        <p className="text-sm text-muted-foreground">
+          {analyzing ? 'Reading the photos' : `${checks.length} ${checks.length === 1 ? 'check' : 'checks'} for the ${roomLabels[room].toLowerCase()}`}
+        </p>
+      </div>
         {analyzing ? (
           <div className="flex flex-col gap-2" aria-hidden="true">
             <Skeleton className="h-5 w-full" />
@@ -102,7 +100,6 @@ export function RoomCheckList({ room, checks, onAdd, onDelete, analyzing, disabl
             </p>
           )}
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

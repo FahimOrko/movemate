@@ -44,7 +44,7 @@ export function PreparePhase({ move }: { move: Move }) {
         <h1 id="prepare-title" className="text-title">
           Prepare
         </h1>
-        <p className="mt-2 text-muted-foreground">Work through the checklist as you go. You can continue at any time.</p>
+        <p className="mt-2 text-muted-foreground">Work through the move checklist as you go. You can continue at any time.</p>
       </section>
       <section aria-labelledby="tips-title" className="flex flex-col gap-4">
         <h2 id="tips-title" className="text-heading">

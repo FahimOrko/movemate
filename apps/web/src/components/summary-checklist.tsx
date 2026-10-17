@@ -32,7 +32,7 @@ export function SummaryChecklist({ checklist, onStatusChange }: SummaryChecklist
           Still open
         </h2>
         {checklist.open.length === 0 ? (
-          <p className="text-muted-foreground">Everything on your checklist is handled.</p>
+          <p className="text-muted-foreground">Everything on your move checklist is handled.</p>
         ) : (
           <Rows entries={checklist.open} onStatusChange={onStatusChange} />
         )}
@@ -46,7 +46,7 @@ export function SummaryChecklist({ checklist, onStatusChange }: SummaryChecklist
         )}
       </div>
       <div className="hidden print:block">
-        <h2 className="text-heading">Checklist</h2>
+        <h2 className="text-heading">Move checklist</h2>
         <ul className="mt-2 divide-y">
           {all.map((entry) => (
             <li key={entry.key} className="flex justify-between gap-4 py-2 text-sm">

@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePhotoActions, usePhotos } from './use-photos';
 
-export function PhotosPanel({ moveId, stage }: { moveId: string; stage: PhotoStage }) {
+export function PhotosPanel({ moveId, stage, uploadOnly }: { moveId: string; stage: PhotoStage; /** Hides the grid and the actions it owns, for screens that manage photos elsewhere. */ uploadOnly?: boolean }) {
   const photos = usePhotos(moveId, stage);
   const { upload, relabel, remove } = usePhotoActions(moveId, stage);
   const actionError = relabel.error ?? remove.error;
@@ -33,7 +33,7 @@ export function PhotosPanel({ moveId, stage }: { moveId: string; stage: PhotoSta
   for (const photo of photos.data) counts[photo.room] = (counts[photo.room] ?? 0) + 1;
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className={uploadOnly ? 'flex flex-col gap-4' : 'flex flex-col gap-10'}>
       <PhotoUploader existingCounts={counts} upload={(file, room) => upload.mutateAsync({ file, room })} />
       {actionError && (
         <Alert variant="destructive">
@@ -42,12 +42,14 @@ export function PhotosPanel({ moveId, stage }: { moveId: string; stage: PhotoSta
           <AlertDescription>{actionError.message}</AlertDescription>
         </Alert>
       )}
-      <PhotoGrid
-        photos={photos.data}
-        disabled={relabel.isPending || remove.isPending}
-        onRelabel={(photo, room) => relabel.mutate({ id: photo.id, room })}
-        onDelete={(photo) => remove.mutate(photo.id)}
-      />
+      {!uploadOnly && (
+        <PhotoGrid
+          photos={photos.data}
+          disabled={relabel.isPending || remove.isPending}
+          onRelabel={(photo, room) => relabel.mutate({ id: photo.id, room })}
+          onDelete={(photo) => remove.mutate(photo.id)}
+        />
+      )}
     </div>
   );
 }
