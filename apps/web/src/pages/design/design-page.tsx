@@ -26,7 +26,9 @@ import { RoomSelect } from '@/components/room-select';
 import { StartOverDialog } from '@/components/start-over-dialog';
 import { Stepper, type StepState } from '@/components/stepper';
 import { DiscountBadge } from '@/components/discount-badge';
-import { ProviderCard } from '@/components/provider-card';
+import { ProviderHeroCard } from '@/components/provider-hero-card';
+import { ProviderOptionList } from '@/components/provider-option-list';
+import { SettleInProgress } from '@/components/settle-in-progress';
 import { SummaryView } from '@/components/summary-view';
 import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -615,13 +617,32 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="provider-card" title="Provider card" description="Unselected, selected, highlighted (If, with discount badge and a quote link that opens in a new tab) and disabled. Select toggles. The link is not shown without a configured url.">
-        <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
-          <ProviderCard name="Electricity Provider A" onSelect={() => undefined} />
-          <ProviderCard name="Electricity Provider B" selected onSelect={() => undefined} />
-          <ProviderCard name="Electricity Provider C" disabled onSelect={() => undefined} />
-          <ProviderCard name="If" highlighted url="https://example.com/if-insurance" discount={designDiscount} onSelect={() => undefined} />
-          <ProviderCard name="If" highlighted selected discount={designDiscount} onSelect={() => undefined} />
+      <DesignSection id="provider-hero-card" title="Provider hero card" description="The highlighted insurer: offer with a copyable code, three short points, a quote link that opens in a new tab and a Select toggle. Shown default, selected, copied and without a configured url (no quote link).">
+        <div className="flex max-w-2xl flex-col gap-6">
+          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} onSelect={() => undefined} />
+          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} selected onSelect={() => undefined} />
+          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" url="https://example.com/if-insurance" discount={designDiscount} defaultCopied onSelect={() => undefined} />
+          <ProviderHeroCard name="If" explainerTitle="Why home insurance matters when you move in" discount={designDiscount} onSelect={() => undefined} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="provider-option-list" title="Provider option list" description="One radio-style list per category. The whole row is clickable, a second click clears the choice, arrow keys move and select. Shown default, selected, compact (Other options) and with the N/A note.">
+        <div className="flex max-w-2xl flex-col gap-6">
+          <ProviderOptionList label="Electricity default" options={[{ key: 'a', name: 'Electricity Provider A' }, { key: 'b', name: 'Electricity Provider B' }]} selectedKey={null} onChoose={() => undefined} />
+          <ProviderOptionList label="Internet selected" options={[{ key: 'a', name: 'Internet Provider A' }, { key: 'b', name: 'Internet Provider B' }]} selectedKey="b" onChoose={() => undefined} />
+          <ProviderOptionList label="Other options compact" options={[{ key: 'a', name: 'Insurer A' }, { key: 'b', name: 'Insurer B' }]} selectedKey="a" compact onChoose={() => undefined} />
+          <div className="flex flex-col gap-3">
+            <ChecklistNaNote />
+            <ProviderOptionList label="With N/A note" options={[{ key: 'a', name: 'Electricity Provider A' }]} selectedKey={null} onChoose={() => undefined} />
+          </div>
+        </div>
+      </DesignSection>
+
+      <DesignSection id="settle-in-progress" title="Settle in progress" description="The progress line under the Settle in title and above Finish. Nothing, some and all categories chosen.">
+        <div className="flex flex-col gap-4">
+          <SettleInProgress chosen={0} total={3} />
+          <SettleInProgress chosen={2} total={3} />
+          <SettleInProgress chosen={3} total={3} />
         </div>
       </DesignSection>
 

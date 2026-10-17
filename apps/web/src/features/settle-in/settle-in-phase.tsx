@@ -1,10 +1,11 @@
 import type { Move, ProviderCategory } from '@movemate/contracts';
-import { ArrowRightIcon, CircleAlertIcon, ShieldCheckIcon } from 'lucide-react';
+import { ArrowRightIcon, CircleAlertIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { ChecklistNaNote } from '@/components/checklist-na-note';
-import { ProviderCard } from '@/components/provider-card';
+import { ProviderHeroCard } from '@/components/provider-hero-card';
+import { ProviderOptionList } from '@/components/provider-option-list';
+import { SettleInProgress } from '@/components/settle-in-progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
@@ -12,6 +13,8 @@ import { useChecklist } from '@/features/checklist/use-checklist';
 import { useAdvanceMove } from '@/features/prepare/use-move';
 import { providerCategoryLabels } from '@/lib/provider-categories';
 import { useProviderSelection, useSetProviderSelection, useSettleInGuidance } from './use-settle-in';
+
+const categoryOrder: ProviderCategory[] = ['home_insurance', 'electricity', 'internet'];
 
 export function SettleInPhase({ move }: { move: Move }) {
   const navigate = useNavigate();
@@ -40,40 +43,46 @@ export function SettleInPhase({ move }: { move: Move }) {
   }
 
   const { explainer, providers } = guidance.data;
+  const chosenCount = categoryOrder.filter((category) => selection.data[category] !== null).length;
+  const choose = (category: ProviderCategory, providerKey: string) =>
+    setSelection.mutate({ category, providerKey: selection.data[category] === providerKey ? null : providerKey });
+  const insurers = providers.filter((provider) => provider.category === 'home_insurance');
+  const hero = insurers.find((provider) => provider.highlighted);
+  const otherInsurers = insurers.filter((provider) => provider !== hero);
+  const listCategories = categoryOrder.filter((category) => category !== 'home_insurance');
+
   return (
     <section className="flex flex-col gap-8">
-      <div>
+      <div className="flex flex-col gap-3">
         <h1 className="text-title">Settle in</h1>
-        <p className="mt-2 text-muted-foreground">Set up electricity, internet and home insurance for your new home.</p>
+        <p className="text-muted-foreground">Set up home insurance, electricity and internet for your new home.</p>
+        <SettleInProgress chosen={chosenCount} total={categoryOrder.length} />
       </div>
-      <Card variant="surface">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheckIcon className="size-4 text-muted-foreground" aria-hidden="true" />
-            {explainer.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-muted-foreground">{explainer.body}</CardContent>
-      </Card>
-      {(Object.keys(providerCategoryLabels) as ProviderCategory[]).map((category) => (
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-medium">{providerCategoryLabels.home_insurance}</h2>
+        {checklist.data?.some((entry) => entry.linkedCategory === 'home_insurance' && entry.status === 'na') && <ChecklistNaNote />}
+        {hero && (
+          <ProviderHeroCard
+            name={hero.name}
+            explainerTitle={explainer.title}
+            url={hero.url}
+            discount={hero.discount}
+            selected={selection.data.home_insurance === hero.key}
+            onSelect={() => choose('home_insurance', hero.key)}
+          />
+        )}
+        {otherInsurers.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-medium text-muted-foreground">Other options</h3>
+            <ProviderOptionList label="Other home insurance options" options={otherInsurers} selectedKey={selection.data.home_insurance} compact onChoose={(key) => choose('home_insurance', key)} />
+          </div>
+        )}
+      </div>
+      {listCategories.map((category) => (
         <div key={category} className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">{providerCategoryLabels[category]}</h2>
           {checklist.data?.some((entry) => entry.linkedCategory === category && entry.status === 'na') && <ChecklistNaNote />}
-          <div className="grid gap-3 sm:grid-cols-2">
-            {providers
-              .filter((provider) => provider.category === category)
-              .map((provider) => (
-                <ProviderCard
-                  key={provider.key}
-                  name={provider.name}
-                  highlighted={provider.highlighted}
-                  url={provider.url}
-                  discount={provider.discount}
-                  selected={selection.data[category] === provider.key}
-                  onSelect={() => setSelection.mutate({ category, providerKey: selection.data[category] === provider.key ? null : provider.key })}
-                />
-              ))}
-          </div>
+          <ProviderOptionList label={providerCategoryLabels[category]} options={providers.filter((provider) => provider.category === category)} selectedKey={selection.data[category]} onChoose={(key) => choose(category, key)} />
         </div>
       ))}
       {advance.isError && (
@@ -83,7 +92,11 @@ export function SettleInPhase({ move }: { move: Move }) {
           <AlertDescription>{advance.error.message}</AlertDescription>
         </Alert>
       )}
-      <div>
+      <div className="flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <SettleInProgress chosen={chosenCount} total={categoryOrder.length} />
+          <p className="text-sm text-muted-foreground">Choices are optional. You can change them later.</p>
+        </div>
         <Button size="lg" disabled={advance.isPending} onClick={() => advance.mutate(move.id, { onSuccess: (next) => navigate(`/move/${next.phase}`) })}>
           {advance.isPending && <Spinner data-icon="inline-start" />}
           Finish

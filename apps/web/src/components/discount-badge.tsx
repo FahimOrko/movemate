@@ -4,17 +4,13 @@ import { useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { discountDuration } from '@/lib/discount';
 
 const COPIED_MS = 2000;
 const HOVER_CLOSE_MS = 150;
 
-function discountDuration(months: number): string {
-  if (months % 12 === 0) return months === 12 ? '1 year' : `${months / 12} years`;
-  return `${months} months`;
-}
-
-function CopyCodeButton({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
+export function CopyCodeButton({ code, defaultCopied = false }: { code: string; defaultCopied?: boolean }) {
+  const [copied, setCopied] = useState(defaultCopied);
   const timer = useRef<number>(undefined);
 
   async function copy() {
@@ -25,7 +21,7 @@ function CopyCodeButton({ code }: { code: string }) {
   }
 
   return (
-    <Button size="sm" variant="secondary" onClick={() => void copy()}>
+    <Button size="sm" variant="secondary" aria-label={copied ? `Code ${code} copied` : `Copy code ${code}`} onClick={() => void copy()}>
       {copied ? <CheckIcon data-icon="inline-start" /> : <CopyIcon data-icon="inline-start" />}
       <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
     </Button>
