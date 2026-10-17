@@ -91,7 +91,7 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 **Done when:** a fresh `db:seed` lets you record the full flow end to end without manual fixes.
 
 ## Stretch Slice 8: Contract analysis (only after 0–7 work)
-Own `contract` context: PDF upload, text extraction, one AI job flagging deposit, damage-responsibility and notice-period clauses with cautious wording; table `contracts (id, move_id, file_path, analysis jsonb, created_at)`. Plan it in detail only when Slice 7 is done.
+Contract analysis is an **optional step the user can skip**; the move flow works the same without it. Own `contract` context: PDF upload, text extraction, one AI job flagging deposit, damage-responsibility, inspection-waiver, entry and notice-period clauses; table `contracts (id, move_id, file_path, analysis jsonb, created_at)`. Test it with the demo lease `apps/api/demo-assets/demo-lease.pdf` (served at `GET /api/demo/contract`; the private answer key stays out of the repo's served files). Flags use cautious "worth confirming with the landlord" wording and never state legal conclusions or say a clause is illegal or invalid. Plan it in detail only when Slice 7 is done.
 
 ---
 

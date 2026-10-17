@@ -1,5 +1,6 @@
 import { CircleAlertIcon } from 'lucide-react';
 import { Link, Outlet } from 'react-router';
+import { HeaderNav } from '@/components/header-nav';
 import { Logo } from '@/components/logo';
 import { Alert,AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,9 +15,13 @@ export function MoveShellPage() {
     <div className="min-h-dvh">
       <header className="border-b print:hidden">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-          <Link to="/" aria-label="MoveMate home">
-            <Logo size={24} />
-          </Link>
+          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+            <Link to="/" aria-label="MoveMate home">
+              <Logo variant="mark" size={24} className="sm:hidden" />
+              <Logo size={24} className="hidden sm:inline-flex" />
+            </Link>
+            <HeaderNav />
+          </div>
           <StartOverButton />
         </div>
       </header>

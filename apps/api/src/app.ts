@@ -1,5 +1,6 @@
 import type { Health } from '@movemate/contracts';
 import express from 'express';
+import { demoRouter } from './contexts/demo/demo.routes';
 import { guidanceRouter } from './contexts/guidance/guidance.routes';
 import { inspectionRouter } from './contexts/inspection/inspection.routes';
 import { moveRouter } from './contexts/move/move.routes';
@@ -25,7 +26,7 @@ export function createApp() {
     const data: Health = { status: 'ok', db: 'connected' };
     res.json({ data });
   });
-  api.use(moveRouter, guidanceRouter, photosRouter, inspectionRouter, reportRouter);
+  api.use(demoRouter, moveRouter, guidanceRouter, photosRouter, inspectionRouter, reportRouter);
   api.use(() => {
     throw new AppError('not_found', 'Route not found');
   });

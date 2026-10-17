@@ -142,7 +142,12 @@ export function DemoPage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <Button asChild size="lg">
-                  <Link to="/move">Start my move</Link>
+                  <Link to="/move" target="_blank" rel="noopener noreferrer">Start my move</Link>
+                </Button>
+                <Button asChild variant="link" className="self-start px-0">
+                  <a href="/api/demo/contract" target="_blank" rel="noopener noreferrer">
+                    Sample lease (PDF)
+                  </a>
                 </Button>
                 {ifDiscount && (
                   <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">

@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { AddFindingForm } from '@/components/add-finding-form';
 import { AiErrorAlert } from '@/components/ai-error-alert';
 import { EnlargeablePhoto } from '@/components/enlargeable-photo';
+import { HeaderNav } from '@/components/header-nav';
 import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { Logo } from '@/components/logo';
@@ -749,6 +750,10 @@ export function DesignPage() {
           <AlertTitle>Something went wrong</AlertTitle>
           <AlertDescription>Try again in a moment.</AlertDescription>
         </Alert>
+      </DesignSection>
+
+      <DesignSection id="header-nav" title="Header navigation" description="Ghost small buttons next to the logo in the move header. The link for the current page is highlighted and carries aria-current. Here Design is active and Demo is the default state.">
+        <HeaderNav />
       </DesignSection>
 
       <DesignSection id="start-over" title="Start over" description="Small secondary button in the move header. It opens a confirm dialog. The confirm button shows a spinner while deleting, and a failure shows an alert inside the dialog.">
