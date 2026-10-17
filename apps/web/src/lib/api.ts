@@ -42,6 +42,9 @@ export const api = {
   put: <T>(path: string, schema: ZodType<T>, json?: unknown) => request(schema, 'PUT', path, { json }),
   patch: <T>(path: string, schema: ZodType<T>, json?: unknown) => request(schema, 'PATCH', path, { json }),
   upload: <T>(path: string, schema: ZodType<T>, form: FormData) => request(schema, 'POST', path, { form }),
+  postEmpty: async (path: string): Promise<void> => {
+    await send('POST', path);
+  },
   delete: async (path: string): Promise<void> => {
     await send('DELETE', path);
   },

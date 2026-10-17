@@ -25,3 +25,7 @@ export async function updatePhase(id: string, phase: Phase): Promise<MoveRow | u
   const [row] = await db.update(moves).set({ phase, updatedAt: new Date() }).where(eq(moves.id, id)).returning();
   return row;
 }
+
+export async function deleteAllMoves(executor: Pick<typeof db, 'delete'> = db): Promise<void> {
+  await executor.delete(moves);
+}

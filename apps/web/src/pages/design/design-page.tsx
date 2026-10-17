@@ -1,5 +1,6 @@
 import type { Finding, Photo, Report, Room, RoomCheck } from '@movemate/contracts';
 import { CircleAlertIcon, FileTextIcon, HouseIcon, InfoIcon, PrinterIcon, RefreshCwIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { AddFindingForm } from '@/components/add-finding-form';
 import { AiErrorAlert } from '@/components/ai-error-alert';
@@ -14,6 +15,7 @@ import { ReportIssue } from '@/components/report-issue';
 import { ReportView } from '@/components/report-view';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
+import { StartOverDialog } from '@/components/start-over-dialog';
 import { Stepper } from '@/components/stepper';
 import { DiscountBadge } from '@/components/discount-badge';
 import { ProviderCard } from '@/components/provider-card';
@@ -286,6 +288,8 @@ const designSummary = {
 };
 
 export function DesignPage() {
+  const [startOverState, setStartOverState] = useState<'default' | 'loading' | 'error' | null>(null);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-12">
@@ -701,6 +705,27 @@ export function DesignPage() {
           <AlertTitle>Something went wrong</AlertTitle>
           <AlertDescription>Try again in a moment.</AlertDescription>
         </Alert>
+      </DesignSection>
+
+      <DesignSection id="start-over" title="Start over" description="Small secondary button in the move header. It opens a confirm dialog. The confirm button shows a spinner while deleting, and a failure shows an alert inside the dialog.">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="secondary" size="sm" onClick={() => setStartOverState('default')}>
+            Start over
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setStartOverState('loading')}>
+            Dialog: loading
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setStartOverState('error')}>
+            Dialog: error
+          </Button>
+        </div>
+        <StartOverDialog
+          open={startOverState !== null}
+          onOpenChange={(open) => !open && setStartOverState(null)}
+          onConfirm={() => undefined}
+          pending={startOverState === 'loading'}
+          error={startOverState === 'error' ? 'Could not delete everything. Try again.' : undefined}
+        />
       </DesignSection>
 
       <DesignSection id="background" title="Interactive background" description="Landing page canvas. Follows the pointer; static under reduced motion.">

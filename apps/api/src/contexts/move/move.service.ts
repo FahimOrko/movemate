@@ -1,4 +1,8 @@
 import { phaseOrder, type CreateMove, type Move, type Phase } from '@movemate/contracts';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { db } from '../../db/client';
+import { env } from '../../env';
 import { AppError } from '../../shared/errors';
 import * as repository from './move.repository';
 import type { MoveEvent } from './move.types';
@@ -76,4 +80,16 @@ async function setPhase(id: string, phase: Phase): Promise<Move> {
   const row = await repository.updatePhase(id, phase);
   if (!row) throw new AppError('not_found', 'Move not found');
   return toMove(row);
+}
+
+// Uploads are emptied here, not through photos.service: photos depends on move, so move cannot call it.
+export async function resetAll(): Promise<void> {
+  if (env.NODE_ENV === 'production') throw new AppError('not_found', 'Route not found');
+  const uploadRoot = path.resolve(env.UPLOAD_DIR);
+  await db.transaction(async (tx) => {
+    await repository.deleteAllMoves(tx);
+    await fs.mkdir(uploadRoot, { recursive: true });
+    const entries = await fs.readdir(uploadRoot);
+    await Promise.all(entries.map((entry) => fs.rm(path.join(uploadRoot, entry), { recursive: true, force: true })));
+  });
 }

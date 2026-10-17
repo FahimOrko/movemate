@@ -16,3 +16,8 @@ export async function advance(req: Request, res: Response) {
   const { id } = moveIdParamsSchema.parse(req.params);
   res.json({ data: await service.advance(id) });
 }
+
+export async function reset(_req: Request, res: Response) {
+  await service.resetAll();
+  res.status(204).end();
+}

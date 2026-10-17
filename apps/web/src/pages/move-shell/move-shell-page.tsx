@@ -3,6 +3,7 @@ import { Link, Outlet } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentMove } from '@/features/prepare/use-move';
+import { StartOverButton } from '@/features/reset/start-over-button';
 import { CreateMoveForm } from './create-move-form';
 
 export function MoveShellPage() {
@@ -11,10 +12,11 @@ export function MoveShellPage() {
   return (
     <div className="min-h-dvh">
       <header className="border-b print:hidden">
-        <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
           <Link to="/" className="text-heading">
             MoveMate
           </Link>
+          <StartOverButton />
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-6 py-12 print:p-0">
