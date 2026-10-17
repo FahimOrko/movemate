@@ -34,12 +34,20 @@ export const providerCategories = ['electricity', 'internet', 'home_insurance'] 
 export const providerCategorySchema = z.enum(providerCategories);
 export type ProviderCategory = z.infer<typeof providerCategorySchema>;
 
+export const providerDiscountSchema = z.object({
+  percent: z.number(),
+  durationMonths: z.number(),
+  code: z.string(),
+});
+export type ProviderDiscount = z.infer<typeof providerDiscountSchema>;
+
 export const providerSchema = z.object({
   key: z.string(),
   category: providerCategorySchema,
   name: z.string(),
   highlighted: z.boolean(),
   url: z.string().nullable(),
+  discount: providerDiscountSchema.nullable(),
 });
 export type Provider = z.infer<typeof providerSchema>;
 
@@ -54,3 +62,13 @@ export const settleInGuidanceSchema = z.object({
   providers: z.array(providerSchema),
 });
 export type SettleInGuidance = z.infer<typeof settleInGuidanceSchema>;
+
+export const providerSelectionSchema = z.object({
+  electricity: z.string().nullable(),
+  internet: z.string().nullable(),
+  home_insurance: z.string().nullable(),
+});
+export type ProviderSelection = z.infer<typeof providerSelectionSchema>;
+
+export const setProviderSelectionSchema = z.object({ providerKey: z.string().min(1).max(100).nullable() });
+export type SetProviderSelection = z.infer<typeof setProviderSelectionSchema>;

@@ -46,3 +46,14 @@ export const reportSchema = z.object({
   snapshot: reportSnapshotSchema,
 });
 export type Report = z.infer<typeof reportSchema>;
+
+export const reportSummarySchema = z.object({
+  reportId: z.uuid(),
+  address: z.string(),
+  moveDate: z.iso.date().nullable(),
+  generatedAt: z.iso.datetime(),
+  roomsDocumented: z.number(),
+  counts: z.object({ ok: z.number(), issues: z.number(), custom: z.number() }),
+  watchListDueDate: z.iso.date().nullable(),
+});
+export type ReportSummary = z.infer<typeof reportSummarySchema>;

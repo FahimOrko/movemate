@@ -14,7 +14,7 @@ const eventTable: Record<MoveEvent, { requires: Phase | null; unlocks: Phase | n
 
 const advanceBlockedMessage: Partial<Record<Phase, string>> = {
   move_in: 'Generate the report to continue',
-  settle_in: 'This is the last phase',
+  summary: 'This is the last phase',
 };
 
 function phaseIndex(phase: Phase): number {

@@ -1,4 +1,4 @@
-import type { ChecklistItem, InsuranceExplainer, Provider, Tip } from '@movemate/contracts';
+import type { ChecklistItem, InsuranceExplainer, Provider, ProviderDiscount, Tip } from '@movemate/contracts';
 
 export const prepareChecklist: ChecklistItem[] = [
   {
@@ -77,15 +77,17 @@ export const insuranceExplainer: InsuranceExplainer = {
   body: 'The landlord’s insurance covers the building, not your belongings. Home insurance covers your things against fire, water damage and theft, and usually covers damage you cause to the apartment. Arrange it before your first night, so you are covered from day one.',
 };
 
+export const IF_DISCOUNT: ProviderDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
+
 // The highlighted provider's url is filled in by the service from env.
-export const providerTemplates: Omit<Provider, 'url'>[] = [
-  { key: 'electricity-helen', category: 'electricity', name: 'Helen', highlighted: false },
-  { key: 'electricity-fortum', category: 'electricity', name: 'Fortum', highlighted: false },
-  { key: 'electricity-vattenfall', category: 'electricity', name: 'Vattenfall', highlighted: false },
-  { key: 'internet-elisa', category: 'internet', name: 'Elisa', highlighted: false },
-  { key: 'internet-telia', category: 'internet', name: 'Telia', highlighted: false },
-  { key: 'internet-dna', category: 'internet', name: 'DNA', highlighted: false },
+export const providerTemplates: Omit<Provider, 'url' | 'discount'>[] = [
+  { key: 'electricity-a', category: 'electricity', name: 'Electricity Provider A', highlighted: false },
+  { key: 'electricity-b', category: 'electricity', name: 'Electricity Provider B', highlighted: false },
+  { key: 'electricity-c', category: 'electricity', name: 'Electricity Provider C', highlighted: false },
+  { key: 'internet-a', category: 'internet', name: 'Internet Provider A', highlighted: false },
+  { key: 'internet-b', category: 'internet', name: 'Internet Provider B', highlighted: false },
+  { key: 'internet-c', category: 'internet', name: 'Internet Provider C', highlighted: false },
   { key: 'insurance-if', category: 'home_insurance', name: 'If', highlighted: true },
-  { key: 'insurance-lahitapiola', category: 'home_insurance', name: 'LocalTapiola', highlighted: false },
-  { key: 'insurance-pohjola', category: 'home_insurance', name: 'OP', highlighted: false },
+  { key: 'insurance-b', category: 'home_insurance', name: 'Insurance Company B', highlighted: false },
+  { key: 'insurance-c', category: 'home_insurance', name: 'Insurance Company C', highlighted: false },
 ];

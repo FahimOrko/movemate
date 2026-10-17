@@ -4,7 +4,7 @@ import { moves } from '../../../db/schema/move';
 import { eq } from 'drizzle-orm';
 import * as service from '../move.service';
 
-async function moveInPhase(phase: 'before_photos' | 'move_in' | 'report' | 'settle_in') {
+async function moveInPhase(phase: 'before_photos' | 'move_in' | 'report' | 'settle_in' | 'summary') {
   const move = await service.create({ address: 'Aurakatu 12, Turku' });
   await db.update(moves).set({ phase }).where(eq(moves.id, move.id));
   return move;
@@ -45,15 +45,21 @@ describe('move service', () => {
     expect((await service.advance(move.id)).phase).toBe('settle_in');
   });
 
-  it('refuses to advance from move_in and settle_in', async () => {
+  it('advances from settle_in to summary', async () => {
+    const move = await moveInPhase('settle_in');
+
+    expect((await service.advance(move.id)).phase).toBe('summary');
+  });
+
+  it('refuses to advance from move_in and summary', async () => {
     const inMoveIn = await moveInPhase('move_in');
-    const inSettleIn = await moveInPhase('settle_in');
+    const inSummary = await moveInPhase('summary');
 
     await expect(service.advance(inMoveIn.id)).rejects.toMatchObject({
       code: 'invalid_phase_transition',
       message: 'Generate the report to continue',
     });
-    await expect(service.advance(inSettleIn.id)).rejects.toMatchObject({ code: 'invalid_phase_transition' });
+    await expect(service.advance(inSummary.id)).rejects.toMatchObject({ code: 'invalid_phase_transition' });
   });
 
   it('applyEvent never moves the phase backwards', async () => {

@@ -39,6 +39,7 @@ async function request<T>(schema: ZodType<T>, method: string, path: string, body
 export const api = {
   get: <T>(path: string, schema: ZodType<T>) => request(schema, 'GET', path),
   post: <T>(path: string, schema: ZodType<T>, json?: unknown) => request(schema, 'POST', path, { json }),
+  put: <T>(path: string, schema: ZodType<T>, json?: unknown) => request(schema, 'PUT', path, { json }),
   patch: <T>(path: string, schema: ZodType<T>, json?: unknown) => request(schema, 'PATCH', path, { json }),
   upload: <T>(path: string, schema: ZodType<T>, form: FormData) => request(schema, 'POST', path, { form }),
   delete: async (path: string): Promise<void> => {

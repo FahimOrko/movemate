@@ -5,6 +5,7 @@ import { BeforePhotosPhase } from '@/features/before-photos/before-photos-phase'
 import { MoveInPhase } from '@/features/move-in/move-in-phase';
 import { SettleInPhase } from '@/features/settle-in/settle-in-phase';
 import { ReportPhase } from '@/features/report/report-phase';
+import { SummaryPhase } from '@/features/summary/summary-phase';
 import { PreparePhase } from '@/features/prepare/prepare-phase';
 
 export function MovePhasePage() {
@@ -27,8 +28,10 @@ export function MovePhasePage() {
         <MoveInPhase move={move} />
       ) : phase === 'report' ? (
         <ReportPhase move={move} />
+      ) : phase === 'settle_in' ? (
+        <SettleInPhase move={move} />
       ) : (
-        <SettleInPhase />
+        <SummaryPhase move={move} />
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { providerCategories } from '@movemate/contracts';
 import { boolean, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { moves } from './move';
 
@@ -13,4 +14,17 @@ export const guidanceProgress = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [unique().on(table.moveId, table.itemKey)],
+);
+
+export const providerSelections = pgTable(
+  'provider_selections',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    moveId: uuid('move_id')
+      .notNull()
+      .references(() => moves.id, { onDelete: 'cascade' }),
+    category: text({ enum: providerCategories }).notNull(),
+    providerKey: text('provider_key').notNull(),
+  },
+  (table) => [unique().on(table.moveId, table.category)],
 );

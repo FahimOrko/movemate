@@ -17,3 +17,8 @@ export async function getLatest(req: Request, res: Response) {
   const { id } = moveIdParamsSchema.parse(req.params);
   res.json({ data: await service.getLatest(id) });
 }
+
+export async function getSummary(req: Request, res: Response) {
+  const { id } = moveIdParamsSchema.parse(req.params);
+  res.json({ data: await service.getSummary(id) });
+}

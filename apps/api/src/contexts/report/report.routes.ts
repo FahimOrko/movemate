@@ -6,3 +6,4 @@ export const reportRouter = Router();
 reportRouter.post('/moves/:id/reports', controller.generate);
 reportRouter.get('/moves/:id/reports/latest', controller.getLatest);
 reportRouter.get('/reports/:id', controller.getById);
+reportRouter.get('/moves/:id/summary', controller.getSummary);

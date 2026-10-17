@@ -6,4 +6,5 @@ export const phaseLabels: Record<Phase, string> = {
   move_in: 'Move-in photos',
   report: 'Report',
   settle_in: 'Settle in',
+  summary: 'Summary',
 };

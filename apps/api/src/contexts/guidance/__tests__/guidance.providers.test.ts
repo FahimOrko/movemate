@@ -13,7 +13,7 @@ afterEach(() => {
 async function getProviders() {
   const res = await request(app).get('/api/guidance/providers');
   expect(res.status).toBe(200);
-  return res.body.data as { explainer: { title: string; body: string }; providers: { name: string; highlighted: boolean; url: string | null }[] };
+  return res.body.data as { explainer: { title: string; body: string }; providers: { name: string; category: string; highlighted: boolean; url: string | null; discount: { percent: number; durationMonths: number; code: string } | null }[] };
 }
 
 describe('GET /api/guidance/providers', () => {
@@ -33,6 +33,21 @@ describe('GET /api/guidance/providers', () => {
 
     expect(providers.filter((p) => p.highlighted).map((p) => p.name)).toEqual(['If']);
     expect(providers.filter((p) => p.name !== 'If').every((p) => p.url === null)).toBe(true);
+  });
+
+  it('lists only If by name under home insurance, the rest are placeholders', async () => {
+    const { providers } = await getProviders();
+
+    expect(providers.filter((p) => p.category === 'home_insurance').map((p) => p.name)).toEqual(['If', 'Insurance Company B', 'Insurance Company C']);
+    expect(providers.filter((p) => p.category === 'electricity').map((p) => p.name)).toEqual(['Electricity Provider A', 'Electricity Provider B', 'Electricity Provider C']);
+    expect(providers.filter((p) => p.category === 'internet').map((p) => p.name)).toEqual(['Internet Provider A', 'Internet Provider B', 'Internet Provider C']);
+  });
+
+  it('sends the discount on If only', async () => {
+    const { providers } = await getProviders();
+
+    expect(providers.find((p) => p.name === 'If')?.discount).toEqual({ percent: 10, durationMonths: 12, code: 'MOVEMATE10' });
+    expect(providers.filter((p) => p.name !== 'If').every((p) => p.discount === null)).toBe(true);
   });
 
   it('returns url null when the env value is not set', async () => {

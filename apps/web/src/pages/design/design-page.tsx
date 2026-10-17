@@ -15,7 +15,9 @@ import { ReportView } from '@/components/report-view';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
 import { Stepper } from '@/components/stepper';
+import { DiscountBadge } from '@/components/discount-badge';
 import { ProviderCard } from '@/components/provider-card';
+import { SummaryView } from '@/components/summary-view';
 import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -272,6 +274,17 @@ const zeroIssueReport: Report = {
   snapshot: { ...sampleReport.snapshot, issues: [], findingsByRoom: [], watchList: sampleReport.snapshot.watchList.slice(1) },
 };
 
+const designDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
+const designSummary = {
+  reportId: '00000000-0000-4000-8000-000000000000',
+  address: 'Aurakatu 12, Turku',
+  moveDate: '2026-11-01',
+  generatedAt: '2026-11-01T10:00:00.000Z',
+  roomsDocumented: 4,
+  counts: { ok: 9, issues: 2, custom: 1 },
+  watchListDueDate: '2026-12-01',
+};
+
 export function DesignPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -430,7 +443,7 @@ export function DesignPage() {
 
       <DesignSection id="stepper" title="Stepper" description="Reached phases are links, later phases are locked. Labels collapse to the active one below the lg breakpoint.">
         <div className="flex flex-col gap-8">
-          {(['prepare', 'move_in', 'settle_in'] as const).map((reached) => (
+          {(['prepare', 'move_in', 'summary'] as const).map((reached) => (
             <Stepper key={reached} reached={reached} active={reached} hrefFor={() => '/design#stepper'} />
           ))}
           <Stepper reached="move_in" active="before_photos" hrefFor={() => '/design#stepper'} />
@@ -448,11 +461,29 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="provider-card" title="Provider card" description="Default lists a provider by name. Highlighted adds the discount line and a link that opens in a new tab. Without a configured url the link is not shown.">
+      <DesignSection id="provider-card" title="Provider card" description="Unselected, selected, highlighted (If, with discount badge and a quote link that opens in a new tab) and disabled. Select toggles. The link is not shown without a configured url.">
         <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
-          <ProviderCard name="Helen" />
-          <ProviderCard name="If" highlighted url="https://example.com/if-insurance" />
-          <ProviderCard name="If" highlighted />
+          <ProviderCard name="Electricity Provider A" onSelect={() => undefined} />
+          <ProviderCard name="Electricity Provider B" selected onSelect={() => undefined} />
+          <ProviderCard name="Electricity Provider C" disabled onSelect={() => undefined} />
+          <ProviderCard name="If" highlighted url="https://example.com/if-insurance" discount={designDiscount} onSelect={() => undefined} />
+          <ProviderCard name="If" highlighted selected discount={designDiscount} onSelect={() => undefined} />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="discount-badge" title="Discount badge" description="Opens on hover, keyboard focus or tap. The Copy button copies the code and shows Copied for two seconds.">
+        <div className="flex flex-wrap items-start gap-8">
+          <DiscountBadge discount={designDiscount} />
+          <div className="pb-32">
+            <DiscountBadge discount={designDiscount} defaultOpen />
+          </div>
+        </div>
+      </DesignSection>
+
+      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers.">
+        <div className="flex flex-col gap-10">
+          <SummaryView summary={designSummary} reportHref="/design#summary" chosen={[{ category: 'internet', name: 'Internet Provider B', discount: null }, { category: 'home_insurance', name: 'If', discount: designDiscount }]} />
+          <SummaryView summary={{ ...designSummary, moveDate: null, watchListDueDate: null }} reportHref="/design#summary" chosen={[]} />
         </div>
       </DesignSection>
 

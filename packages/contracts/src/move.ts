@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const phaseOrder = ['prepare', 'before_photos', 'move_in', 'report', 'settle_in'] as const;
+export const phaseOrder = ['prepare', 'before_photos', 'move_in', 'report', 'settle_in', 'summary'] as const;
 export const phaseSchema = z.enum(phaseOrder);
 export type Phase = z.infer<typeof phaseSchema>;
 
