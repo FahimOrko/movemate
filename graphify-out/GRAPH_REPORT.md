@@ -1,326 +1,329 @@
 # Graph Report - movemate  (2026-10-17)
 
 ## Corpus Check
-- 180 files · ~295,827 words
-- Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 3 file(s) not represented in the graph (top: .example 1, (none) 1, .css 1)
+- Large corpus: 207 files · ~532,417 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.
 
 ## Summary
-- 1022 nodes · 2616 edges · 56 communities (50 shown, 6 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.82)
+- 1110 nodes · 2944 edges · 58 communities (51 shown, 7 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 25 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- Web App Shell
-- API Bootstrap & Routes
+- Web Routing & Shell
+- Web Providers & Compare
+- Project Docs & Rules
+- API Tests & Helpers
 - Web Dependencies
 - API Dependencies
-- Guidance & Findings Tests
-- Project Rules & Spec
-- Root Tooling Config
-- Finding & Move Forms
-- Guidance Service
-- Inspection Service
-- Inspection Tests & AI Client
-- Provider & Room Checks UI
-- Design Page
-- Inspection Repository
-- Move Service & Findings
-- shadcn Config
-- Report Snapshot
-- Photo Contracts
-- DB Schema
-- Photos Service
+- Monorepo Tooling
+- Photo Upload UI
 - Guidance Controller
-- Discount Badge
-- Inspection Contracts
-- Inspection Controller
-- Move Repository
-- Checklist & Background UI
-- Report View
-- Room Select
+- Inspection AI Prompts
+- Design System Page
+- Provider & Summary UI
+- Guidance Service
+- Error Handling
+- App & Routers
+- shadcn Config
+- Room Check Forms
+- Dialogs & Photos
+- Inspection Repository
 - Settle-in Hooks
-- TS Base Config
+- Report Snapshot
+- Inspection DB Schema
+- Checklist Panels
+- Table UI
+- Photo Contracts
+- Move Service
+- Finding Row UI
+- Inspection Contracts
+- Env & Photo Routes
+- Demo Service
+- Photos Service
+- Phase Stepper
+- Checklist Status UI
+- Inspection Controller
 - Photos Controller
-- Photo Dialog
-- Stepper & Phases
-- Contracts Package
-- Photo Grid & Empty
+- Discount Badge
+- Report View
+- TS Base Config
 - Guidance Repository
+- Checklist Drawer
+- Contracts Package
 - Inspection Schemas
-- Report Service
-- Photos Route Tests
-- Guidance Contracts
+- Move Repository
+- DB Test Setup
 - Photos Repository
+- OpenRouter Client
 - Report Repository
 - Web TS Config
-- Inspection Prompts
-- Prepare Hooks
-- Compare Tests
+- Finding Mutations
+- Report Service
+- Photo Route Tests
 - API TS Config
-- Photo Uploader
-- Spec & Plan Docs
-- Demo Photos
 - Contracts TS Config
-- Test Global Setup
 - MCP Config
-- Checklist & Quality Rules
-- Favicon
-- Slice 7 Demo Hardening
+- Demo Lease Key
+- Web index.html
+- CLAUDE.md
+- pnpm Workspace
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppError` - 48 edges
-2. `Button()` - 45 edges
-3. `DesignPage()` - 44 edges
-4. `Spinner()` - 29 edges
-5. `lucide-react` - 27 edges
-6. `react` - 24 edges
-7. `vitest` - 23 edges
+1. `Button()` - 55 edges
+2. `DesignPage()` - 54 edges
+3. `AppError` - 50 edges
+4. `lucide-react` - 31 edges
+5. `Spinner()` - 29 edges
+6. `react` - 27 edges
+7. `vitest` - 25 edges
 8. `Alert()` - 22 edges
 9. `ComparePanel()` - 22 edges
 10. `AlertDescription()` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Code quality rules (SPEC section 9)` --semantically_similar_to--> `End-of-slice checklist`  [INFERRED] [semantically similar]
-  docs/SPEC.md → CLAUDE.md
-- `Slice 0: Foundation + /design + landing` --conceptually_related_to--> `Web app HTML entry (MoveMate, mounts src/main.tsx)`  [INFERRED]
-  docs/PLAN.md → apps/web/index.html
-- `Layering routes-controller-service-repository` --implements--> `Bounded contexts: move, guidance, photos, inspection, report, contract`  [EXTRACTED]
-  CLAUDE.md → docs/SPEC.md
-- `Cross-context calls only through service` --implements--> `Bounded contexts: move, guidance, photos, inspection, report, contract`  [EXTRACTED]
-  CLAUDE.md → docs/SPEC.md
-- `Testing rules (Vitest, Supertest, mocked AI, movemate_test DB)` --references--> `MoveMate build plan`  [INFERRED]
+- `buildSummary()` --calls--> `isHandled()`  [EXTRACTED]
+  apps/api/src/contexts/report/report.summary.ts → packages/contracts/src/guidance.ts
+- `ChecklistDrawer()` --calls--> `isHandled()`  [EXTRACTED]
+  apps/web/src/components/checklist-drawer.tsx → packages/contracts/src/guidance.ts
+- `MovePhasePage()` --calls--> `isHandled()`  [EXTRACTED]
+  apps/web/src/pages/move-shell/move-phase-page.tsx → packages/contracts/src/guidance.ts
+- `Update SPEC and PLAN on logic changes` --references--> `MoveMate Build Plan`  [INFERRED]
   CLAUDE.md → docs/PLAN.md
+- `Update SPEC and PLAN on logic changes` --references--> `MoveMate Spec`  [INFERRED]
+  CLAUDE.md → docs/SPEC.md
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **MoveMate build slices 0-8** — docs_plan_slice_0, docs_plan_slice_1, docs_plan_slice_2, docs_plan_slice_3, docs_plan_slice_4, docs_plan_slice_5, docs_plan_slice_6, docs_plan_slice_7, docs_plan_slice_8 [EXTRACTED 1.00]
-- **Architecture and layering rules** — claude_layering, claude_context_boundary_rule, docs_spec_bounded_contexts, claude_move_event [INFERRED 0.85]
-- **Infrastructure and workspace setup** — docker_compose_db, pnpm_workspace_packages, apps_web_index_html [INFERRED 0.75]
+- **Phase transition flow** — docs_spec_phases, docs_spec_domain_events, docs_plan_phase_model [EXTRACTED 1.00]
+- **Layered bounded context architecture** — docs_spec_bounded_contexts, docs_spec_layering, claude_md_layering [INFERRED 0.85]
 
-## Communities (56 total, 6 thin omitted)
+## Communities (58 total, 7 thin omitted)
 
-### Community 0 - "Web App Shell"
-Cohesion: 0.05
-Nodes (85): Providers(), queryClient, router, AddFindingForm(), AiErrorAlert(), AiErrorAlertProps, InteractiveBackground(), StartOverDialog() (+77 more)
+### Community 0 - "Web Routing & Shell"
+Cohesion: 0.09
+Nodes (60): AiErrorAlert(), AiErrorAlertProps, HeaderNav(), links, InteractiveBackground(), Logo(), PhotoGrid(), PhotoGridProps (+52 more)
 
-### Community 1 - "API Bootstrap & Routes"
-Cohesion: 0.05
-Nodes (37): createApp(), guidanceRouter, app, app, inspectionRouter, advance(), create(), getCurrent() (+29 more)
+### Community 1 - "Web Providers & Compare"
+Cohesion: 0.06
+Nodes (32): Providers(), queryClient, router, ComparePanel(), roomList(), findingsKey(), useAddFinding(), useDeleteFinding() (+24 more)
 
-### Community 2 - "Web Dependencies"
+### Community 2 - "Project Docs & Rules"
+Cohesion: 0.06
+Nodes (43): Fair Ordinary Clauses (non-flags), Eight Lease Flags, React Root Mount, Context Dependency Table, Update SPEC and PLAN on logic changes, End of Slice Checklist, Frontend Rules (tokens, /design), Routes-Controller-Service-Repository (+35 more)
+
+### Community 3 - "API Tests & Helpers"
+Cohesion: 0.10
+Nodes (26): ai, comparedMove(), oneFinding, app, createMove(), uploadBefore(), uploadPhoto(), ai (+18 more)
+
+### Community 4 - "Web Dependencies"
 Cohesion: 0.05
 Nodes (41): dependencies, class-variance-authority, cn, lucide-react, @movemate/contracts, radix-ui, react, react-dom (+33 more)
 
-### Community 3 - "API Dependencies"
+### Community 5 - "API Dependencies"
 Cohesion: 0.05
-Nodes (38): dependencies, drizzle-orm, express, @movemate/contracts, multer, pg, sharp, zod (+30 more)
+Nodes (39): dependencies, drizzle-orm, express, @movemate/contracts, multer, pg, sharp, zod (+31 more)
 
-### Community 4 - "Guidance & Findings Tests"
+### Community 6 - "Monorepo Tooling"
+Cohesion: 0.06
+Nodes (35): devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, pdfkit, typescript (+27 more)
+
+### Community 7 - "Photo Upload UI"
+Cohesion: 0.10
+Nodes (20): Point, LogoMark(), LogoProps, Draft, PhotoUploader(), addFiles(), onDrop(), removeDraft() (+12 more)
+
+### Community 8 - "Guidance Controller"
+Cohesion: 0.08
+Nodes (20): getPrepareGuidance(), getProviders(), getSelection(), listProgress(), setProgress(), setSelection(), progressParamsSchema, selectionParamsSchema (+12 more)
+
+### Community 9 - "Inspection AI Prompts"
 Cohesion: 0.12
-Nodes (21): ai, comparedMove(), oneFinding, app, createMove(), uploadBefore(), uploadPhoto(), ai (+13 more)
+Nodes (24): BASELINE_SYSTEM_PROMPT, baselineUserText(), COMPARE_SYSTEM_PROMPT, compareUserText(), imageRange(), addCheck(), addFinding(), analyzeRoom() (+16 more)
 
-### Community 5 - "Project Rules & Spec"
+### Community 10 - "Design System Page"
 Cohesion: 0.07
-Nodes (31): Web app HTML entry (MoveMate, mounts src/main.tsx), API conventions ({data}/{error} envelope, AppError), Cross-context calls only through service, Frontend rules (tokens, /design, TanStack Query), Layering routes-controller-service-repository, MoveEvent domain events via applyEvent, Tech stack (React, Express, Drizzle, Postgres, OpenRouter, pnpm), Postgres 16 db service (host port 5433, named volume) (+23 more)
+Nodes (26): allHandled, badgeVariants, baseFinding, buttonSizes, buttonVariants, colorTokens, designChecklist, designDiscount (+18 more)
 
-### Community 6 - "Root Tooling Config"
-Cohesion: 0.07
-Nodes (30): devDependencies, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-plugin-react-refresh, globals, typescript, typescript-eslint (+22 more)
-
-### Community 7 - "Finding & Move Forms"
-Cohesion: 0.12
-Nodes (18): AddFindingFormProps, CreateMoveFields(), CreateMoveFieldsProps, Editing, FindingRow(), resolve(), submit(), FindingRowProps (+10 more)
-
-### Community 8 - "Guidance Service"
-Cohesion: 0.11
-Nodes (13): getSelection(), setProgress(), setSelection(), IF_DISCOUNT, insuranceExplainer, prepareChecklist, prepareTips, providerTemplates (+5 more)
-
-### Community 9 - "Inspection Service"
-Cohesion: 0.14
-Nodes (17): baselineUserText(), addCheck(), addFinding(), analyzeRoom(), findingById(), forEachRoom(), groupByRoom(), listChecks() (+9 more)
-
-### Community 10 - "Inspection Tests & AI Client"
-Cohesion: 0.12
-Nodes (17): ai, aiFailure(), Attempt, AttemptInput, completeJson(), CompleteJsonInput, extractJson(), httpError() (+9 more)
-
-### Community 11 - "Provider & Room Checks UI"
+### Community 11 - "Provider & Summary UI"
 Cohesion: 0.22
-Nodes (16): ProviderCard(), ProviderCardProps, RoomCheckList(), RoomCheckListProps, ChosenProvider, Stat(), SummaryView(), SummaryViewProps (+8 more)
+Nodes (16): ProviderCard(), ProviderCardProps, ChosenProvider, Stat(), SummaryView(), SummaryViewProps, TipCard(), Card() (+8 more)
 
-### Community 12 - "Design Page"
-Cohesion: 0.09
-Nodes (22): badgeVariants, baseFinding, buttonSizes, buttonVariants, colorTokens, designDiscount, designSummary, radiusScale (+14 more)
+### Community 12 - "Guidance Service"
+Cohesion: 0.11
+Nodes (12): getSelection(), setProgress(), setSelection(), IF_DISCOUNT, insuranceExplainer, prepareChecklist, prepareTips, providerTemplates (+4 more)
 
-### Community 13 - "Inspection Repository"
-Cohesion: 0.09
-Nodes (7): AiFindingDraft, FindingPhotoLink, FindingRow, RoomCheckRow, CheckSource, Confidence, Resolution
+### Community 13 - "Error Handling"
+Cohesion: 0.12
+Nodes (14): errorHandler(), ErrorResponse, isMalformedJsonBody(), toErrorResponse(), ErrorCode, statusByCode, appThrowing(), fetchMock (+6 more)
 
-### Community 14 - "Move Service & Findings"
-Cohesion: 0.18
-Nodes (18): deleteCheck(), deleteFinding(), getFindingRow(), resolveFinding(), advance(), advanceBlockedMessage, applyEvent(), assertPhaseReached() (+10 more)
+### Community 14 - "App & Routers"
+Cohesion: 0.16
+Nodes (9): createApp(), demoRouter, guidanceRouter, app, inspectionRouter, moveRouter, reportRouter, pingDatabase() (+1 more)
 
 ### Community 15 - "shadcn Config"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 16 - "Report Snapshot"
+### Community 16 - "Room Check Forms"
+Cohesion: 0.19
+Nodes (13): AddFindingForm(), AddFindingFormProps, CreateMoveFields(), CreateMoveFieldsProps, RoomCheckList(), RoomCheckListProps, CardDescription(), Checkbox() (+5 more)
+
+### Community 17 - "Dialogs & Photos"
+Cohesion: 0.21
+Nodes (15): EnlargeablePhoto(), EnlargeablePhotoProps, StartOverDialog(), StartOverDialogProps, Dialog(), DialogContent(), DialogDescription(), DialogFooter() (+7 more)
+
+### Community 18 - "Inspection Repository"
+Cohesion: 0.10
+Nodes (6): AiFindingDraft, FindingPhotoLink, FindingRow, RoomCheckRow, CheckSource, Confidence
+
+### Community 19 - "Settle-in Hooks"
+Cohesion: 0.11
+Nodes (16): selectionKey(), SetSelectionInput, useSetProviderSelection(), checklistItemSchema, checklistStatusSchema, InsuranceExplainer, insuranceExplainerSchema, providerDiscountSchema (+8 more)
+
+### Community 20 - "Report Snapshot"
 Cohesion: 0.18
 Nodes (12): buildSnapshot(), dueDate(), findingText(), toIssue(), toReportFinding(), toWatchList(), REPORT_DISCLAIMER, WATCH_LIST_DAYS (+4 more)
 
-### Community 17 - "Photo Contracts"
-Cohesion: 0.12
-Nodes (17): aiStatusSchema, resolutionSchema, MAX_PHOTOS_PER_ROOM, Photo, photoSchema, photoStageSchema, RelabelPhoto, relabelPhotoSchema (+9 more)
-
-### Community 18 - "DB Schema"
+### Community 21 - "Inspection DB Schema"
 Cohesion: 0.13
 Nodes (10): findingPhotos, findings, roomChecks, photos, aiStatuses, checkSources, confidences, resolutions (+2 more)
 
-### Community 19 - "Photos Service"
+### Community 22 - "Checklist Panels"
+Cohesion: 0.21
+Nodes (11): ChecklistPanel(), ChecklistPanelProps, groupByCategory(), ChecklistRow(), Rows(), SummaryChecklist(), SummaryChecklistProps, checklistStatusLabels (+3 more)
+
+### Community 23 - "Table UI"
+Cohesion: 0.19
+Nodes (9): Separator(), Table(), TableBody(), TableCell(), TableRow(), demoListing, bedroom, DemoPage() (+1 more)
+
+### Community 24 - "Photo Contracts"
+Cohesion: 0.12
+Nodes (15): guidanceProgressSchema, resolutionSchema, Photo, PhotoStage, RelabelPhoto, relabelPhotoSchema, roomSchema, Report (+7 more)
+
+### Community 25 - "Move Service"
 Cohesion: 0.23
+Nodes (13): advance(), advanceBlockedMessage, applyEvent(), assertPhaseReached(), create(), eventTable, getById(), getCurrent() (+5 more)
+
+### Community 26 - "Finding Row UI"
+Cohesion: 0.14
+Nodes (11): Editing, FindingRow(), resolve(), submit(), FindingRowProps, PhotoGroup(), resolutionBadge, statusBadge (+3 more)
+
+### Community 27 - "Inspection Contracts"
+Cohesion: 0.12
+Nodes (15): BaselineResult, checkSourceSchema, CompareResult, compareResultSchema, CreateFinding, createFindingSchema, createRoomCheckSchema, findingSchema (+7 more)
+
+### Community 28 - "Env & Photo Routes"
+Cohesion: 0.17
+Nodes (9): app, photosRouter, upload, env, envSchema, optionalString, parseEnv(), validEnv (+1 more)
+
+### Community 29 - "Demo Service"
+Cohesion: 0.18
+Nodes (7): DEMO_ASSETS_DIR, getLeaseFile(), LEASE_FILENAME, app, keyText, ai, tables
+
+### Community 30 - "Photos Service"
+Cohesion: 0.26
 Nodes (13): acceptedFormats, assertRoomHasSpace(), getFilePath(), getRow(), listByStage(), normalizeImage(), readFile(), relabel() (+5 more)
 
-### Community 20 - "Guidance Controller"
-Cohesion: 0.15
-Nodes (10): getPrepareGuidance(), getProviders(), getSelection(), listProgress(), setProgress(), setSelection(), progressParamsSchema, selectionParamsSchema (+2 more)
+### Community 31 - "Phase Stepper"
+Cohesion: 0.22
+Nodes (9): StepperProps, StepState, phaseLabels, CreateMove, createMoveSchema, moveSchema, Phase, phaseOrder (+1 more)
 
-### Community 21 - "Discount Badge"
-Cohesion: 0.21
-Nodes (8): CopyCodeButton(), DiscountBadge(), DiscountBadgeProps, discountDuration(), Popover(), PopoverContent(), PopoverTrigger(), radix-ui
+### Community 32 - "Checklist Status UI"
+Cohesion: 0.25
+Nodes (6): ChecklistRowProps, options, StatusControl(), StatusControlProps, SetStatusInput, ChecklistStatus
 
-### Community 22 - "Inspection Contracts"
-Cohesion: 0.13
-Nodes (14): BaselineResult, checkSourceSchema, CompareResult, compareResultSchema, CreateFinding, createFindingSchema, createRoomCheckSchema, findingSchema (+6 more)
-
-### Community 23 - "Inspection Controller"
+### Community 33 - "Inspection Controller"
 Cohesion: 0.14
 Nodes (5): addFinding(), listFindings(), resolveFinding(), runBaseline(), runCompare()
 
-### Community 24 - "Move Repository"
-Cohesion: 0.21
-Nodes (4): MoveRow, db, moves, drizzle-orm
+### Community 34 - "Photos Controller"
+Cohesion: 0.18
+Nodes (8): relabel(), remove(), sendFile(), upload(), listPhotosQuerySchema, photoIdParamsSchema, uploadFieldsSchema, photoStageSchema
 
-### Community 25 - "Checklist & Background UI"
-Cohesion: 0.22
-Nodes (7): ChecklistItem(), ChecklistItemProps, Point, Draft, PhotoUploaderProps, Checkbox(), react
+### Community 35 - "Discount Badge"
+Cohesion: 0.23
+Nodes (7): CopyCodeButton(), DiscountBadge(), DiscountBadgeProps, discountDuration(), Popover(), PopoverContent(), PopoverTrigger()
 
-### Community 26 - "Report View"
+### Community 36 - "Report View"
 Cohesion: 0.34
 Nodes (9): ReportIssue(), ReportPhotos(), ReportView(), resolutionLabel, Badge(), badgeVariants, formatDate(), formatDateTime() (+1 more)
 
-### Community 27 - "Room Select"
-Cohesion: 0.27
-Nodes (9): RoomSelect(), RoomSelectProps, Select(), SelectContent(), SelectItem(), SelectScrollDownButton(), SelectScrollUpButton(), SelectTrigger() (+1 more)
-
-### Community 28 - "Settle-in Hooks"
-Cohesion: 0.16
-Nodes (8): selectionKey(), SetSelectionInput, useSetProviderSelection(), providerCategoryLabels, ProviderCategory, ProviderSelection, providerSelectionSchema, settleInGuidanceSchema
-
-### Community 29 - "TS Base Config"
+### Community 37 - "TS Base Config"
 Cohesion: 0.14
 Nodes (13): compilerOptions, isolatedModules, module, moduleResolution, noEmit, noFallthroughCasesInSwitch, noUncheckedIndexedAccess, noUnusedLocals (+5 more)
 
-### Community 30 - "Photos Controller"
-Cohesion: 0.19
-Nodes (7): relabel(), remove(), sendFile(), upload(), listPhotosQuerySchema, photoIdParamsSchema, uploadFieldsSchema
+### Community 38 - "Guidance Repository"
+Cohesion: 0.18
+Nodes (4): guidanceProgress, providerSelections, checklistStatuses, providerCategories
 
-### Community 31 - "Photo Dialog"
-Cohesion: 0.31
-Nodes (9): EnlargeablePhoto(), EnlargeablePhotoProps, Dialog(), DialogContent(), DialogDescription(), DialogOverlay(), DialogPortal(), DialogTitle() (+1 more)
+### Community 39 - "Checklist Drawer"
+Cohesion: 0.33
+Nodes (10): ChecklistDrawer(), ChecklistDrawerProps, Sheet(), SheetContent(), SheetDescription(), SheetHeader(), SheetOverlay(), SheetPortal() (+2 more)
 
-### Community 32 - "Stepper & Phases"
-Cohesion: 0.21
-Nodes (8): StepperProps, phaseLabels, CreateMove, createMoveSchema, moveSchema, Phase, phaseOrder, phaseSchema
-
-### Community 33 - "Contracts Package"
+### Community 40 - "Contracts Package"
 Cohesion: 0.15
 Nodes (12): dependencies, zod, devDependencies, typescript, exports, typescript, zod, name (+4 more)
 
-### Community 34 - "Photo Grid & Empty"
-Cohesion: 0.41
-Nodes (9): PhotoGrid(), PhotoGridProps, Empty(), EmptyDescription(), EmptyHeader(), EmptyMedia(), emptyMediaVariants, EmptyTitle() (+1 more)
+### Community 41 - "Inspection Schemas"
+Cohesion: 0.17
+Nodes (8): baselineOutputSchema, checkIdParamsSchema, CompareOutput, compareOutputSchema, findingIdParamsSchema, aiStatusSchema, confidenceSchema, MAX_CHECK_LENGTH
 
-### Community 35 - "Guidance Repository"
-Cohesion: 0.22
-Nodes (3): guidanceProgress, providerSelections, providerCategories
+### Community 43 - "DB Test Setup"
+Cohesion: 0.31
+Nodes (5): migration, db, pool, drizzle-orm, pg
 
-### Community 36 - "Inspection Schemas"
-Cohesion: 0.18
-Nodes (7): baselineOutputSchema, checkIdParamsSchema, CompareOutput, compareOutputSchema, findingIdParamsSchema, confidenceSchema, MAX_CHECK_LENGTH
+### Community 45 - "OpenRouter Client"
+Cohesion: 0.33
+Nodes (9): Attempt, AttemptInput, CompleteJsonInput, extractJson(), httpError(), isRecord(), Message, readContent() (+1 more)
 
-### Community 37 - "Report Service"
-Cohesion: 0.36
-Nodes (7): generate(), getById(), getLatest(), getSummary(), toReport(), buildSummary(), ReportSummary
-
-### Community 38 - "Photos Route Tests"
-Cohesion: 0.24
-Nodes (5): app, createMove(), png(), post(), sharp
-
-### Community 39 - "Guidance Contracts"
-Cohesion: 0.20
-Nodes (9): checklistItemSchema, insuranceExplainerSchema, PrepareGuidance, providerDiscountSchema, providerSchema, SetProgress, setProgressSchema, SetProviderSelection (+1 more)
-
-### Community 41 - "Report Repository"
+### Community 46 - "Report Repository"
 Cohesion: 0.31
 Nodes (3): ReportRow, reports, ReportSnapshot
 
-### Community 42 - "Web TS Config"
+### Community 47 - "Web TS Config"
 Cohesion: 0.22
 Nodes (8): compilerOptions, jsx, lib, paths, types, extends, include, ../../tsconfig.base.json
 
-### Community 43 - "Inspection Prompts"
-Cohesion: 0.29
-Nodes (7): BASELINE_SYSTEM_PROMPT, COMPARE_SYSTEM_PROMPT, compareUserText(), imageRange(), compareRoom(), cutSummary(), toDrafts()
+### Community 48 - "Finding Mutations"
+Cohesion: 0.32
+Nodes (7): deleteCheck(), deleteFinding(), getFindingRow(), resolveFinding(), aiFailure(), aiFailure(), AppError
 
-### Community 44 - "Prepare Hooks"
-Cohesion: 0.25
-Nodes (4): SetProgressInput, GuidanceProgress, guidanceProgressSchema, prepareGuidanceSchema
+### Community 49 - "Report Service"
+Cohesion: 0.50
+Nodes (6): generate(), getById(), getLatest(), getSummary(), toReport(), buildSummary()
 
-### Community 45 - "Compare Tests"
-Cohesion: 0.29
-Nodes (5): ai, aiFailure(), applyEvent, kitchenMove(), RawFinding
+### Community 50 - "Photo Route Tests"
+Cohesion: 0.40
+Nodes (5): app, createMove(), png(), post(), sharp
 
-### Community 46 - "API TS Config"
+### Community 51 - "API TS Config"
 Cohesion: 0.33
 Nodes (5): compilerOptions, types, extends, include, ../../tsconfig.base.json
 
-### Community 47 - "Photo Uploader"
-Cohesion: 0.47
-Nodes (5): PhotoUploader(), addFiles(), onDrop(), removeDraft(), uploadAll()
-
-### Community 48 - "Spec & Plan Docs"
-Cohesion: 0.40
-Nodes (5): MoveMate project instructions, Testing rules (Vitest, Supertest, mocked AI, movemate_test DB), MoveMate build plan, MoveMate Project Spec, Out of scope list (section 12)
-
-### Community 49 - "Demo Photos"
-Cohesion: 0.50
-Nodes (5): Demo before/move-in photo comparison with AI-detectable defects, Bedroom stock photo (clean 'before' baseline): beige walls, pink tufted headboard, grey bedspread, wood floor, desk and wall TV, no defects, Bedroom move-in photo with planted defects: ceiling water stain, scratch marks on wall by headboard, dark stain on bedspread, floor scratches, Kitchen stock photo (clean 'before' baseline): white cabinets, stainless fridge, gas range, microwave, granite counters, no defects, Living room move-in photo with planted defects: ceiling water stain, wall crack and hole, dark carpet stain, two sofas, TV
-
-### Community 50 - "Contracts TS Config"
+### Community 52 - "Contracts TS Config"
 Cohesion: 0.50
 Nodes (3): extends, include, ../../tsconfig.base.json
 
 ## Knowledge Gaps
-- **41 isolated node(s):** `npx`, `@movemate/contracts`, `zod`, `@types/express`, `@types/multer` (+36 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 398 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **49 isolated node(s):** `npx`, `@movemate/contracts`, `zod`, `@types/express`, `@types/multer` (+44 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 437 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AppError` connect `Move Service & Findings` to `API Bootstrap & Routes`, `Guidance & Findings Tests`, `Report Service`, `Guidance Service`, `Inspection Service`, `Inspection Tests & AI Client`, `Compare Tests`, `Photos Service`, `Photos Controller`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `lucide-react` connect `Web Routing & Shell` to `Checklist Status UI`, `Web Providers & Compare`, `Discount Badge`, `Web Dependencies`, `Checklist Drawer`, `Photo Upload UI`, `Design System Page`, `Provider & Summary UI`, `Room Check Forms`, `Dialogs & Photos`, `Table UI`, `Finding Row UI`, `Phase Stepper`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **What connects `npx`, `@movemate/contracts`, `zod` to the rest of the system?**
-  _41 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Web App Shell` be split into smaller, more focused modules?**
-  _Cohesion score 0.052929085303186026 - nodes in this community are weakly interconnected._
-- **Why does `drizzle-orm` connect `Move Repository` to `API Bootstrap & Routes`, `Guidance Repository`, `API Dependencies`, `Guidance & Findings Tests`, `Photos Repository`, `Report Repository`, `Inspection Repository`, `DB Schema`, `Test Global Setup`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Should `API Bootstrap & Routes` be split into smaller, more focused modules?**
-  _Cohesion score 0.05384615384615385 - nodes in this community are weakly interconnected._
-- **Why does `lucide-react` connect `Web App Shell` to `Stepper & Phases`, `Web Dependencies`, `Photo Grid & Empty`, `Finding & Move Forms`, `Provider & Room Checks UI`, `Design Page`, `Discount Badge`, `Checklist & Background UI`, `Room Select`, `Photo Dialog`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+  _49 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Web Routing & Shell` be split into smaller, more focused modules?**
+  _Cohesion score 0.0895843287147635 - nodes in this community are weakly interconnected._
+- **Should `Web Providers & Compare` be split into smaller, more focused modules?**
+  _Cohesion score 0.06265664160401002 - nodes in this community are weakly interconnected._
+- **Should `Project Docs & Rules` be split into smaller, more focused modules?**
+  _Cohesion score 0.058693244739756366 - nodes in this community are weakly interconnected._
+- **Should `API Tests & Helpers` be split into smaller, more focused modules?**
+  _Cohesion score 0.09966777408637874 - nodes in this community are weakly interconnected._
 - **Should `Web Dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.048726467331118496 - nodes in this community are weakly interconnected._
