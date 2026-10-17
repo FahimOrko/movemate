@@ -71,10 +71,10 @@ One slice per session. Each slice lists only what it adds. Where a later slice e
 ## Slice 5: Phase 4 report
 **Contracts:** `report.ts` (ReportSnapshot: move info, generatedAt, issues with before/after photo refs + upload times + notes, all findings by room, watch list, disclaimer).
 **DB:** `db/schema/report.ts` (reports); migration `0004`.
-**API:** `contexts/report/*`. Generate: 409 if there are no findings or any are pending; builds the snapshot through the inspection, photos and move services; inserts; raises ReportGenerated. Watch list = `unclear` findings + `custom` notes + 5 templated items (heating, leaks, ventilation/mold, windows/doors, appliances), due at moveDate (or generatedAt) + 30 days.
+**API:** `contexts/report/*`. Generate: zero issues is allowed (no findings, or all `ok`, gives a report that says "No issues recorded"); 409 only while any finding is pending or the move has no move-in photos; builds the snapshot through the inspection, photos and move services; inserts; raises ReportGenerated. Watch list = `unclear` findings + `custom` notes + 5 templated items (heating, leaks, ventilation/mold, windows/doors, appliances), due at moveDate (or generatedAt) + 30 days.
 **Endpoints:** `POST /moves/:id/reports`, `GET /reports/:id`, `GET /moves/:id/reports/latest` (added; see risk 3).
-**Web:** `features/report` (Generate/Regenerate, report view, "Print / Save as PDF" calling `window.print()`, Continue), print CSS (`@media print`: hide app chrome, `break-inside: avoid` per issue, sized images). Add the ReportIssue block to /design.
-**Tests:** snapshot builder (only issue/custom in issues, watch-list date math, disclaimer present); the snapshot stays the same after a finding is edited; 409 while findings are pending; GET 404; latest.
+**Web:** the Move-in screen gets a "Generate report" button, enabled when no findings are pending; it calls `POST /moves/:id/reports` and opens the Report phase. `features/report` (Generate/Regenerate, report view, "Print / Save as PDF" calling `window.print()`, Continue), print CSS (`@media print`: hide app chrome, `break-inside: avoid` per issue, sized images). Add the ReportIssue block to /design.
+**Tests:** snapshot builder (only issue/custom in issues, watch-list date math, disclaimer present); the snapshot stays the same after a finding is edited; 409 while findings are pending; GET 404; latest; zero-issue report works; 409 without move-in photos; photo delete 409 after the report.
 **Done when:** browser print produces a clean PDF.
 
 ## Slice 6: Phase 5 settle in

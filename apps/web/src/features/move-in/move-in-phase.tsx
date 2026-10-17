@@ -1,6 +1,7 @@
 import type { Move } from '@movemate/contracts';
 import { PhotosPanel } from '@/features/photos/photos-panel';
 import { ComparePanel } from './compare-panel';
+import { GenerateReportButton } from './generate-report-button';
 
 export function MoveInPhase({ move }: { move: Move }) {
   return (
@@ -15,6 +16,7 @@ export function MoveInPhase({ move }: { move: Move }) {
       </div>
       <PhotosPanel moveId={move.id} stage="move_in" />
       <ComparePanel move={move} />
+      <GenerateReportButton move={move} />
     </section>
   );
 }

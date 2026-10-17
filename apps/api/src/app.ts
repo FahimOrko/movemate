@@ -4,6 +4,7 @@ import { guidanceRouter } from './contexts/guidance/guidance.routes';
 import { inspectionRouter } from './contexts/inspection/inspection.routes';
 import { moveRouter } from './contexts/move/move.routes';
 import { photosRouter } from './contexts/photos/photos.routes';
+import { reportRouter } from './contexts/report/report.routes';
 import { pingDatabase } from './db/client';
 import { errorHandler } from './shared/error-handler';
 import { AppError } from './shared/errors';
@@ -24,7 +25,7 @@ export function createApp() {
     const data: Health = { status: 'ok', db: 'connected' };
     res.json({ data });
   });
-  api.use(moveRouter, guidanceRouter, photosRouter, inspectionRouter);
+  api.use(moveRouter, guidanceRouter, photosRouter, inspectionRouter, reportRouter);
   api.use(() => {
     throw new AppError('not_found', 'Route not found');
   });

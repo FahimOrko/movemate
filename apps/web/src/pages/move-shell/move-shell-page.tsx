@@ -10,14 +10,14 @@ export function MoveShellPage() {
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b">
+      <header className="border-b print:hidden">
         <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
           <Link to="/" className="text-heading">
             MoveMate
           </Link>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-12">
+      <main className="mx-auto max-w-5xl px-6 py-12 print:p-0">
         {isPending && (
           <div className="flex flex-col gap-3" aria-hidden="true">
             <Skeleton className="h-8 w-full" />

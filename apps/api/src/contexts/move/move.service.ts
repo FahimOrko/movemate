@@ -9,6 +9,7 @@ const eventTable: Record<MoveEvent, { requires: Phase | null; unlocks: Phase | n
   BeforePhotosAnalyzed: { requires: 'before_photos', unlocks: 'move_in' },
   MoveInCompared: { requires: 'move_in', unlocks: null },
   FindingResolved: { requires: 'move_in', unlocks: null },
+  ReportGenerated: { requires: 'move_in', unlocks: 'report' },
 };
 
 const advanceBlockedMessage: Partial<Record<Phase, string>> = {

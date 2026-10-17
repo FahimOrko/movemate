@@ -119,3 +119,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}

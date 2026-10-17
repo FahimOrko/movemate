@@ -1,5 +1,5 @@
-import type { Finding, Photo, Room, RoomCheck } from '@movemate/contracts';
-import { CircleAlertIcon, HouseIcon, InfoIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
+import type { Finding, Photo, Report, Room, RoomCheck } from '@movemate/contracts';
+import { CircleAlertIcon, FileTextIcon, HouseIcon, InfoIcon, PrinterIcon, RefreshCwIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { AddFindingForm } from '@/components/add-finding-form';
 import { AiErrorAlert } from '@/components/ai-error-alert';
@@ -10,6 +10,8 @@ import { ChecklistItem } from '@/components/checklist-item';
 import { CreateMoveFields } from '@/components/create-move-fields';
 import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
+import { ReportIssue } from '@/components/report-issue';
+import { ReportView } from '@/components/report-view';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomSelect } from '@/components/room-select';
 import { Stepper } from '@/components/stepper';
@@ -219,6 +221,55 @@ const buttonVariants = ['default', 'secondary', 'ghost', 'destructive', 'link'] 
 const buttonSizes = ['sm', 'default', 'lg', 'xl'] as const;
 const badgeVariants = ['default', 'secondary', 'outline'] as const;
 const statusBadgeVariants = ['success', 'warning', 'destructive'] as const;
+
+const sampleReport: Report = {
+  id: '00000000-0000-4000-8000-000000000400',
+  moveId: '00000000-0000-4000-8000-000000000099',
+  createdAt: '2026-10-12T15:00:00.000Z',
+  snapshot: {
+    move: { address: 'Aurakatu 12, Turku', moveDate: '2026-10-12' },
+    generatedAt: '2026-10-12T15:00:00.000Z',
+    issues: [
+      {
+        findingId: '00000000-0000-4000-8000-000000000301',
+        room: 'kitchen',
+        kind: 'issue',
+        text: 'A dark mark may be visible on the ceiling above the window in the move-in photos.',
+        note: 'Visible in person, near the light switch.',
+        beforePhotos: samplePhotos.slice(0, 1),
+        moveInPhotos: sampleMoveInPhotos,
+      },
+      {
+        findingId: '00000000-0000-4000-8000-000000000303',
+        room: 'bedroom',
+        kind: 'custom',
+        text: 'The window handle is loose.',
+        note: null,
+        beforePhotos: [],
+        moveInPhotos: [],
+      },
+    ],
+    findingsByRoom: [
+      {
+        room: 'kitchen',
+        findings: [
+          { findingId: '00000000-0000-4000-8000-000000000301', aiStatus: 'changed', resolution: 'issue', text: 'A dark mark may be visible on the ceiling.', note: null },
+          { findingId: '00000000-0000-4000-8000-000000000302', aiStatus: 'looks_good', resolution: 'ok', text: 'The countertop edge looks similar in both sets of photos.', note: null },
+        ],
+      },
+    ],
+    watchList: [
+      { title: 'Unclear in the photos', detail: 'The wall left of the door may have a mark.', dueDate: '2026-11-11' },
+      { title: 'Heating', detail: 'Check that every radiator warms up and the thermostat responds.', dueDate: '2026-11-11' },
+    ],
+    disclaimer: 'This report documents what the tenant recorded and confirmed. It is not a legal or insurance determination.',
+  },
+};
+
+const zeroIssueReport: Report = {
+  ...sampleReport,
+  snapshot: { ...sampleReport.snapshot, issues: [], findingsByRoom: [], watchList: sampleReport.snapshot.watchList.slice(1) },
+};
 
 export function DesignPage() {
   return (
@@ -510,6 +561,61 @@ export function DesignPage() {
         <AiErrorAlert title="Some rooms could not be compared" message="Bedroom failed. The other rooms were saved." onRetry={() => undefined} />
         <AiErrorAlert title="AI is not set up" message="Add the issues you see by hand below." />
         <p className="text-sm text-muted-foreground">Skipped Bedroom, Balcony: a room needs both before and move-in photos to be compared.</p>
+      </DesignSection>
+
+      <DesignSection
+        id="report"
+        title="Report"
+        description="The ReportIssue block, then the full report as it prints, with issues and with none. Photo captions say when each photo was uploaded. The buttons are the ones on the Move-in and Report steps."
+      >
+        <Card>
+          <CardContent>
+            <ul className="divide-y">
+              <ReportIssue issue={sampleReport.snapshot.issues[0] as (typeof sampleReport.snapshot.issues)[number]} />
+              <ReportIssue issue={sampleReport.snapshot.issues[1] as (typeof sampleReport.snapshot.issues)[number]} />
+            </ul>
+          </CardContent>
+        </Card>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button size="lg">
+            <FileTextIcon data-icon="inline-start" />
+            Generate report
+          </Button>
+          <Button size="lg" disabled aria-busy="true">
+            <Spinner data-icon="inline-start" />
+            Generating
+          </Button>
+          <Button size="lg" disabled>
+            <FileTextIcon data-icon="inline-start" />
+            Generate report
+          </Button>
+          <span className="text-sm text-muted-foreground">Answer the 2 remaining findings first.</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button>
+            <PrinterIcon data-icon="inline-start" />
+            Print / Save as PDF
+          </Button>
+          <Button variant="secondary">
+            <RefreshCwIcon data-icon="inline-start" />
+            Regenerate
+          </Button>
+          <Button variant="secondary" disabled aria-busy="true">
+            <Spinner data-icon="inline-start" />
+            Generating
+          </Button>
+        </div>
+        <AiErrorAlert title="Could not generate the report" message="Answer every finding before generating the report" />
+        <Card>
+          <CardContent>
+            <ReportView report={sampleReport} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <ReportView report={zeroIssueReport} />
+          </CardContent>
+        </Card>
       </DesignSection>
 
       <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">
