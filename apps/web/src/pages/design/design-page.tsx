@@ -1,7 +1,10 @@
-import type { Photo, Room, RoomCheck } from '@movemate/contracts';
-import { CircleAlertIcon, HouseIcon, InfoIcon, SparklesIcon } from 'lucide-react';
+import type { Finding, Photo, Room, RoomCheck } from '@movemate/contracts';
+import { CircleAlertIcon, HouseIcon, InfoIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
 import { Link } from 'react-router';
+import { AddFindingForm } from '@/components/add-finding-form';
 import { AiErrorAlert } from '@/components/ai-error-alert';
+import { EnlargeablePhoto } from '@/components/enlargeable-photo';
+import { FindingRow } from '@/components/finding-row';
 import { InteractiveBackground } from '@/components/interactive-background';
 import { ChecklistItem } from '@/components/checklist-item';
 import { CreateMoveFields } from '@/components/create-move-fields';
@@ -129,6 +132,88 @@ const sampleChecks: RoomCheck[] = (
   room: 'kitchen',
   createdAt: '2026-10-12T14:32:00.000Z',
 }));
+
+const sampleMoveInPhotos: Photo[] = samplePhotos.slice(0, 2).map((photo, index) => ({
+  ...photo,
+  id: `00000000-0000-4000-8000-00000000002${index}`,
+  stage: 'move_in',
+  url: `https://picsum.photos/seed/movemate-move-in-${index}/400/300`,
+}));
+
+const baseFinding: Finding = {
+  id: '00000000-0000-4000-8000-000000000300',
+  moveId: '00000000-0000-4000-8000-000000000099',
+  room: 'kitchen',
+  roomCheckId: null,
+  checkText: null,
+  source: 'ai',
+  aiStatus: 'changed',
+  aiSummary: 'A dark mark may be visible on the ceiling above the window in the move-in photos.',
+  confidence: 'high',
+  resolution: 'pending',
+  userNote: null,
+  beforePhotos: samplePhotos.slice(0, 1),
+  moveInPhotos: sampleMoveInPhotos.slice(0, 1),
+  createdAt: '2026-10-12T14:32:00.000Z',
+  updatedAt: '2026-10-12T14:32:00.000Z',
+};
+
+const sampleFindings: { title: string; finding: Finding; disabled?: boolean }[] = [
+  { title: 'Changed, pending', finding: baseFinding },
+  {
+    title: 'Unclear, marked as an issue with a note',
+    finding: {
+      ...baseFinding,
+      id: '00000000-0000-4000-8000-000000000301',
+      aiStatus: 'unclear',
+      confidence: 'low',
+      aiSummary: 'The wall left of the door may have a mark, but the angle makes it hard to compare.',
+      resolution: 'issue',
+      userNote: 'Visible in person, near the light switch.',
+      moveInPhotos: sampleMoveInPhotos,
+    },
+  },
+  {
+    title: 'Looks the same, with a related check, marked OK',
+    finding: {
+      ...baseFinding,
+      id: '00000000-0000-4000-8000-000000000302',
+      aiStatus: 'looks_good',
+      confidence: 'medium',
+      aiSummary: 'The countertop edge left of the sink looks similar in both sets of photos.',
+      roomCheckId: '00000000-0000-4000-8000-000000000100',
+      checkText: 'Check whether the countertop edge left of the sink has chips or stains.',
+      resolution: 'ok',
+    },
+  },
+  {
+    title: 'Custom answer',
+    finding: {
+      ...baseFinding,
+      id: '00000000-0000-4000-8000-000000000303',
+      aiStatus: 'unclear',
+      confidence: 'medium',
+      resolution: 'custom',
+      userNote: 'The mark was already there at the viewing.',
+    },
+  },
+  {
+    title: 'Added by you',
+    finding: {
+      ...baseFinding,
+      id: '00000000-0000-4000-8000-000000000304',
+      source: 'user',
+      aiStatus: null,
+      aiSummary: null,
+      confidence: null,
+      resolution: 'issue',
+      userNote: 'Scratch on the door frame near the hinge.',
+      beforePhotos: [],
+      moveInPhotos: [],
+    },
+  },
+  { title: 'Disabled while saving', finding: baseFinding, disabled: true },
+];
 
 const buttonVariants = ['default', 'secondary', 'ghost', 'destructive', 'link'] as const;
 const buttonSizes = ['sm', 'default', 'lg', 'xl'] as const;
@@ -359,6 +444,72 @@ export function DesignPage() {
             Analyze photos
           </Button>
         </div>
+      </DesignSection>
+
+      <DesignSection
+        id="finding-row"
+        title="Finding row"
+        description="One AI or user finding: thumbnails (click to enlarge), status, confidence, the related check, the current answer and the resolve controls. Press Issue or Write my own to see the note field. Saving with an empty custom answer shows the error."
+      >
+        <Card>
+          <CardContent>
+            <div className="divide-y">
+              {sampleFindings.map(({ title, finding, disabled }) => (
+                <div key={title} className="py-2">
+                  <p className="text-sm text-muted-foreground">{title}</p>
+                  <ul>
+                    <FindingRow finding={finding} disabled={disabled} onResolve={() => new Promise((resolve) => setTimeout(resolve, 800))} onDelete={() => undefined} />
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <ul>
+          <FindingRow
+            finding={{ ...baseFinding, id: '00000000-0000-4000-8000-000000000305' }}
+            onResolve={() => Promise.reject(new Error('Could not save your answer'))}
+            onDelete={() => undefined}
+          />
+        </ul>
+        <p className="text-sm text-muted-foreground">Above: save fails with an error.</p>
+      </DesignSection>
+
+      <DesignSection id="enlargeable-photo" title="Enlargeable photo and add-an-issue form" description="Click the thumbnail to open it in a dialog. The form shows its error when submitted empty.">
+        <div className="flex flex-wrap gap-4">
+          <EnlargeablePhoto photo={samplePhotos[0] as Photo} label="Before photo of the kitchen" />
+          <EnlargeablePhoto photo={sampleMoveInPhotos[0] as Photo} label="Move-in photo of the kitchen" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <AddFindingForm room="kitchen" onAdd={() => new Promise((resolve) => setTimeout(resolve, 800))} />
+          <AddFindingForm room="bedroom" onAdd={() => Promise.reject(new Error('Could not add the issue'))} />
+          <AddFindingForm room="hallway" onAdd={() => Promise.resolve()} disabled />
+        </div>
+      </DesignSection>
+
+      <DesignSection id="compare" title="Compare button, counter and notices" description="The button while comparing, with findings, and disabled. Failed rooms offer a retry, skipped rooms are a plain note.">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button>
+            <ScanSearchIcon data-icon="inline-start" />
+            Compare photos
+          </Button>
+          <Button>
+            <ScanSearchIcon data-icon="inline-start" />
+            Re-run comparison (clears your answers for these rooms)
+          </Button>
+          <Button disabled aria-busy="true">
+            <Spinner data-icon="inline-start" />
+            Comparing
+          </Button>
+          <Button disabled>
+            <ScanSearchIcon data-icon="inline-start" />
+            Compare photos
+          </Button>
+        </div>
+        <p className="text-heading">7 of 9 resolved</p>
+        <AiErrorAlert title="Some rooms could not be compared" message="Bedroom failed. The other rooms were saved." onRetry={() => undefined} />
+        <AiErrorAlert title="AI is not set up" message="Add the issues you see by hand below." />
+        <p className="text-sm text-muted-foreground">Skipped Bedroom, Balcony: a room needs both before and move-in photos to be compared.</p>
       </DesignSection>
 
       <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">

@@ -62,6 +62,15 @@ describe('move service', () => {
     expect((await service.applyEvent(move.id, 'MoveCreated')).phase).toBe('before_photos');
   });
 
+  it('move-in events need move_in and unlock nothing', async () => {
+    const early = await moveInPhase('before_photos');
+    const inMoveIn = await moveInPhase('move_in');
+
+    await expect(service.applyEvent(early.id, 'MoveInCompared')).rejects.toMatchObject({ code: 'invalid_phase_transition' });
+    expect((await service.applyEvent(inMoveIn.id, 'MoveInCompared')).phase).toBe('move_in');
+    expect((await service.applyEvent(inMoveIn.id, 'FindingResolved')).phase).toBe('move_in');
+  });
+
   it('assertPhaseReached passes for reached phases and rejects locked ones', async () => {
     const move = await moveInPhase('before_photos');
 

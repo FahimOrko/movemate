@@ -1,5 +1,6 @@
 import type { Move } from '@movemate/contracts';
 import { PhotosPanel } from '@/features/photos/photos-panel';
+import { ComparePanel } from './compare-panel';
 
 export function MoveInPhase({ move }: { move: Move }) {
   return (
@@ -13,6 +14,7 @@ export function MoveInPhase({ move }: { move: Move }) {
         </p>
       </div>
       <PhotosPanel moveId={move.id} stage="move_in" />
+      <ComparePanel move={move} />
     </section>
   );
 }

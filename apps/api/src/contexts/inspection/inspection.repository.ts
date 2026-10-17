@@ -1,9 +1,18 @@
-import type { CheckSource, Room } from '@movemate/contracts';
+import type { AiStatus, CheckSource, Confidence, Resolution, Room } from '@movemate/contracts';
 import { and, asc, eq } from 'drizzle-orm';
 import { db } from '../../db/client';
-import { roomChecks } from '../../db/schema/inspection';
+import { findingPhotos, findings, roomChecks } from '../../db/schema/inspection';
 
 export type RoomCheckRow = typeof roomChecks.$inferSelect;
+export type FindingRow = typeof findings.$inferSelect;
+export type FindingPhotoLink = { findingId: string; photoId: string };
+export type AiFindingDraft = {
+  roomCheckId: string | null;
+  aiStatus: AiStatus;
+  aiSummary: string;
+  confidence: Confidence;
+  photoIds: string[];
+};
 
 export function listByMove(moveId: string): Promise<RoomCheckRow[]> {
   return db.select().from(roomChecks).where(eq(roomChecks.moveId, moveId)).orderBy(asc(roomChecks.createdAt), asc(roomChecks.id));
@@ -26,4 +35,61 @@ export async function replaceAiChecks(moveId: string, room: Room, texts: string[
     await tx.delete(roomChecks).where(and(eq(roomChecks.moveId, moveId), eq(roomChecks.room, room), eq(roomChecks.source, 'ai')));
     if (texts.length > 0) await tx.insert(roomChecks).values(texts.map((text) => ({ moveId, room, text, source: 'ai' as const })));
   });
+}
+
+export function listFindings(moveId: string): Promise<FindingRow[]> {
+  return db.select().from(findings).where(eq(findings.moveId, moveId)).orderBy(asc(findings.createdAt), asc(findings.id));
+}
+
+export function listFindingPhotoLinks(moveId: string): Promise<FindingPhotoLink[]> {
+  return db
+    .select({ findingId: findingPhotos.findingId, photoId: findingPhotos.photoId })
+    .from(findingPhotos)
+    .innerJoin(findings, eq(findings.id, findingPhotos.findingId))
+    .where(eq(findings.moveId, moveId));
+}
+
+export async function findFindingById(id: string): Promise<FindingRow | undefined> {
+  const [row] = await db.select().from(findings).where(eq(findings.id, id));
+  return row;
+}
+
+// Never touches user-written findings or other rooms. One transaction, so a room is replaced whole or not at all.
+export async function replaceAiFindings(moveId: string, room: Room, drafts: AiFindingDraft[]): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx.delete(findings).where(and(eq(findings.moveId, moveId), eq(findings.room, room), eq(findings.source, 'ai')));
+    if (drafts.length === 0) return;
+    const inserted = await tx
+      .insert(findings)
+      .values(
+        drafts.map(({ roomCheckId, aiStatus, aiSummary, confidence }) => ({
+          moveId,
+          room,
+          roomCheckId,
+          source: 'ai' as const,
+          aiStatus,
+          aiSummary,
+          confidence,
+          resolution: 'pending' as const,
+        })),
+      )
+      .returning({ id: findings.id });
+    const links = inserted.flatMap(({ id }, index) => (drafts[index]?.photoIds ?? []).map((photoId) => ({ findingId: id, photoId })));
+    if (links.length > 0) await tx.insert(findingPhotos).values(links);
+  });
+}
+
+export async function insertUserFinding(moveId: string, room: Room, note: string): Promise<FindingRow> {
+  const [row] = await db.insert(findings).values({ moveId, room, source: 'user', resolution: 'issue', userNote: note }).returning();
+  if (!row) throw new Error('Insert returned no row');
+  return row;
+}
+
+export async function updateResolution(id: string, resolution: Resolution, userNote: string | null): Promise<FindingRow | undefined> {
+  const [row] = await db.update(findings).set({ resolution, userNote, updatedAt: new Date() }).where(eq(findings.id, id)).returning();
+  return row;
+}
+
+export async function deleteFinding(id: string): Promise<void> {
+  await db.delete(findings).where(eq(findings.id, id));
 }

@@ -4,9 +4,11 @@ import * as repository from './move.repository';
 import type { MoveEvent } from './move.types';
 
 // What each event unlocks. A row is added in the slice that raises the event.
-const eventTable: Record<MoveEvent, { requires: Phase | null; unlocks: Phase }> = {
+const eventTable: Record<MoveEvent, { requires: Phase | null; unlocks: Phase | null }> = {
   MoveCreated: { requires: null, unlocks: 'prepare' },
   BeforePhotosAnalyzed: { requires: 'before_photos', unlocks: 'move_in' },
+  MoveInCompared: { requires: 'move_in', unlocks: null },
+  FindingResolved: { requires: 'move_in', unlocks: null },
 };
 
 const advanceBlockedMessage: Partial<Record<Phase, string>> = {
@@ -59,7 +61,7 @@ export async function applyEvent(id: string, event: MoveEvent): Promise<Move> {
     throw new AppError('invalid_phase_transition', `${event} needs the ${requires} phase`);
   }
   // Unlocking never moves the phase backwards.
-  return phaseIndex(unlocks) > phaseIndex(move.phase) ? setPhase(id, unlocks) : move;
+  return unlocks && phaseIndex(unlocks) > phaseIndex(move.phase) ? setPhase(id, unlocks) : move;
 }
 
 export async function assertPhaseReached(id: string, phase: Phase): Promise<void> {

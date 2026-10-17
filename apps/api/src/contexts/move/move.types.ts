@@ -1,1 +1,1 @@
-export type MoveEvent = 'MoveCreated' | 'BeforePhotosAnalyzed';
+export type MoveEvent = 'MoveCreated' | 'BeforePhotosAnalyzed' | 'MoveInCompared' | 'FindingResolved';

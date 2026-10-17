@@ -22,6 +22,13 @@
       "when": 1792260241572,
       "tag": "0002_hard_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792262184691,
+      "tag": "0003_dark_harry_osborn",
+      "breakpoints": true
     }
   ]
 }
