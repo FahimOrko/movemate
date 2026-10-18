@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { roomCheckStatusLabels } from '@/lib/room-check-status';
 
 export type CheckAnswer = { status: 'pending' | 'ok' | 'na' } | { status: 'problem'; note: string; kept: Photo[]; files: File[] };
 
@@ -19,11 +20,7 @@ type RoomCheckAnswerProps = {
   disabled?: boolean;
 };
 
-const options = [
-  { status: 'ok', text: 'Yes' },
-  { status: 'problem', text: 'Problem' },
-  { status: 'na', text: 'N/A' },
-] as const satisfies readonly { status: RoomCheckStatus; text: string }[];
+const options = (['ok', 'problem', 'na'] as const).map((status) => ({ status, text: roomCheckStatusLabels[status] }));
 
 export function RoomCheckAnswer({ check, onAnswer, onDelete, disabled }: RoomCheckAnswerProps) {
   const noteId = useId();
@@ -84,7 +81,7 @@ export function RoomCheckAnswer({ check, onAnswer, onDelete, disabled }: RoomChe
 
       {check.problem && !editing && (
         <div className="flex flex-col gap-2 rounded-lg border border-warning bg-warning/10 p-3">
-          <p className="text-sm font-medium text-warning-text">Problem</p>
+          <p className="text-sm font-medium text-warning-text">{roomCheckStatusLabels.problem}</p>
           <p className="text-base wrap-break-word">{check.problem.note}</p>
           {check.problem.photos.length > 0 && (
             <ul className="flex flex-wrap gap-2">

@@ -79,7 +79,7 @@ describe('runCompare photo index mapping', () => {
 
   it('maps a check number to the check and drops one out of range', async () => {
     const { id } = await kitchenMove();
-    const check = await service.addCheck(id, { room: 'kitchen', text: 'Check whether the oven door closes' });
+    const check = await service.addCheck(id, { room: 'kitchen', text: 'Look at the oven door for gaps when closed' });
     ai.mockResolvedValue(
       raw([
         { status: 'looks_good', check_number: 1 },
@@ -91,7 +91,7 @@ describe('runCompare photo index mapping', () => {
 
     expect(findings.find((f) => f.aiStatus === 'looks_good')).toMatchObject({ roomCheckId: check.id, checkText: check.text });
     expect(findings.find((f) => f.aiStatus === 'unclear')).toMatchObject({ roomCheckId: null, checkText: null });
-    expect(ai.mock.calls[0]?.[0].text).toContain('1. Check whether the oven door closes');
+    expect(ai.mock.calls[0]?.[0].text).toContain('1. Look at the oven door for gaps when closed');
   });
 
   it('keeps the order the model returned across repeated runs', async () => {
@@ -107,7 +107,7 @@ describe('runCompare photo index mapping', () => {
 
   it('orders changed first, drops looks_good without a check, cuts to 8 and shortens long summaries', async () => {
     const { id } = await kitchenMove();
-    await service.addCheck(id, { room: 'kitchen', text: 'Check whether the sink is chipped' });
+    await service.addCheck(id, { room: 'kitchen', text: 'Look at the sink for chips' });
     ai.mockResolvedValue(
       raw([
         { status: 'looks_good', check_number: 1 },
@@ -215,7 +215,7 @@ describe('runCompare replacing and failing', () => {
 
   it('nulls room_check_id when the check is deleted', async () => {
     const { id } = await kitchenMove();
-    const check = await service.addCheck(id, { room: 'kitchen', text: 'Check whether the tap drips' });
+    const check = await service.addCheck(id, { room: 'kitchen', text: 'Look at the tap for drips' });
     ai.mockResolvedValue(raw([{ status: 'looks_good', check_number: 1 }]));
     await service.runCompare(id);
 

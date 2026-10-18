@@ -45,13 +45,13 @@ const check = (index: number, text: string, patch: Partial<RoomCheck> = {}): Roo
   ...patch,
 });
 
-const problemCheck = check(3, 'Check whether the tiles by the sink have cracks.', {
+const problemCheck = check(3, 'Look for cracks in the tiles by the sink.', {
   status: 'problem',
   problem: { findingId: '00000000-0000-4000-8000-000000000601', note: 'Hairline crack in the second tile from the sink.', photos: kitchenMoveIn.slice(4, 6) },
 });
 const checks: RoomCheck[] = [
-  check(1, 'Check whether the countertop edge left of the sink has chips or stains.'),
-  check(2, 'Check whether the oven door seal appears intact along the lower edge.', { status: 'ok' }),
+  check(1, 'Look at the countertop edge left of the sink for chips or stains.'),
+  check(2, 'Look at the oven door seal along the lower edge for gaps or tears.', { status: 'ok' }),
   problemCheck,
   check(4, 'Ask about the dishwasher filter.', { source: 'user', status: 'na' }),
 ];
@@ -156,7 +156,7 @@ export function MoveInDesignSections() {
         </div>
       </DesignSection>
 
-      <DesignSection id="room-check-answer" title="Room check answer and problem note" description="Yes, Problem and N/A. Pressing the active option resets to unanswered. Problem opens a required note (1 to 500 characters) and up to 3 photos. The saved note and photos show under the check. Saving fails in the last row.">
+      <DesignSection id="room-check-answer" title="Room check answer and problem note" description="Looks fine, Problem and N/A. Pressing the active option resets to unanswered. Problem opens a required note (1 to 500 characters) and up to 3 photos. The saved note and photos show under the check. Saving fails in the last row.">
         <ul className="divide-y rounded-xl border px-4">
           <RoomCheckAnswer check={checks[0] as RoomCheck} onAnswer={later} onDelete={() => undefined} />
           <RoomCheckAnswer check={problemCheck} onAnswer={later} onDelete={() => undefined} />

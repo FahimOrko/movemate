@@ -17,7 +17,7 @@ describe('POST /moves/:id/inspection/baseline', () => {
   it('returns the checks and failed rooms', async () => {
     const id = await createMove();
     await uploadBefore(id, 'kitchen');
-    ai.mockResolvedValue({ checks: ['Check whether the tap drips'] });
+    ai.mockResolvedValue({ checks: ['Look at the tap for drips'] });
 
     const res = await request(app).post(`/api/moves/${id}/inspection/baseline`).expect(200);
 

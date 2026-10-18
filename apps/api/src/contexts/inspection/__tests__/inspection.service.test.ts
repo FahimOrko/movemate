@@ -19,12 +19,12 @@ describe('runBaseline', () => {
   it('saves the checks per room and unlocks move-in', async () => {
     const id = await createMove();
     await uploadBefore(id, 'kitchen');
-    ai.mockResolvedValue({ checks: ['Check whether the counter is chipped'] });
+    ai.mockResolvedValue({ checks: ['Look at the counter for chips'] });
 
     const result = await service.runBaseline(id);
 
     expect(result.failedRooms).toEqual([]);
-    expect(result.checks).toMatchObject([{ room: 'kitchen', source: 'ai', text: 'Check whether the counter is chipped' }]);
+    expect(result.checks).toMatchObject([{ room: 'kitchen', source: 'ai', text: 'Look at the counter for chips' }]);
     expect((await moveService.getById(id)).phase).toBe('move_in');
   });
 
@@ -43,7 +43,7 @@ describe('runBaseline', () => {
   it('keeps only the first 8 checks', async () => {
     const id = await createMove();
     await uploadBefore(id, 'kitchen');
-    ai.mockResolvedValue({ checks: Array.from({ length: 11 }, (_, i) => `Check whether ${i}`) });
+    ai.mockResolvedValue({ checks: Array.from({ length: 11 }, (_, i) => `Look at item ${i}`) });
     expect((await service.runBaseline(id)).checks).toHaveLength(8);
   });
 

@@ -147,8 +147,8 @@ const designDialogPhotos: Photo[] = [
 
 const sampleChecks: RoomCheck[] = (
   [
-    { source: 'ai', text: 'Check whether the countertop edge left of the sink has chips or stains.' },
-    { source: 'ai', text: 'Check whether the oven door seal appears intact along the lower edge.' },
+    { source: 'ai', text: 'Look at the countertop edge left of the sink for chips or stains.' },
+    { source: 'ai', text: 'Look at the oven door seal along the lower edge for gaps or tears.' },
     { source: 'user', text: 'Ask about the dishwasher filter.' },
   ] as const
 ).map((check, index) => ({
@@ -210,7 +210,7 @@ const sampleFindings: { title: string; finding: Finding; disabled?: boolean }[] 
       confidence: 'medium',
       aiSummary: 'The countertop edge left of the sink looks similar in both sets of photos.',
       roomCheckId: '00000000-0000-4000-8000-000000000100',
-      checkText: 'Check whether the countertop edge left of the sink has chips or stains.',
+      checkText: 'Look at the countertop edge left of the sink for chips or stains.',
       resolution: 'ok',
     },
   },
@@ -499,7 +499,7 @@ export function DesignPage() {
                 <CardTitle>Kitchen</CardTitle>
                 <CardDescription>4 before photos</CardDescription>
               </CardHeader>
-              <CardContent className="text-sm">Check whether the counter edge near the sink is chipped.</CardContent>
+              <CardContent className="text-sm">Look at the counter edge near the sink for chips.</CardContent>
               <CardFooter>
                 <Button variant="secondary" size="sm">
                   Add a check

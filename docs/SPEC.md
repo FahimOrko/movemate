@@ -125,6 +125,7 @@ movemate/
 - **guidance_progress**: id, move_id, item_key, status (`pending | done | no | na`; a missing row means `pending`), updated_at
 - **photos**: id, move_id, stage (`before | move_in`), room, file_path, width, height, created_at
 - **room_checks**: id, move_id, room, text, source (`ai | user`), status (`pending | ok | problem | na`, default `pending`), created_at
+- Room check answers show as "Looks fine" (`ok`), "Problem" and "N/A", pending stays unselected; AI checks are short instructions starting with "Look at" or "Look for", never questions or "Check whether". The Move checklist keeps Yes / No / N/A.
 - **findings**: id, move_id, room, room_check_id (nullable; set null when the check is deleted, so a user problem stays as a standalone issue), source (`ai | user`), ai_status (`looks_good | changed | unclear`), ai_summary, confidence (`low | medium | high`), resolution (`pending | ok | issue | custom`), user_note, created_at, updated_at
 - **finding_photos**: finding_id, photo_id (links go when the photo or the finding is deleted; the finding stays when only the photo goes)
 - **reports**: id, move_id, snapshot (jsonb), generated_at
