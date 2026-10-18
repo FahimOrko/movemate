@@ -4,10 +4,10 @@ services:
     environment:
       POSTGRES_USER: movemate
       POSTGRES_DB: movemate
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
     ports:
       # 5433 on the host: a native Postgres often already owns 5432
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - movemate-pgdata:/var/lib/postgresql/data
       - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
@@ -17,5 +17,47 @@ services:
       timeout: 3s
       retries: 15
 
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    # Set explicitly (no env_file) so dev-only values in .env never reach the container.
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://movemate:${POSTGRES_PASSWORD:-change_me}@db:5432/movemate
+      UPLOAD_DIR: /data/uploads
+      ENABLE_RESET: "true"
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_VISION_MODEL: ${OPENROUTER_VISION_MODEL:-nvidia/nemotron-3.5-super-vl:free}
+      OPENROUTER_TIMEOUT_MS: ${OPENROUTER_TIMEOUT_MS:-60000}
+      IF_INSURANCE_URL: ${IF_INSURANCE_URL:-}
+    volumes:
+      - movemate-uploads:/data/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/api/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
 volumes:
   movemate-pgdata:
+  movemate-uploads:

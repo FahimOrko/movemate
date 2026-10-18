@@ -12,6 +12,7 @@ vi.mock('../../../shared/ai/openrouter.client', () => ({ completeJson: vi.fn() }
 const ai = vi.mocked(completeJson);
 
 const originalNodeEnv = env.NODE_ENV;
+const originalEnableReset = env.ENABLE_RESET;
 const tables = ['moves', 'photos', 'findings', 'reports'] as const;
 
 async function rowCount(table: (typeof tables)[number]): Promise<number> {
@@ -25,6 +26,7 @@ beforeEach(() => {
 
 afterEach(() => {
   env.NODE_ENV = originalNodeEnv;
+  env.ENABLE_RESET = originalEnableReset;
 });
 
 describe('POST /api/reset', () => {
@@ -57,10 +59,21 @@ describe('POST /api/reset', () => {
   it('404s in production and deletes nothing', async () => {
     await request(app).post('/api/moves').send({ address: 'Aurakatu 12' });
     env.NODE_ENV = 'production';
+    env.ENABLE_RESET = false;
 
     const res = await request(app).post('/api/reset');
 
     expect(res.status).toBe(404);
     expect(await rowCount('moves')).toBe(1);
+  });
+
+  it('works in production when ENABLE_RESET is true', async () => {
+    await request(app).post('/api/moves').send({ address: 'Aurakatu 12' });
+    env.NODE_ENV = 'production';
+    env.ENABLE_RESET = true;
+
+    await request(app).post('/api/reset').expect(204);
+
+    expect(await rowCount('moves')).toBe(0);
   });
 });

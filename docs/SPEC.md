@@ -231,4 +231,7 @@ OPENROUTER_TIMEOUT_MS=45000
 UPLOAD_DIR=./private-uploads
 MAX_UPLOAD_MB=8
 IF_INSURANCE_URL=replace_me
+ENABLE_RESET=false
 ```
+
+`POST /api/reset` (Start over) works when `NODE_ENV` is not `production` or `ENABLE_RESET=true`, otherwise it returns 404. The Docker full-stack run sets `ENABLE_RESET=true`.

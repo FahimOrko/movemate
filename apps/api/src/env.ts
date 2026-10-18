@@ -12,6 +12,7 @@ const envSchema = z.object({
   OPENROUTER_API_KEY: optionalString,
   OPENROUTER_VISION_MODEL: optionalString,
   OPENROUTER_TIMEOUT_MS: z.coerce.number().int().positive().default(45000),
+  ENABLE_RESET: z.preprocess((value) => (value === '' ? undefined : value), z.enum(['true', 'false']).default('false').transform((value) => value === 'true')),
   IF_INSURANCE_URL: z.preprocess((value) => (value === '' ? undefined : value), z.url().optional()),
 });
 

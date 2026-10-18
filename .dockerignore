@@ -1,0 +1,14 @@
+**/node_modules
+.git
+.claude
+.env
+.env.*
+!.env.example
+**/uploads
+**/private-uploads
+**/demo-assets/KEY_*
+/demo-assets
+graphify-out
+docs
+**/dist
+**/*.log

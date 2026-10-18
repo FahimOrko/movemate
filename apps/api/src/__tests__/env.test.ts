@@ -53,3 +53,18 @@ describe('parseEnv IF_INSURANCE_URL', () => {
     expect(() => parseEnv({ ...validEnv, IF_INSURANCE_URL: 'not a url' })).toThrow(/IF_INSURANCE_URL/);
   });
 });
+
+describe('parseEnv ENABLE_RESET', () => {
+  it('defaults to false and treats empty as unset', () => {
+    expect(parseEnv(validEnv).ENABLE_RESET).toBe(false);
+    expect(parseEnv({ ...validEnv, ENABLE_RESET: '' }).ENABLE_RESET).toBe(false);
+  });
+
+  it('parses true', () => {
+    expect(parseEnv({ ...validEnv, ENABLE_RESET: 'true' }).ENABLE_RESET).toBe(true);
+  });
+
+  it('rejects other values', () => {
+    expect(() => parseEnv({ ...validEnv, ENABLE_RESET: 'yes' })).toThrow(/ENABLE_RESET/);
+  });
+});

@@ -162,3 +162,7 @@ Contract analysis is an **optional step the user can skip**; the move flow works
 **Tests:** snapshot (all photos, three problem sources, no OK problems, Not checked, status line math, zero problems, no before photos), summary builder and route, routes (unanswered checks do not block, 409 rules, snapshot unchanged after later edits, `report_outdated` for an old snapshot).
 **Done when:** `pnpm check` is green and a regenerated report shows every photo, check answer and problem.
 **Follow-up (UI only):** landlord-facing report layout (problems table first, per-room problem blocks, photo and room-check appendices), Summary redesign with stat cards and a sticky actions card ("Download report (PDF)" via `/move/report?print=1`, "Download summary (PDF)"), and a compare-prompt rule against photo numbers in summaries. No API, snapshot or migration changes.
+
+## Docker full-stack run
+
+`docker compose up --build` runs db, api and web (nginx proxies `/api`); `pnpm db:up` starts only `db`. The compose api sets `NODE_ENV=production` and `ENABLE_RESET=true`, so `POST /api/reset` works there (env: `ENABLE_RESET`, default false; reset is 404 only when production and the flag is off).

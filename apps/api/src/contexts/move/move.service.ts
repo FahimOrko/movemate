@@ -84,7 +84,7 @@ async function setPhase(id: string, phase: Phase): Promise<Move> {
 
 // Uploads are emptied here, not through photos.service: photos depends on move, so move cannot call it.
 export async function resetAll(): Promise<void> {
-  if (env.NODE_ENV === 'production') throw new AppError('not_found', 'Route not found');
+  if (env.NODE_ENV === 'production' && !env.ENABLE_RESET) throw new AppError('not_found', 'Route not found');
   const uploadRoot = path.resolve(env.UPLOAD_DIR);
   await db.transaction(async (tx) => {
     await repository.deleteAllMoves(tx);
