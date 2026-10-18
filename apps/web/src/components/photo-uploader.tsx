@@ -13,11 +13,13 @@ type PhotoUploaderProps = {
   maxPerRoom: number;
   upload: (file: File, room: Room) => Promise<unknown>;
   disabled?: boolean;
+  /** Fixes the room of every photo and hides the room pickers, for uploads made inside one room. */
+  room?: Room;
 };
 
 const acceptedTypes = 'image/jpeg,image/png,image/webp';
 
-export function PhotoUploader({ existingCounts, maxPerRoom, upload, disabled }: PhotoUploaderProps) {
+export function PhotoUploader({ existingCounts, maxPerRoom, upload, disabled, room: fixedRoom }: PhotoUploaderProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -34,7 +36,7 @@ export function PhotoUploader({ existingCounts, maxPerRoom, upload, disabled }: 
     const images = [...(files ?? [])].filter((file) => file.type.startsWith('image/'));
     setDrafts((current) => [
       ...current,
-      ...images.map((file) => ({ id: crypto.randomUUID(), file, previewUrl: URL.createObjectURL(file), room: 'kitchen' as Room })),
+      ...images.map((file) => ({ id: crypto.randomUUID(), file, previewUrl: URL.createObjectURL(file), room: fixedRoom ?? ('kitchen' as Room) })),
     ]);
   }
 
@@ -130,7 +132,7 @@ export function PhotoUploader({ existingCounts, maxPerRoom, upload, disabled }: 
                     <XIcon />
                   </Button>
                 </div>
-                <RoomSelect value={draft.room} onValueChange={(room) => setRoom(draft.id, room)} label={`Room for ${draft.file.name}`} disabled={isUploading} />
+                {!fixedRoom && <RoomSelect value={draft.room} onValueChange={(room) => setRoom(draft.id, room)} label={`Room for ${draft.file.name}`} disabled={isUploading} />}
                 {draft.error && (
                   <p role="alert" className="text-sm text-destructive-text">
                     {draft.error}

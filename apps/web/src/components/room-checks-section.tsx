@@ -1,10 +1,12 @@
-import { roomSchema, type RoomCheck, roomLabels } from '@movemate/contracts';
+import { phaseOrder, roomSchema, type Phase, type RoomCheck, roomLabels } from '@movemate/contracts';
 import { ChevronRightIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 
 type RoomChecksSectionProps = {
   checks: RoomCheck[];
+  /** Phase being viewed; from Move-in on, rows show answered of total and open the Move-in card. */
+  phase?: Phase;
   /** Called when a room link is followed, for example to close the drawer. */
   onNavigate?: () => void;
   /** Pass both to make the section collapsible; the drawer omits them and stays expanded. */
@@ -12,18 +14,23 @@ type RoomChecksSectionProps = {
   onCollapsedChange?: (collapsed: boolean) => void;
 };
 
-export function RoomChecksSection({ checks, onNavigate, collapsed, onCollapsedChange }: RoomChecksSectionProps) {
+export function RoomChecksSection({ checks, phase, onNavigate, collapsed, onCollapsedChange }: RoomChecksSectionProps) {
   const groups = roomSchema.options
-    .map((room) => ({ room, count: checks.filter((check) => check.room === room).length }))
+    .map((room) => {
+      const inRoom = checks.filter((check) => check.room === room);
+      return { room, count: inRoom.length, answered: inRoom.filter((check) => check.status !== 'pending').length };
+    })
     .filter((group) => group.count > 0);
   if (groups.length === 0) return null;
 
+  const answering = phase !== undefined && phaseOrder.indexOf(phase) >= phaseOrder.indexOf('move_in');
+  const answeredTotal = checks.filter((check) => check.status !== 'pending').length;
   const toggleable = onCollapsedChange !== undefined;
   const expanded = !(toggleable && collapsed);
   const heading = (
     <>
       Room checks
-      <span className="text-sm font-normal text-muted-foreground">{checks.length}</span>
+      <span className="text-sm font-normal text-muted-foreground">{answering ? `${answeredTotal} of ${checks.length}` : checks.length}</span>
     </>
   );
 
@@ -45,15 +52,15 @@ export function RoomChecksSection({ checks, onNavigate, collapsed, onCollapsedCh
       )}
       {expanded && (
         <ul className="mt-2 divide-y">
-          {groups.map(({ room, count }) => (
+          {groups.map(({ room, count, answered }) => (
             <li key={room}>
               <Link
-                to={`/move/before_photos?room=${room}`}
+                to={`/move/${answering ? 'move_in' : 'before_photos'}?room=${room}`}
                 onClick={onNavigate}
                 className="flex items-center justify-between gap-3 rounded-md py-2.5 text-sm outline-none hover:text-primary focus-visible:ring-2 focus-visible:ring-ring/40"
               >
                 <span>{roomLabels[room]}</span>
-                <span className="text-muted-foreground">{count}</span>
+                <span className="text-muted-foreground">{answering ? `${answered} of ${count} answered` : count}</span>
               </Link>
             </li>
           ))}

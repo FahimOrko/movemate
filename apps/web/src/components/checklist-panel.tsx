@@ -1,6 +1,7 @@
 import {
   type ChecklistStatus,
   type GuidanceProgress,
+  type Phase,
   type RoomCheck,
 } from "@movemate/contracts";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
@@ -14,6 +15,8 @@ type ChecklistPanelProps = {
   onStatusChange: (itemKey: string, status: ChecklistStatus) => void;
   /** Read-only room checks shown under the move checklist when there are any. */
   roomChecks?: RoomCheck[];
+  /** Phase being viewed; Move-in and later show answered counts and link to the Move-in cards. */
+  phase?: Phase;
   onRoomNavigate?: () => void;
   /** Pass both to show the collapse toggle; the drawer omits them and stays expanded. */
   collapsed?: boolean;
@@ -36,6 +39,7 @@ export function ChecklistPanel({
   entries,
   onStatusChange,
   roomChecks,
+  phase,
   onRoomNavigate,
   collapsed,
   onCollapsedChange,
@@ -48,6 +52,7 @@ export function ChecklistPanel({
   const roomSection = roomChecks && (
     <RoomChecksSection
       checks={roomChecks}
+      phase={phase}
       onNavigate={onRoomNavigate}
       collapsed={roomChecksCollapsed}
       onCollapsedChange={onRoomChecksCollapsedChange}

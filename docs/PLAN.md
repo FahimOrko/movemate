@@ -147,3 +147,9 @@ Contract analysis is an **optional step the user can skip**; the move flow works
 ## Settle in redesign
 **Web:** `features/settle-in` is three flat lists (Home insurance, Electricity, Internet) from `provider-category-list` and `provider-row`, each ending in "Not needed (N/A)" (selected when the linked item is `na`; it goes through the checklist PATCH). `insurance-info-popover` holds the explainer; `discount-badge` carries the offer; `settle-in-progress` shows "n of 3 handled". Hero card, offer block and N/A note are removed. All states on /design.
 **Done when:** N/A and provider choices keep the Move checklist in sync; `pnpm check` is green.
+
+## Move-in photos redesign
+**Web only, no API or contract changes.** The Move-in screen uses the Before photos room-card pattern: status line ("3 room checks and 2 findings still open" or "All done"; open = pending room checks plus pending findings), compact upload strip, room card grid with an "Add a room" card, then Compare photos, "Mark all looks good as OK" and Generate report (rules unchanged). A card opens the shared room dialog with four tabs: Photos (Before read-only, Move-in with Compared / Not used in comparison / Attached to a problem markers), Room checks (Yes / Problem / N/A; Problem takes a note and up to 3 photos uploaded as move-in photos first), Findings (AI findings) and Add a problem (text, optional photos, standalone problems only).
+**Stepper:** `phaseSteps(reached, prepareOpen, moveInOpen)` shows Move-in as attention ("N items still open") while any room check or finding is pending. It never blocks navigation.
+**Side panel:** the Room checks section shows "answered of total" per room from Move-in on, and a room opens its Move-in card.
+**Done when:** `pnpm check` is green and every new component is on /design.

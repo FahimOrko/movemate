@@ -1,6 +1,7 @@
 import {
   baselineResultSchema,
   roomCheckSchema,
+  type AnswerRoomCheck,
   type CreateRoomCheck,
   type Room,
 } from '@movemate/contracts';
@@ -41,5 +42,14 @@ export function useDeleteRoomCheck(moveId: string) {
   return useMutation({
     mutationFn: (id: string) => api.delete(`/room-checks/${id}`),
     onSettled: () => queryClient.invalidateQueries({ queryKey: checksKey(moveId) }),
+  });
+}
+
+export function useAnswerRoomCheck(moveId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: AnswerRoomCheck }) => api.patch(`/room-checks/${id}`, roomCheckSchema, body),
+    // A problem is stored as a finding, so both lists change.
+    onSettled: () => Promise.all([queryClient.invalidateQueries({ queryKey: checksKey(moveId) }), queryClient.invalidateQueries({ queryKey: ['findings', moveId] })]),
   });
 }

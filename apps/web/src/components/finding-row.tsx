@@ -80,6 +80,9 @@ export function FindingRow({ finding, onResolve, onDelete, disabled }: FindingRo
         {!isUser && <Badge variant={resolution.variant}>{resolution.label}</Badge>}
       </div>
 
+      {isUser && finding.moveInPhotos.length > 0 && (
+        <PhotoGroup title="Photos" photos={finding.moveInPhotos.map((photo) => ({ photo, label: `Photo of the problem in the ${roomLabel}` }))} />
+      )}
       {!isUser && (
         <div className="flex flex-wrap gap-4">
           <PhotoGroup title="Before" photos={finding.beforePhotos.map((photo) => ({ photo, label: `Before photo of the ${roomLabel}` }))} />

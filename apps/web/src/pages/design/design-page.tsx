@@ -51,6 +51,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { DesignSection } from './design-section';
+import { MoveInDesignSections } from './move-in-design-sections';
 import { RoomDialogDemo } from './room-dialog-demo';
 
 // Class names are written out in full so Tailwind can find them.
@@ -721,7 +722,7 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="room-checks-section" title="Room checks in the side panel" description="Read-only and collapsed by default, under the move checklist. One row per room with its count. A room opens that room's card on Before photos, from any phase. Hidden when there are no room checks.">
+      <DesignSection id="room-checks-section" title="Room checks in the side panel" description="Read-only and collapsed by default, under the move checklist. One row per room with its count. A room opens that room's card on Before photos. From Move-in on it shows answered of total and opens the Move-in card. Hidden when there are no room checks.">
         <div className="grid gap-10 md:grid-cols-2">
           <div className="max-w-sm">
             <RoomChecksSection checks={[...sampleChecks, ...sampleChecks.slice(0, 1).map((check) => ({ ...check, id: '00000000-0000-4000-8000-000000000199', room: 'bedroom' as const }))]} />
@@ -732,6 +733,8 @@ export function DesignPage() {
           </div>
         </div>
       </DesignSection>
+
+      <MoveInDesignSections />
 
       <DesignSection id="ai-error" title="AI error alert and analyze button" description="Shown when the AI fails. Retry is hidden when AI is not configured.">
         <AiErrorAlert title="The AI could not analyze your photos" message="The AI rate limit was reached. Try again later or add checks by hand." onRetry={() => undefined} />

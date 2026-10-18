@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 
 type ChecklistDrawerProps = Parameters<typeof ChecklistPanel>[0];
 
-export function ChecklistDrawer({ entries, onStatusChange, roomChecks }: ChecklistDrawerProps) {
+export function ChecklistDrawer({ entries, onStatusChange, roomChecks, phase }: ChecklistDrawerProps) {
   const { handled, left } = countChecklist(entries);
   const [open, setOpen] = useState(false);
   return (
@@ -25,7 +25,7 @@ export function ChecklistDrawer({ entries, onStatusChange, roomChecks }: Checkli
           <SheetTitle>Move checklist</SheetTitle>
           <SheetDescription>Answer each item. Nothing here blocks your move.</SheetDescription>
         </SheetHeader>
-        <ChecklistPanel entries={entries} onStatusChange={onStatusChange} roomChecks={roomChecks} onRoomNavigate={() => setOpen(false)} />
+        <ChecklistPanel entries={entries} onStatusChange={onStatusChange} roomChecks={roomChecks} phase={phase} onRoomNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

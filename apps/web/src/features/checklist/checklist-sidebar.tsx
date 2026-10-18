@@ -1,4 +1,4 @@
-import type { Move } from "@movemate/contracts";
+import type { Move, Phase } from "@movemate/contracts";
 import { ChecklistDrawer } from "@/components/checklist-drawer";
 import { ChecklistPanel } from "@/components/checklist-panel";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,7 +6,7 @@ import { useRoomChecks } from "@/features/before-photos/use-room-checks";
 import { useStoredFlag } from "@/lib/use-stored-flag";
 import { useChecklist, useSetChecklistStatus } from "./use-checklist";
 
-export function ChecklistSidebar({ move }: { move: Move }) {
+export function ChecklistSidebar({ move, phase }: { move: Move; /** The phase being viewed. */ phase: Phase }) {
   const checklist = useChecklist(move.id);
   const setStatus = useSetChecklistStatus(move.id);
   const roomChecks = useRoomChecks(move.id).data;
@@ -41,6 +41,7 @@ export function ChecklistSidebar({ move }: { move: Move }) {
           entries={checklist.data}
           onStatusChange={onStatusChange}
           roomChecks={roomChecks}
+          phase={phase}
         />
       </div>
       <aside
@@ -51,6 +52,7 @@ export function ChecklistSidebar({ move }: { move: Move }) {
           entries={checklist.data}
           onStatusChange={onStatusChange}
           roomChecks={roomChecks}
+          phase={phase}
           collapsed={collapsed}
           onCollapsedChange={setCollapsed}
           roomChecksCollapsed={roomChecksCollapsed}

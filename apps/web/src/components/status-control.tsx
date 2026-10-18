@@ -1,5 +1,5 @@
 import type { ChecklistStatus } from '@movemate/contracts';
-import { Button } from '@/components/ui/button';
+import { AnswerControl } from '@/components/answer-control';
 
 type StatusControlProps = {
   value: ChecklistStatus;
@@ -15,26 +15,6 @@ const options = [
   { status: 'na', text: 'N/A' },
 ] as const;
 
-export function StatusControl({ value, onChange, label, disabled }: StatusControlProps) {
-  return (
-    <div role="group" aria-label={`Answer for ${label}`} className="flex shrink-0 items-center gap-1">
-      {options.map(({ status, text }) => {
-        const pressed = value === status;
-        return (
-          <Button
-            key={status}
-            type="button"
-            size="sm"
-            variant={pressed ? 'default' : 'secondary'}
-            aria-pressed={pressed}
-            disabled={disabled}
-            aria-disabled={disabled || undefined}
-            onClick={() => onChange(pressed ? 'pending' : status)}
-          >
-            {text}
-          </Button>
-        );
-      })}
-    </div>
-  );
+export function StatusControl(props: StatusControlProps) {
+  return <AnswerControl {...props} reset="pending" options={options} />;
 }
