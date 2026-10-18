@@ -2,9 +2,9 @@
 
 MoveMate helps renters prove what condition a home was in when they moved in. You photograph each room, an AI model compares those photos with the listing photos, you confirm every result, and MoveMate produces a dated report you can hand to your landlord.
 
-| Pitch video                                                                                                                              | Full walkthrough                                                                                                                |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| <a href="https://www.youtube.com/watch?v=gIWQTVlLvH4"><img src="docs/movemate-thumbnail.png" alt="MoveMate pitch video" width="400"></a> | <a href="WALKTHROUGH_LINK"><img src="docs/movemate-walkthrough-thumbnail.png" alt="MoveMate walkthrough video" width="400"></a> |
+| Pitch video                                                                                                                              | Full walkthrough                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a href="https://www.youtube.com/watch?v=gIWQTVlLvH4"><img src="docs/movemate-thumbnail.png" alt="MoveMate pitch video" width="400"></a> | <a href="https://youtu.be/_bEXEd1xQx8"><img src="docs/movemate-walkthrough-thumbnail.png" alt="MoveMate walkthrough video" width="400"></a> |
 
 ---
 
