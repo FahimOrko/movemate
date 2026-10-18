@@ -1,4 +1,15 @@
-import { roomSchema, type Finding, type Move, type ReportFinding, type ReportIssue, type ReportSnapshot, type WatchItem } from '@movemate/contracts';
+import {
+  REPORT_SNAPSHOT_VERSION,
+  roomSchema,
+  type Finding,
+  type Move,
+  type Photo,
+  type ReportProblem,
+  type ReportRoom,
+  type ReportSnapshot,
+  type RoomCheck,
+  type WatchItem,
+} from '@movemate/contracts';
 import { REPORT_DISCLAIMER, WATCH_LIST_DAYS, watchListTemplates } from './report.templates';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -10,25 +21,21 @@ function dueDate(move: Move, generatedAt: Date): string {
 
 const findingText = (finding: Finding) => (finding.source === 'user' ? finding.userNote : finding.aiSummary) ?? '';
 
-function toIssue(finding: Finding, kind: ReportIssue['kind']): ReportIssue {
-  return {
-    findingId: finding.id,
-    room: finding.room,
-    kind,
-    text: findingText(finding),
-    note: finding.source === 'user' ? null : finding.userNote,
-    beforePhotos: finding.beforePhotos,
-    moveInPhotos: finding.moveInPhotos,
-  };
+function problemSource(finding: Finding): ReportProblem['source'] {
+  if (finding.source === 'ai') return 'ai';
+  return finding.roomCheckId ? 'room_check' : 'user';
 }
 
-function toReportFinding(finding: Finding): ReportFinding {
+function toProblem(finding: Finding, resolution: ReportProblem['resolution']): ReportProblem {
   return {
     findingId: finding.id,
-    aiStatus: finding.aiStatus,
-    resolution: finding.resolution,
-    text: findingText(finding),
-    note: finding.source === 'user' ? null : finding.userNote,
+    source: problemSource(finding),
+    checkText: finding.checkText,
+    aiSummary: finding.source === 'ai' ? finding.aiSummary : null,
+    resolution,
+    note: finding.userNote,
+    beforePhotos: finding.beforePhotos,
+    moveInPhotos: finding.moveInPhotos,
   };
 }
 
@@ -43,14 +50,28 @@ function toWatchList(findings: Finding[], due: string): WatchItem[] {
   return [...fromFindings, ...watchListTemplates.map((template) => ({ ...template, dueDate: due }))];
 }
 
-export function buildSnapshot(move: Move, findings: Finding[], generatedAt: Date): ReportSnapshot {
+function toRoom(room: ReportRoom['room'], photos: Photo[], checks: RoomCheck[], findings: Finding[]): ReportRoom {
+  const inRoom = <T extends { room: ReportRoom['room'] }>(items: T[]) => items.filter((item) => item.room === room);
   return {
+    room,
+    beforePhotos: inRoom(photos).filter((photo) => photo.stage === 'before'),
+    moveInPhotos: inRoom(photos).filter((photo) => photo.stage === 'move_in'),
+    checks: inRoom(checks).map((check) => ({ checkId: check.id, text: check.text, source: check.source, status: check.status })),
+    problems: inRoom(findings).flatMap((finding) =>
+      finding.resolution === 'issue' || finding.resolution === 'custom' ? [toProblem(finding, finding.resolution)] : [],
+    ),
+  };
+}
+
+const hasContent = (room: ReportRoom) =>
+  room.beforePhotos.length + room.moveInPhotos.length + room.checks.length + room.problems.length > 0;
+
+export function buildSnapshot(move: Move, photos: Photo[], checks: RoomCheck[], findings: Finding[], generatedAt: Date): ReportSnapshot {
+  return {
+    version: REPORT_SNAPSHOT_VERSION,
     move: { address: move.address, moveDate: move.moveDate },
     generatedAt: generatedAt.toISOString(),
-    issues: findings.flatMap((finding) => (finding.resolution === 'issue' || finding.resolution === 'custom' ? [toIssue(finding, finding.resolution)] : [])),
-    findingsByRoom: roomSchema.options
-      .map((room) => ({ room, findings: findings.filter((finding) => finding.room === room).map(toReportFinding) }))
-      .filter((group) => group.findings.length > 0),
+    rooms: roomSchema.options.map((room) => toRoom(room, photos, checks, findings)).filter(hasContent),
     watchList: toWatchList(findings, dueDate(move, generatedAt)),
     disclaimer: REPORT_DISCLAIMER,
   };

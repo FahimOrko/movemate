@@ -1,82 +1,59 @@
-import type { ChecklistStatus, ProviderCategory, ProviderDiscount, ReportSummary } from '@movemate/contracts';
+import type { ChecklistStatus, ProviderCategory, ReportSummary } from '@movemate/contracts';
 import { Link } from 'react-router';
 import { SummaryChecklist } from '@/components/summary-checklist';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatDate } from '@/lib/format';
-import { providerCategoryLabels } from '@/lib/provider-categories';
+import { SummaryProblems } from '@/components/summary-problems';
+import { SummaryRoomChecks } from '@/components/summary-room-checks';
+import { SummaryStrip } from '@/components/summary-strip';
+import { formatDate, formatDateTime } from '@/lib/format';
 
-export type ChosenProvider = { category: ProviderCategory; name: string; discount: ProviderDiscount | null };
+type SummaryViewProps = {
+  summary: ReportSummary;
+  discountCodes: Partial<Record<ProviderCategory, string>>;
+  reportHref: string;
+  onChecklistStatusChange: (itemKey: string, status: ChecklistStatus) => void;
+};
 
-type SummaryViewProps = { summary: ReportSummary; chosen: ChosenProvider[]; reportHref: string; onChecklistStatusChange: (itemKey: string, status: ChecklistStatus) => void };
-
-function Stat({ label, value }: { label: string; value: number }) {
+export function SummaryView({ summary, discountCodes, reportHref, onChecklistStatusChange }: SummaryViewProps) {
+  const { totals } = summary;
   return (
-    <div>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-title">{value}</dd>
-    </div>
-  );
-}
-
-export function SummaryView({ summary, chosen, reportHref, onChecklistStatusChange }: SummaryViewProps) {
-  return (
-    <article aria-labelledby="summary-title" className="flex flex-col gap-8">
-      <header>
-        <h1 id="summary-title" className="text-title">
-          Your move, summed up
-        </h1>
-        <p className="mt-2 text-base">{summary.address}</p>
-        {summary.moveDate && <p className="text-sm text-muted-foreground">Move date {formatDate(summary.moveDate)}</p>}
+    <article aria-labelledby="summary-title" className="flex flex-col gap-10">
+      <header className="flex flex-col gap-5">
+        <div>
+          <h1 id="summary-title" className="text-title">
+            Your move, summed up
+          </h1>
+          <p className="mt-2 text-base">{summary.address}</p>
+          <p className="text-sm text-muted-foreground">
+            {summary.moveDate && `Move date ${formatDate(summary.moveDate)}. `}Report generated {formatDateTime(summary.generatedAt)}.
+          </p>
+          <Link to={reportHref} className="mt-1 inline-block rounded-sm text-primary underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 print:hidden">
+            Open the full report
+          </Link>
+        </div>
+        <SummaryStrip
+          label="Totals"
+          stats={[
+            { label: 'Rooms documented', value: totals.roomsDocumented },
+            { label: 'Photos before', value: totals.beforePhotos },
+            { label: 'Photos move-in', value: totals.moveInPhotos },
+            { label: 'Checks answered', value: `${totals.checksAnswered} of ${totals.checksTotal}` },
+            { label: 'Problems found', value: totals.problems },
+          ]}
+        />
       </header>
 
-      <SummaryChecklist checklist={summary.checklist} onStatusChange={onChecklistStatusChange} />
-
-      <Card variant="surface">
-        <CardHeader>
-          <CardTitle>Move-in report</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Stat label="Rooms documented" value={summary.roomsDocumented} />
-            <Stat label="OK" value={summary.counts.ok} />
-            <Stat label="Issues" value={summary.counts.issues} />
-            <Stat label="Your own notes" value={summary.counts.custom} />
-          </dl>
-          <Link to={reportHref} className="w-fit text-primary underline underline-offset-4 print:hidden">
-            Open the saved report
-          </Link>
-        </CardContent>
-      </Card>
+      <SummaryProblems problems={summary.problems} reportHref={reportHref} />
+      <SummaryRoomChecks rooms={summary.rooms} />
+      <SummaryChecklist checklist={summary.checklist} onStatusChange={onChecklistStatusChange} discountCodes={discountCodes} />
 
       {summary.watchListDueDate && (
-        <section aria-labelledby="watch-title">
+        <section aria-labelledby="watch-title" className="break-inside-avoid">
           <h2 id="watch-title" className="text-heading">
             30-day watch list
           </h2>
           <p className="mt-2 text-muted-foreground">Check your watch list items by {formatDate(summary.watchListDueDate)}.</p>
         </section>
       )}
-
-      <section aria-labelledby="providers-title">
-        <h2 id="providers-title" className="text-heading">
-          Your providers
-        </h2>
-        {chosen.length === 0 ? (
-          <p className="mt-2 text-muted-foreground">You have not chosen any providers.</p>
-        ) : (
-          <ul className="mt-2 divide-y">
-            {chosen.map(({ category, name, discount }) => (
-              <li key={category} className="flex flex-wrap items-baseline justify-between gap-2 py-3">
-                <span className="text-muted-foreground">{providerCategoryLabels[category]}</span>
-                <span>
-                  {name}
-                  {discount && <span className="ml-2 text-sm text-muted-foreground">Discount code {discount.code}</span>}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       <p className="text-heading">Your move is documented and your next steps are set. Welcome home.</p>
     </article>

@@ -1,11 +1,10 @@
-import type { ReportSnapshot } from '@movemate/contracts';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '../../db/client';
 import { reports } from '../../db/schema/report';
 
 export type ReportRow = typeof reports.$inferSelect;
 
-export async function insertReport(moveId: string, snapshot: ReportSnapshot): Promise<ReportRow> {
+export async function insertReport(moveId: string, snapshot: unknown): Promise<ReportRow> {
   const [row] = await db.insert(reports).values({ moveId, snapshot }).returning();
   if (!row) throw new Error('Insert returned no row');
   return row;

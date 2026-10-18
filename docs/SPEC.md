@@ -44,10 +44,14 @@ Business goal: the final phase connects the user to providers they need after mo
   - Photos attached to a user problem are details, not room views, so the AI compare skips them
   - AI compares before vs move-in per room, producing findings: `looks_good` / `changed` / `unclear`
   - User resolves each finding: confirm OK, confirm issue, or write a custom answer
-- **Phase 4: Report** (main user value)
-  - Issues with before/after photos, timestamps, user notes, plus a 30-day watch list
-  - Print-friendly page, saved as PDF via browser print
-  - Report is a frozen snapshot at generation time
+- **Phase 4: Report** (main user value): the full record of the move, frozen at generation
+  - Per room, in the fixed room order (rooms with any photo, check or problem): photo counts ("3 before photos, 2 move-in photos"), ALL before and ALL move-in photos with their stage label and upload time ("Before (listing or viewing)", "Move-in, uploaded at ..."), the room check status line ("5 of 7 checked, 1 problem, 1 N/A"), the problems, and every room check with its answer (Looks fine, Problem, N/A or Not checked)
+  - Problems come from three sources, each labeled: Room check (a check answered Problem, with note and photos), AI finding (resolved as issue or custom, with the AI summary, the renter's note and the before and move-in photos used) and Added by you (the renter's own problem, with note and photos). Looks-fine and OK findings are not problems
+  - A room with no before photos says "No before photos, not compared"; a room with no problems says "No problems recorded"; a move with no problems at all still generates a valid report
+  - Also: move info, generated time, the 30-day watch list and the disclaimer
+  - Generating is blocked (409) only by findings still pending or by a move with no move-in photos. Unanswered room checks do not block; they show as Not checked
+  - The snapshot carries a version (`2`). A report saved by an older version is not migrated: reading it returns 409 `report_outdated` ("Regenerate this report")
+  - Print-friendly page, saved as PDF via browser print: app chrome hidden, each problem kept together, at most 3 photos per problem stage with "+N more photos", room check lists compact
 - **Phase 5: Settle in** (business value, templated)
   - Providers by category: electricity, internet, home insurance
   - Each category is one flat single-select list with a last row "Not needed (N/A)". A category is handled when a provider is chosen or N/A is selected; the screen shows "n of 3 handled".
@@ -55,7 +59,7 @@ Business goal: the final phase connects the user to providers they need after mo
   - If is highlighted by a small discount badge (popover: percent, duration and copyable code, all from the API constants) and a quiet "Get a quote" link to `IF_INSURANCE_URL` (hidden when unset).
   - Other providers listed by name only. No prices anywhere.
   - **Sync with the Move checklist** (in guidance, server enforced): saving a provider sets the linked item to `done`, also when it was `na`; clearing it sets the item back to `pending` only if it is `done` (N/A and No stay). Selecting the N/A row, or setting the linked item to `na` from the Move checklist, clears that category's provider selection. Settle in shows the N/A row selected whenever the linked item is `na`. On Settle in the checklist panel hides the "Choose in Settle in" link and keeps the provider name.
-- **Summary**: shows a checklist reminder first. "Still open" lists pending and No items with the same Yes / No / N/A control so the user can answer there. "Handled" (Yes and N/A) is a collapsed group. Print shows every item with its status and no controls.
+- **Summary**: the record of the whole workflow, in this order: Move (address, date, report generated time, link to the full report); Totals (rooms documented = rooms with any photos, before and move-in photos, checks answered, problems found); Problems found grouped by room (source, note, photo count, linking to the room in the report); Room checks (status line per room, with Not checked items listed as a reminder); Move checklist ("Still open" lists pending and No items with the Yes / No / N/A control, "Handled" (Yes and N/A) is a collapsed group, linked items show the chosen provider and the If discount code when If was chosen); the 30-day watch list due date; a closing message ending "Welcome home." Print shows every status and no controls. An outdated report (409 `report_outdated`) asks the user to regenerate it.
 
 ## 4. Stack
 
@@ -128,7 +132,7 @@ movemate/
 - Room check answers show as "Looks fine" (`ok`), "Problem" and "N/A", pending stays unselected; AI checks are short instructions starting with "Look at" or "Look for", never questions or "Check whether". The Move checklist keeps Yes / No / N/A.
 - **findings**: id, move_id, room, room_check_id (nullable; set null when the check is deleted, so a user problem stays as a standalone issue), source (`ai | user`), ai_status (`looks_good | changed | unclear`), ai_summary, confidence (`low | medium | high`), resolution (`pending | ok | issue | custom`), user_note, created_at, updated_at
 - **finding_photos**: finding_id, photo_id (links go when the photo or the finding is deleted; the finding stays when only the photo goes)
-- **reports**: id, move_id, snapshot (jsonb), generated_at
+- **reports**: id, move_id, snapshot (jsonb, versioned: `version` 2 holds `rooms` with photos, checks and problems; older shapes are rejected on read), generated_at
 
 Rooms enum: `kitchen | living_room | bedroom | bathroom | hallway | balcony | other`.
 
@@ -143,9 +147,9 @@ All under `/api`. Success `{ data }`, error `{ error: { code, message } }`.
 - guidance: `GET /guidance/prepare`, `GET /guidance/providers`, `GET /moves/:id/guidance` (every template item with its status, `linkedCategory`, `locked` and `providerName` for linked items), `PATCH /moves/:id/guidance/:itemKey` (body `{ status }`, upsert; 404 unknown move or key, 400 invalid status, 409 for a locked linked item). `PUT /moves/:id/providers/selection/:category` also updates the linked checklist item (sync rule above)
 - photos: `POST /moves/:id/photos` (multipart: file, stage, room; caps per room: 4 `before`, 8 `move_in`, 400 beyond), `GET /moves/:id/photos?stage=`, `PATCH /photos/:id` (relabel), `DELETE /photos/:id`, `GET /photos/:id/file`
 - inspection: `POST /moves/:id/inspection/baseline`, `GET /moves/:id/room-checks`, `POST /moves/:id/room-checks`, `PATCH /room-checks/:id` (body `{ status: "pending" | "ok" | "na" }` or `{ status: "problem", note, photoIds? }`; 400 invalid body or photos, 404 unknown check, 409 below `move_in`; a problem edits its one linked user finding), `DELETE /room-checks/:id`, `POST /moves/:id/inspection/compare`, `GET /moves/:id/findings`, `POST /moves/:id/findings` (body `{ room, note, photoIds? }`, any room), `PATCH /findings/:id`, `DELETE /findings/:id`. `GET /moves/:id/room-checks` returns each check's status and its problem (note and photo urls). `photoIds` must be this move's `move_in` photos of the same room, at most 3, otherwise 400. A finding linked to a check cannot be resolved or deleted directly (409): change the check's answer instead
-- report: `POST /moves/:id/reports`, `GET /reports/:id`, `GET /moves/:id/summary` (also returns the live checklist split into open and handled)
+- report: `POST /moves/:id/reports` (409 only for pending findings or no move-in photos), `GET /reports/:id`, `GET /moves/:id/reports/latest`, `GET /moves/:id/summary` (totals, problems, room checks, and the live checklist split into open and handled). The three GETs return 409 `report_outdated` for a report saved by an older snapshot version
 
-Status codes: 400 validation, 404 missing, 409 invalid phase transition, 413 upload too large, 502 AI failure, 500 unexpected. Never return stack traces or upstream payloads.
+Status codes: 400 validation, 404 missing, 409 invalid phase transition or `report_outdated`, 413 upload too large, 502 AI failure, 500 unexpected. Never return stack traces or upstream payloads.
 
 ## 8. AI
 

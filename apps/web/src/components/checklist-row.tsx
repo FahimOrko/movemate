@@ -18,11 +18,13 @@ type ChecklistRowProps = {
   /** Linked item before Settle in: answers are disabled. */
   locked?: boolean;
   providerName?: string | null;
+  /** Discount code of the chosen provider, shown beside its name. */
+  discountCode?: string;
   /** Starts with the description open. */
   defaultExpanded?: boolean;
 };
 
-export function ChecklistRow({ title, description, status, onStatusChange, disabled, linked, locked, providerName, defaultExpanded = false }: ChecklistRowProps) {
+export function ChecklistRow({ title, description, status, onStatusChange, disabled, linked, locked, providerName, discountCode, defaultExpanded = false }: ChecklistRowProps) {
   const descriptionId = useId();
   const [expanded, setExpanded] = useState(defaultExpanded);
   const onSettleIn = useLocation().pathname === settleInPath;
@@ -55,6 +57,7 @@ export function ChecklistRow({ title, description, status, onStatusChange, disab
       {linked && !locked && (providerName || !onSettleIn) && (
         <p className="mt-1 text-sm text-muted-foreground">
           {providerName && <span className="mr-2 font-medium text-foreground">{providerName}</span>}
+          {providerName && discountCode && <span className="mr-2">Discount code {discountCode}</span>}
           {!onSettleIn && (
             <Link to={settleInPath} className="rounded-sm underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40">
               Choose in Settle in

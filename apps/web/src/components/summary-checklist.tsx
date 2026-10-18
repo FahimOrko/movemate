@@ -1,13 +1,15 @@
-import type { ChecklistStatus, GuidanceProgress, ReportSummary } from '@movemate/contracts';
+import type { ChecklistStatus, GuidanceProgress, ProviderCategory, ReportSummary } from '@movemate/contracts';
 import { ChecklistRow } from '@/components/checklist-row';
 import { checklistStatusLabels } from '@/lib/checklist-status';
 
 type SummaryChecklistProps = {
   checklist: ReportSummary['checklist'];
   onStatusChange: (itemKey: string, status: ChecklistStatus) => void;
+  /** Discount code of the chosen provider per category (only If has one). */
+  discountCodes: Partial<Record<ProviderCategory, string>>;
 };
 
-function Rows({ entries, onStatusChange }: { entries: GuidanceProgress[]; onStatusChange: SummaryChecklistProps['onStatusChange'] }) {
+function Rows({ entries, onStatusChange, discountCodes }: Pick<SummaryChecklistProps, 'onStatusChange' | 'discountCodes'> & { entries: GuidanceProgress[] }) {
   return (
     <div className="divide-y">
       {entries.map((entry) => (
@@ -19,6 +21,7 @@ function Rows({ entries, onStatusChange }: { entries: GuidanceProgress[]; onStat
           linked={entry.linkedCategory !== undefined}
           locked={entry.locked}
           providerName={entry.providerName}
+          discountCode={entry.linkedCategory ? discountCodes[entry.linkedCategory] : undefined}
           onStatusChange={(status) => onStatusChange(entry.key, status)}
         />
       ))}
@@ -26,25 +29,26 @@ function Rows({ entries, onStatusChange }: { entries: GuidanceProgress[]; onStat
   );
 }
 
-export function SummaryChecklist({ checklist, onStatusChange }: SummaryChecklistProps) {
+export function SummaryChecklist({ checklist, onStatusChange, discountCodes }: SummaryChecklistProps) {
   const all = [...checklist.open, ...checklist.handled];
   return (
     <section aria-labelledby="checklist-summary-title" className="flex flex-col gap-3">
       <div className="flex flex-col gap-3 print:hidden">
         <h2 id="checklist-summary-title" className="text-heading">
-          Still open
+          Move checklist
         </h2>
+        <h3 className="font-medium">Still open</h3>
         {checklist.open.length === 0 ? (
           <p className="text-muted-foreground">Everything on your move checklist is handled.</p>
         ) : (
-          <Rows entries={checklist.open} onStatusChange={onStatusChange} />
+          <Rows entries={checklist.open} onStatusChange={onStatusChange} discountCodes={discountCodes} />
         )}
         {checklist.handled.length > 0 && (
           <details className="group">
             <summary className="w-fit cursor-pointer rounded-md text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/40">
               Handled ({checklist.handled.length})
             </summary>
-            <Rows entries={checklist.handled} onStatusChange={onStatusChange} />
+            <Rows entries={checklist.handled} onStatusChange={onStatusChange} discountCodes={discountCodes} />
           </details>
         )}
       </div>
@@ -52,8 +56,17 @@ export function SummaryChecklist({ checklist, onStatusChange }: SummaryChecklist
         <h2 className="text-heading">Move checklist</h2>
         <ul className="mt-2 divide-y">
           {all.map((entry) => (
-            <li key={entry.key} className="flex justify-between gap-4 py-2 text-sm">
-              <span>{entry.title}</span>
+            <li key={entry.key} className="flex justify-between gap-4 py-2 text-sm break-inside-avoid">
+              <span>
+                {entry.title}
+                {entry.providerName && (
+                  <span className="text-muted-foreground">
+                    {' '}
+                    ({entry.providerName}
+                    {entry.linkedCategory && discountCodes[entry.linkedCategory] && `, discount code ${discountCodes[entry.linkedCategory]}`})
+                  </span>
+                )}
+              </span>
               <span>{checklistStatusLabels[entry.status]}</span>
             </li>
           ))}

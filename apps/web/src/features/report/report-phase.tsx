@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { ApiError } from '@/lib/api';
 import { useAdvanceMove } from '@/features/prepare/use-move';
 import { useGenerateReport, useLatestReport } from './use-report';
 
@@ -17,7 +18,8 @@ export function ReportPhase({ move }: { move: Move }) {
   const advance = useAdvanceMove();
   const actionError = generate.error ?? advance.error;
 
-  if (latest.isError) {
+  const outdated = latest.error instanceof ApiError && latest.error.code === 'report_outdated';
+  if (latest.isError && !outdated) {
     return (
       <Alert variant="destructive">
         <CircleAlertIcon />
@@ -36,6 +38,8 @@ export function ReportPhase({ move }: { move: Move }) {
   }
 
   const report = latest.data;
+  const emptyTitle = outdated ? 'This report is from an older version' : 'No report yet';
+  const emptyDescription = outdated ? 'Regenerate this report to see it with the full record of your move.' : 'Answer every finding on the move-in step, then generate your report.';
   const generateButton = (label: string, variant: 'default' | 'secondary') => (
     <Button variant={variant} disabled={generate.isPending} onClick={() => generate.mutate()}>
       {generate.isPending ? <Spinner data-icon="inline-start" /> : <RefreshCwIcon data-icon="inline-start" />}
@@ -81,10 +85,10 @@ export function ReportPhase({ move }: { move: Move }) {
             <EmptyMedia variant="icon">
               <FileTextIcon />
             </EmptyMedia>
-            <EmptyTitle>No report yet</EmptyTitle>
-            <EmptyDescription>Answer every finding on the move-in step, then generate your report.</EmptyDescription>
+            <EmptyTitle>{emptyTitle}</EmptyTitle>
+            <EmptyDescription>{emptyDescription}</EmptyDescription>
           </EmptyHeader>
-          {generateButton('Generate report', 'default')}
+          {generateButton(outdated ? 'Regenerate this report' : 'Generate report', 'default')}
         </Empty>
       )}
     </section>

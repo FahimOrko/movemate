@@ -1,4 +1,4 @@
-import type { Report, ReportSummary } from '@movemate/contracts';
+import { reportSnapshotSchema, type Report, type ReportSummary } from '@movemate/contracts';
 import { AppError } from '../../shared/errors';
 import * as guidanceService from '../guidance/guidance.service';
 import * as inspectionService from '../inspection/inspection.service';
@@ -8,22 +8,26 @@ import { buildSnapshot } from './report.snapshot';
 import { buildSummary } from './report.summary';
 import * as repository from './report.repository';
 
+// Reports saved by an older snapshot version are not migrated; the user regenerates them.
 function toReport(row: repository.ReportRow): Report {
-  return { id: row.id, moveId: row.moveId, createdAt: row.createdAt.toISOString(), snapshot: row.snapshot };
+  const snapshot = reportSnapshotSchema.safeParse(row.snapshot);
+  if (!snapshot.success) throw new AppError('report_outdated', 'Regenerate this report');
+  return { id: row.id, moveId: row.moveId, createdAt: row.createdAt.toISOString(), snapshot: snapshot.data };
 }
 
 export async function generate(moveId: string): Promise<Report> {
   await moveService.assertPhaseReached(moveId, 'move_in');
-  const [move, findings, moveInPhotos] = await Promise.all([
+  const [move, findings, checks, photos] = await Promise.all([
     moveService.getById(moveId),
     inspectionService.listFindings(moveId),
-    photosService.listByStage(moveId, 'move_in'),
+    inspectionService.listChecks(moveId),
+    photosService.listByStage(moveId),
   ]);
-  if (moveInPhotos.length === 0) throw new AppError('invalid_phase_transition', 'Add move-in photos first');
+  if (!photos.some((photo) => photo.stage === 'move_in')) throw new AppError('invalid_phase_transition', 'Add move-in photos first');
   if (findings.some((finding) => finding.resolution === 'pending')) {
     throw new AppError('invalid_phase_transition', 'Answer every finding before generating the report');
   }
-  const row = await repository.insertReport(moveId, buildSnapshot(move, findings, new Date()));
+  const row = await repository.insertReport(moveId, buildSnapshot(move, photos, checks, findings, new Date()));
   await moveService.applyEvent(moveId, 'ReportGenerated');
   return toReport(row);
 }

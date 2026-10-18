@@ -2,6 +2,7 @@ const statusByCode = {
   validation_error: 400,
   not_found: 404,
   invalid_phase_transition: 409,
+  report_outdated: 409,
   payload_too_large: 413,
   ai_failure: 502,
   ai_not_configured: 503,

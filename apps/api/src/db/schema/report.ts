@@ -1,5 +1,4 @@
 import { jsonb, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
-import type { ReportSnapshot } from '@movemate/contracts';
 import { moves } from './move';
 
 export const reports = pgTable('reports', {
@@ -7,6 +6,6 @@ export const reports = pgTable('reports', {
   moveId: uuid('move_id')
     .notNull()
     .references(() => moves.id, { onDelete: 'cascade' }),
-  snapshot: jsonb().$type<ReportSnapshot>().notNull(),
+  snapshot: jsonb().$type<unknown>().notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

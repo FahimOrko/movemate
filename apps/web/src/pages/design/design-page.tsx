@@ -1,4 +1,4 @@
-import { MAX_PHOTOS_PER_ROOM, type ChecklistStatus, type Finding, type GuidanceProgress, type Photo, type Report, type Room, type RoomCheck } from '@movemate/contracts';
+import { MAX_PHOTOS_PER_ROOM, type ChecklistStatus, type Finding, type GuidanceProgress, type Photo, type Room, type RoomCheck } from '@movemate/contracts';
 import { CircleAlertIcon, FileTextIcon, HouseIcon, InfoIcon, PrinterIcon, RefreshCwIcon, ScanSearchIcon, SparklesIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -16,8 +16,6 @@ import { StatusControl } from '@/components/status-control';
 import { CreateMoveFields } from '@/components/create-move-fields';
 import { PhotoGrid } from '@/components/photo-grid';
 import { PhotoUploader } from '@/components/photo-uploader';
-import { ReportIssue } from '@/components/report-issue';
-import { ReportView } from '@/components/report-view';
 import { RoomCard } from '@/components/room-card';
 import { RoomCheckList } from '@/components/room-check-list';
 import { RoomChecksSection } from '@/components/room-checks-section';
@@ -29,7 +27,6 @@ import { InsuranceExplainer } from '@/components/insurance-explainer';
 import { ProviderCategoryList } from '@/components/provider-category-list';
 import { PARTNER_TAG } from '@/features/settle-in/partner-tag';
 import { SettleInProgress } from '@/components/settle-in-progress';
-import { SummaryView } from '@/components/summary-view';
 import { TipCard } from '@/components/tip-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +49,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { DesignSection } from './design-section';
 import { MoveInDesignSections } from './move-in-design-sections';
+import { ReportDesignSections, SummaryDesignSections } from './report-design-sections';
 import { RoomDialogDemo } from './room-dialog-demo';
 
 // Class names are written out in full so Tailwind can find them.
@@ -248,55 +246,6 @@ const buttonSizes = ['sm', 'default', 'lg', 'xl'] as const;
 const badgeVariants = ['default', 'secondary', 'outline'] as const;
 const statusBadgeVariants = ['success', 'warning', 'destructive'] as const;
 
-const sampleReport: Report = {
-  id: '00000000-0000-4000-8000-000000000400',
-  moveId: '00000000-0000-4000-8000-000000000099',
-  createdAt: '2026-10-12T15:00:00.000Z',
-  snapshot: {
-    move: { address: 'Aurakatu 12, Turku', moveDate: '2026-10-12' },
-    generatedAt: '2026-10-12T15:00:00.000Z',
-    issues: [
-      {
-        findingId: '00000000-0000-4000-8000-000000000301',
-        room: 'kitchen',
-        kind: 'issue',
-        text: 'A dark mark may be visible on the ceiling above the window in the move-in photos.',
-        note: 'Visible in person, near the light switch.',
-        beforePhotos: samplePhotos.slice(0, 1),
-        moveInPhotos: sampleMoveInPhotos,
-      },
-      {
-        findingId: '00000000-0000-4000-8000-000000000303',
-        room: 'bedroom',
-        kind: 'custom',
-        text: 'The window handle is loose.',
-        note: null,
-        beforePhotos: [],
-        moveInPhotos: [],
-      },
-    ],
-    findingsByRoom: [
-      {
-        room: 'kitchen',
-        findings: [
-          { findingId: '00000000-0000-4000-8000-000000000301', aiStatus: 'changed', resolution: 'issue', text: 'A dark mark may be visible on the ceiling.', note: null },
-          { findingId: '00000000-0000-4000-8000-000000000302', aiStatus: 'looks_good', resolution: 'ok', text: 'The countertop edge looks similar in both sets of photos.', note: null },
-        ],
-      },
-    ],
-    watchList: [
-      { title: 'Unclear in the photos', detail: 'The wall left of the door may have a mark.', dueDate: '2026-11-11' },
-      { title: 'Heating', detail: 'Check that every radiator warms up and the thermostat responds.', dueDate: '2026-11-11' },
-    ],
-    disclaimer: 'This report documents what the tenant recorded and confirmed. It is not a legal or insurance determination.',
-  },
-};
-
-const zeroIssueReport: Report = {
-  ...sampleReport,
-  snapshot: { ...sampleReport.snapshot, issues: [], findingsByRoom: [], watchList: sampleReport.snapshot.watchList.slice(1) },
-};
-
 const designDiscount = { percent: 10, durationMonths: 12, code: 'MOVEMATE10' };
 const electricityOptions = [
   { key: 'a', name: 'Electricity Provider A' },
@@ -355,17 +304,6 @@ const stepperExamples: { caption: string; active: 'prepare' | 'before_photos' | 
     steps: { prepare: { state: 'attention', label: '3 items still open' }, before_photos: { state: 'complete' }, move_in: { state: 'upcoming' }, report: { state: 'locked' }, settle_in: { state: 'locked' }, summary: { state: 'locked' } },
   },
 ];
-
-const designSummary = {
-  reportId: '00000000-0000-4000-8000-000000000000',
-  address: 'Aurakatu 12, Turku',
-  moveDate: '2026-11-01',
-  generatedAt: '2026-11-01T10:00:00.000Z',
-  roomsDocumented: 4,
-  counts: { ok: 9, issues: 2, custom: 1 },
-  watchListDueDate: '2026-12-01',
-  checklist: { open: designChecklist.filter((entry) => entry.status === 'pending' || entry.status === 'no'), handled: designChecklist.filter((entry) => entry.status === 'done' || entry.status === 'na') },
-};
 
 export function DesignPage() {
   const [startOverState, setStartOverState] = useState<'default' | 'loading' | 'error' | null>(null);
@@ -668,12 +606,7 @@ export function DesignPage() {
         </div>
       </DesignSection>
 
-      <DesignSection id="summary" title="Summary" description="The ending screen. Print hides the stepper and buttons. Shown with and without chosen providers, and with open and handled move checklist groups.">
-        <div className="flex flex-col gap-10">
-          <SummaryView summary={designSummary} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[{ category: 'internet', name: 'Internet Provider B', discount: null }, { category: 'home_insurance', name: 'If', discount: designDiscount }]} />
-          <SummaryView summary={{ ...designSummary, moveDate: null, watchListDueDate: null, checklist: { open: [], handled: allHandled } }} onChecklistStatusChange={noop} reportHref="/design#summary" chosen={[]} />
-        </div>
-      </DesignSection>
+      <SummaryDesignSections checklist={designChecklist} />
 
       <DesignSection id="room-select" title="Room select" description="Default, disabled. Opens with Enter or Space.">
         <div className="grid max-w-md grid-cols-2 gap-4">
@@ -826,16 +759,8 @@ export function DesignPage() {
       <DesignSection
         id="report"
         title="Report"
-        description="The ReportIssue block, then the full report as it prints, with issues and with none. Photo captions say when each photo was uploaded. The buttons are the ones on the Move-in and Report steps."
+        description="The report buttons on the Move-in and Report steps. The report blocks follow below."
       >
-        <Card>
-          <CardContent>
-            <ul className="divide-y">
-              <ReportIssue issue={sampleReport.snapshot.issues[0] as (typeof sampleReport.snapshot.issues)[number]} />
-              <ReportIssue issue={sampleReport.snapshot.issues[1] as (typeof sampleReport.snapshot.issues)[number]} />
-            </ul>
-          </CardContent>
-        </Card>
         <div className="flex flex-wrap items-center gap-3">
           <Button size="lg">
             <FileTextIcon data-icon="inline-start" />
@@ -866,17 +791,9 @@ export function DesignPage() {
           </Button>
         </div>
         <AiErrorAlert title="Could not generate the report" message="Answer every finding before generating the report" />
-        <Card>
-          <CardContent>
-            <ReportView report={sampleReport} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <ReportView report={zeroIssueReport} />
-          </CardContent>
-        </Card>
       </DesignSection>
+
+      <ReportDesignSections />
 
       <DesignSection id="move-form" title="Create-move fields" description="Address and optional move date.">
         <div className="grid gap-8 sm:grid-cols-3">

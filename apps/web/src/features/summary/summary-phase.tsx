@@ -1,11 +1,13 @@
-import { providerCategories, type Move } from '@movemate/contracts';
+import { providerCategories, type Move, type ProviderCategory } from '@movemate/contracts';
 import { CircleAlertIcon, PrinterIcon } from 'lucide-react';
-import { SummaryView, type ChosenProvider } from '@/components/summary-view';
+import { Link } from 'react-router';
+import { SummaryView } from '@/components/summary-view';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSetChecklistStatus } from '@/features/checklist/use-checklist';
 import { useProviderSelection, useSettleInGuidance } from '@/features/settle-in/use-settle-in';
+import { ApiError } from '@/lib/api';
 import { useSummary } from './use-summary';
 
 export function SummaryPhase({ move }: { move: Move }) {
@@ -14,6 +16,20 @@ export function SummaryPhase({ move }: { move: Move }) {
   const guidance = useSettleInGuidance();
   const setStatus = useSetChecklistStatus(move.id);
 
+  if (summary.error instanceof ApiError && summary.error.code === 'report_outdated') {
+    return (
+      <Alert>
+        <CircleAlertIcon />
+        <AlertTitle>Your report needs to be regenerated</AlertTitle>
+        <AlertDescription>
+          The summary is built from the report.{' '}
+          <Link to="/move/report" className="underline underline-offset-4">
+            Open the report and regenerate it.
+          </Link>
+        </AlertDescription>
+      </Alert>
+    );
+  }
   if (summary.isError || selection.isError || guidance.isError) {
     return (
       <Alert variant="destructive">
@@ -32,16 +48,17 @@ export function SummaryPhase({ move }: { move: Move }) {
     );
   }
 
-  const chosen = providerCategories.flatMap((category): ChosenProvider[] => {
+  const discountCodes: Partial<Record<ProviderCategory, string>> = {};
+  for (const category of providerCategories) {
     const provider = guidance.data.providers.find((candidate) => candidate.key === selection.data[category]);
-    return provider ? [{ category, name: provider.name, discount: provider.discount }] : [];
-  });
+    if (provider?.discount) discountCodes[category] = provider.discount.code;
+  }
 
   return (
     <section className="flex flex-col gap-8">
       <SummaryView
         summary={summary.data}
-        chosen={chosen}
+        discountCodes={discountCodes}
         reportHref="/move/report"
         onChecklistStatusChange={(itemKey, status) => setStatus.mutate({ itemKey, status })}
       />
