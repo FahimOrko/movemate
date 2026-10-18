@@ -1,12 +1,16 @@
 import { reportTotals, type GuidanceProgress, type Photo, type Report, type ReportProblem as ReportProblemData, type ReportRoom, type ReportSummary, type Room } from '@movemate/contracts';
 import { FileTextIcon } from 'lucide-react';
 import { ReportProblem } from '@/components/report-problem';
+import { ReportChecksAppendix } from '@/components/report-checks-appendix';
+import { ReportPhotoAppendix } from '@/components/report-photo-appendix';
+import { ReportProblemsTable } from '@/components/report-problems-table';
 import { ReportRoomSection } from '@/components/report-room-section';
 import { ReportView } from '@/components/report-view';
 import { SummaryChecklist } from '@/components/summary-checklist';
 import { SummaryProblems } from '@/components/summary-problems';
 import { SummaryRoomChecks } from '@/components/summary-room-checks';
-import { SummaryStrip } from '@/components/summary-strip';
+import { StatCard } from '@/components/stat-card';
+import { SummaryActions } from '@/components/summary-actions';
 import { SummaryView } from '@/components/summary-view';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -131,31 +135,33 @@ export function ReportDesignSections() {
   const totals = reportTotals(baseReport.snapshot);
   return (
     <>
-      <DesignSection id="report-strip" title="Summary strip" description="Four stats under the report header, and five on the Summary. A calm surface on screen; print drops the border and keeps the grid.">
-        <SummaryStrip
-          label="Report totals"
-          stats={[
-            { label: 'Rooms', value: totals.roomsDocumented },
-            { label: 'Photos', value: totals.beforePhotos + totals.moveInPhotos },
-            { label: 'Problems', value: totals.problems },
-            { label: 'Checks answered', value: `${totals.checksAnswered} of ${totals.checksTotal}` },
-          ]}
-        />
-        <SummaryStrip
-          label="Report totals, empty"
-          stats={[
-            { label: 'Rooms', value: 0 },
-            { label: 'Photos', value: 0 },
-            { label: 'Problems', value: 0 },
-            { label: 'Checks answered', value: '0 of 0' },
-          ]}
-        />
+      <DesignSection id="report-strip" title="Stat cards" description="One figure and its label. Three on the report (rooms, photos, problems), four on the Summary (plus checks answered). Print keeps the grid and tightens the padding.">
+        <dl aria-label="Report totals" className="grid grid-cols-3 gap-3">
+          <StatCard label="Rooms" value={totals.roomsDocumented} />
+          <StatCard label="Photos" value={totals.beforePhotos + totals.moveInPhotos} />
+          <StatCard label="Problems" value={totals.problems} />
+        </dl>
+        <dl aria-label="Summary totals" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label="Rooms" value={0} />
+          <StatCard label="Photos" value={0} />
+          <StatCard label="Problems" value={0} />
+          <StatCard label="Checks answered" value="0 of 0" />
+        </dl>
+      </DesignSection>
+
+      <DesignSection id="report-table" title="Problems table" description="First in the report: room, short description and photo count. Empty state below.">
+        <Card>
+          <CardContent className="flex flex-col gap-6">
+            <ReportProblemsTable rooms={baseReport.snapshot.rooms} />
+            <ReportProblemsTable rooms={[hallway]} />
+          </CardContent>
+        </Card>
       </DesignSection>
 
       <DesignSection
         id="report-problems"
-        title="Report problems by source"
-        description="Each problem names its source: Room check, AI finding or Added by you. An AI finding the renter answered in their own words also says Your own answer. Photos can be enlarged. Print shows at most 3 photos per stage and a +N more photos line; the last problem has 5 photos."
+        title="Report problem block"
+        description="A plain description, a small source label (Tenant note, or Photo comparison, confirmed by tenant) and the photos in a grid labeled Before (listing) and Move-in. A room check problem leads with the tenant note and shows the checked item as small text. Print shows at most 3 photos per stage and a +N more photos line; the last problem has 5 photos."
       >
         <Card>
           <CardContent>
@@ -171,18 +177,26 @@ export function ReportDesignSections() {
       <DesignSection
         id="report-room"
         title="Report room section"
-        description="One per room: photo counts, before photos then move-in photos with upload times, the check status line, problems, and the room checks in a collapsed group (printed as a compact list). Shown with everything, with no before photos, and with no problems."
+        description="One per room that has problems: the room name, a No before photos, not compared note when it applies, then its problem blocks. Rooms without problems appear only in the appendices."
       >
         <Card>
           <CardContent className="flex flex-col gap-8">
             <ReportRoomSection room={kitchen} />
-            <ReportRoomSection room={bathroomNoBefore} />
-            <ReportRoomSection room={hallway} />
+            <ReportRoomSection room={{ ...kitchen, beforePhotos: [], problems: [userProblem] }} />
           </CardContent>
         </Card>
       </DesignSection>
 
-      <DesignSection id="report-full" title="Full report" description="The report as it prints, with problems and with none. Saved reports from an older version show the last state and ask for a regenerate.">
+      <DesignSection id="report-appendices" title="Report appendices" description="All photos per room with labels and upload times, and a Check / Answer table per room. Print shows every photo here.">
+        <Card>
+          <CardContent className="flex flex-col gap-8">
+            <ReportPhotoAppendix rooms={baseReport.snapshot.rooms} />
+            <ReportChecksAppendix rooms={baseReport.snapshot.rooms} />
+          </CardContent>
+        </Card>
+      </DesignSection>
+
+      <DesignSection id="report-full" title="Full report" description="The landlord-facing report as it prints, with problems and with none. Saved reports from an older version show the last state and ask for a regenerate.">
         <Card>
           <CardContent>
             <ReportView report={baseReport} />
@@ -245,10 +259,10 @@ export function SummaryDesignSections({ checklist }: { checklist: GuidanceProgre
   const discountCodes = { home_insurance: 'MOVEMATE10' };
   return (
     <>
-      <DesignSection id="summary-problems" title="Summary problems and room checks" description="Problems found, grouped by room with source, note and photo count; each room links to its place in the report. Room checks show a status line per room and list what was Not checked as a reminder. Empty states below.">
-        <SummaryProblems problems={summaryBase.problems} reportHref="/design#report-room" />
+      <DesignSection id="summary-problems" title="Summary problems and room checks" description="Problems found, grouped by room with thumbnail, short text and photo count; each room links to its place in the report. Room checks show a status line and a progress bar per room and list what was Not checked as a reminder. Empty states below.">
+        <SummaryProblems problems={summaryBase.problems} thumbnails={[photo(60, 'move_in', 'kitchen'), undefined, photo(61, 'move_in', 'kitchen'), undefined]} reportHref="/design#report-room" />
         <SummaryRoomChecks rooms={summaryBase.rooms} />
-        <SummaryProblems problems={[]} reportHref="/design#report-room" />
+        <SummaryProblems problems={[]} thumbnails={[]} reportHref="/design#report-room" />
         <SummaryRoomChecks rooms={[]} />
       </DesignSection>
 
@@ -257,7 +271,11 @@ export function SummaryDesignSections({ checklist }: { checklist: GuidanceProgre
         <SummaryChecklist checklist={{ open: [], handled: withProvider.filter((entry) => entry.status === 'done') }} onStatusChange={noop} discountCodes={{}} />
       </DesignSection>
 
-      <DesignSection id="summary" title="Summary" description="The record of the whole move: move info, totals, problems, room checks, checklist, watch list and the closing line. Print hides the stepper, links and buttons and shows every status. Shown with problems and open items, then with nothing to report.">
+      <DesignSection id="summary-actions" title="Summary actions" description="Sticky in the right column on desktop, first on mobile. Download report (PDF) opens the report and its print dialog; Download summary (PDF) prints the Summary. Never printed.">
+        <SummaryActions reportPrintHref="/design#report-full" />
+      </DesignSection>
+
+      <DesignSection id="summary" title="Summary" description="The record of the whole move: move info, stat cards, problems, room checks, checklist, watch list and the closing line. Print hides the stepper, links and buttons and shows every status. Shown with problems and open items, then with nothing to report.">
         <div className="flex flex-col gap-10">
           <SummaryView summary={summary} discountCodes={discountCodes} reportHref="/design#report-full" onChecklistStatusChange={noop} />
           <SummaryView

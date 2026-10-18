@@ -125,4 +125,10 @@
     size: A4;
     margin: 15mm;
   }
+  html {
+    font-size: 13px;
+  }
+  body {
+    background: none;
+  }
 }

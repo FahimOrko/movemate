@@ -60,6 +60,7 @@ describe('runCompare photo index mapping', () => {
 
     expect(ai.mock.calls[0]?.[0].text).toContain('Images 1 to 2 are BEFORE photos. Images 3 to 4 are MOVE-IN photos.');
     expect(ai.mock.calls[0]?.[0].images).toHaveLength(4);
+    expect(ai.mock.calls[0]?.[0].system).toContain('Never refer to photo or image numbers in a summary');
     expect(result.findings).toHaveLength(1);
     expect(result.findings[0]?.beforePhotos.map((p) => p.id)).toEqual([before[0]?.id]);
     expect(result.findings[0]?.moveInPhotos.map((p) => p.id)).toEqual([moveIn[1]?.id]);

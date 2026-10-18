@@ -1,17 +1,18 @@
 import { providerCategories, type Move, type ProviderCategory } from '@movemate/contracts';
-import { CircleAlertIcon, PrinterIcon } from 'lucide-react';
+import { CircleAlertIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { SummaryView } from '@/components/summary-view';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSetChecklistStatus } from '@/features/checklist/use-checklist';
+import { useLatestReport } from '@/features/report/use-report';
 import { useProviderSelection, useSettleInGuidance } from '@/features/settle-in/use-settle-in';
 import { ApiError } from '@/lib/api';
 import { useSummary } from './use-summary';
 
 export function SummaryPhase({ move }: { move: Move }) {
   const summary = useSummary(move.id);
+  const report = useLatestReport(move.id);
   const selection = useProviderSelection(move.id);
   const guidance = useSettleInGuidance();
   const setStatus = useSetChecklistStatus(move.id);
@@ -55,19 +56,12 @@ export function SummaryPhase({ move }: { move: Move }) {
   }
 
   return (
-    <section className="flex flex-col gap-8">
-      <SummaryView
-        summary={summary.data}
-        discountCodes={discountCodes}
-        reportHref="/move/report"
-        onChecklistStatusChange={(itemKey, status) => setStatus.mutate({ itemKey, status })}
-      />
-      <div className="print:hidden">
-        <Button onClick={() => window.print()}>
-          <PrinterIcon data-icon="inline-start" />
-          Print / Save as PDF
-        </Button>
-      </div>
-    </section>
+    <SummaryView
+      summary={summary.data}
+      report={report.data ?? undefined}
+      discountCodes={discountCodes}
+      reportHref="/move/report"
+      onChecklistStatusChange={(itemKey, status) => setStatus.mutate({ itemKey, status })}
+    />
   );
 }

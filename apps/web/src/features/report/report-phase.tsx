@@ -1,6 +1,7 @@
 import type { Move } from '@movemate/contracts';
 import { ArrowRightIcon, CircleAlertIcon, FileTextIcon, PrinterIcon, RefreshCwIcon } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { ReportView } from '@/components/report-view';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,20 @@ import { useGenerateReport, useLatestReport } from './use-report';
 
 export function ReportPhase({ move }: { move: Move }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const printRequested = searchParams.get('print') === '1';
+  const printed = useRef(false);
   const latest = useLatestReport(move.id);
   const generate = useGenerateReport(move.id);
   const advance = useAdvanceMove();
+  const reportLoaded = Boolean(latest.data);
+  useEffect(() => {
+    if (!printRequested || !reportLoaded || printed.current) return;
+    printed.current = true;
+    setSearchParams({}, { replace: true });
+    // Wait a frame so the report is painted before the dialog snapshots it.
+    requestAnimationFrame(() => window.print());
+  }, [printRequested, reportLoaded, setSearchParams]);
   const actionError = generate.error ?? advance.error;
 
   const outdated = latest.error instanceof ApiError && latest.error.code === 'report_outdated';

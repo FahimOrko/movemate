@@ -1,5 +1,6 @@
 import { countOpenPrepare, phaseOrder, phaseSchema, type Move } from '@movemate/contracts';
 import { Navigate, useOutletContext, useParams } from 'react-router';
+import { SummaryActions } from '@/components/summary-actions';
 import { Stepper } from '@/components/stepper';
 import { useRoomChecks } from '@/features/before-photos/use-room-checks';
 import { countOpenMoveIn } from '@/features/move-in/open-items';
@@ -48,7 +49,7 @@ export function MovePhasePage() {
           )}
         </div>
         <div className="order-first shrink-0 print:hidden lg:order-last">
-          <ChecklistSidebar move={move} phase={phase} />
+          {phase === 'summary' ? <SummaryActions reportPrintHref="/move/report?print=1" /> : <ChecklistSidebar move={move} phase={phase} />}
         </div>
       </div>
     </div>
