@@ -1,6 +1,7 @@
 {
   "name": "movemate",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@12.10.1",
   "engines": {

@@ -1,6 +1,7 @@
 {
   "name": "@movemate/contracts",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

@@ -209,4 +209,6 @@ docs/            SPEC.md and PLAN.md
 
 ## License
 
-License to be decided. No license is granted until one is added.
+MIT, see [LICENSE](LICENSE).
+
+Demo photos in demo-assets and apps/web/public/demo are stock images and are not covered by this license.

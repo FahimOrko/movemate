@@ -1,6 +1,7 @@
 {
   "name": "@movemate/api",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env src/server.ts",
