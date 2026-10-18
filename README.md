@@ -2,6 +2,12 @@
 
 MoveMate helps renters prove what condition a home was in when they moved in. You photograph each room, an AI model compares those photos with the listing photos, you confirm every result, and MoveMate produces a dated report you can hand to your landlord.
 
+<a href="https://www.youtube.com/watch?v=gIWQTVlLvH4"><img src="docs/movemate-thumbnail.png" alt="MoveMate pitch video" width="720"></a>
+
+<!-- TODO: add walkthrough video link -->
+
+---
+
 ## What MoveMate is
 
 **The problem.** Renters often cannot show what an apartment looked like on day one. When they move out, they risk being blamed, and losing part of the deposit, for damage that was already there.
@@ -19,9 +25,43 @@ MoveMate helps renters prove what condition a home was in when they moved in. Yo
 
 This is a hackathon project. It runs on localhost, for one user, with no login and no deployment.
 
+---
+
 ## Screenshots
 
-Screenshots are not added yet. See [docs/screenshots/README.md](docs/screenshots/README.md) for the list of shots to capture.
+<img src="docs/screenshots/w01-listing.png" alt="Mock rental listing used as the before photos" width="800">
+
+_The demo listing. Its photos are the "before" state._
+
+<img src="docs/screenshots/w05c-before-room-checks.png" alt="AI room checks suggested from the before photos" width="800">
+
+_AI room checks, suggested from the before photos._
+
+<img src="docs/screenshots/w08b-findings.png" alt="AI findings from comparing before and move-in photos" width="800">
+
+_AI findings from comparing before and move-in photos._
+
+<img src="docs/screenshots/w08c-findings-marked.png" alt="Renter confirming each finding" width="800">
+
+_The renter confirms each finding. Nothing enters the report before that._
+
+<img src="docs/screenshots/w09a-report-screen.png" alt="The generated report" width="800">
+
+_The report: problems found, per room._
+
+<img src="docs/screenshots/w09c-report-photos.png" alt="Report with before and move-in photos" width="800">
+
+_Before and move-in photos side by side._
+
+<img src="docs/screenshots/w10b-settle-chosen.png" alt="Settle in with If featured" width="800">
+
+_Settle in. The 10% discount and the code MOVEMATE10 are demo content, the offer we propose to If, not a live deal._
+
+<img src="docs/screenshots/w11-summary.png" alt="Summary of the move" width="800">
+
+_The summary: problems, room checks, checklist and the 30-day watch list._
+
+---
 
 ## How it works
 
@@ -51,13 +91,15 @@ A side panel in every phase (a drawer on small screens). The electricity, intern
 
 Problems reach the report from three places and appear as one list per room, each with a small source label:
 
-| Source | Label in the report |
-| --- | --- |
-| A room check you answered **Problem** | Tenant note |
-| A problem you added yourself | Tenant note |
+| Source                                  | Label in the report                   |
+| --------------------------------------- | ------------------------------------- |
+| A room check you answered **Problem**   | Tenant note                           |
+| A problem you added yourself            | Tenant note                           |
 | An AI finding you confirmed as an issue | Photo comparison, confirmed by tenant |
 
 Findings you mark OK, and "looks good" results, are not problems.
+
+---
 
 ## AI
 
@@ -69,6 +111,8 @@ Findings you mark OK, and "looks good" results, are not problems.
 - **Privacy.** Photos are sent to OpenRouter only when you run an analysis or comparison. The app logs the model id and duration, never image data or keys.
 
 **Important.** The report is tenant-recorded evidence. It is not a legal, deposit or insurance determination. The If discount (10 percent for 12 months, code `MOVEMATE10`) and the partner tag are demo content for the pitch. They are not a real offer.
+
+---
 
 ## Quick start with Docker
 
@@ -91,6 +135,8 @@ Open <http://localhost:5173>.
 - **Wipe everything.** `docker compose down -v` deletes the database and all uploaded photos.
 - **Start over inside the app.** The Docker run enables the in-app "Start over" button (`ENABLE_RESET=true`).
 
+---
+
 ## Local development without Docker for the app
 
 Prerequisites: Node 24 or newer, pnpm 12 (Corepack: `corepack enable`), and Docker only for Postgres.
@@ -107,46 +153,52 @@ Ports: web 5173 (Vite proxies `/api`), API 3000, Postgres 5433 on the host (5432
 
 Do not run `pnpm dev` and the full Docker stack at the same time: both use ports 5173 and 5433.
 
-| Script | What it does |
-| --- | --- |
-| `pnpm dev` | API and web with reload |
-| `pnpm check` | typecheck, lint and tests. Must pass |
-| `pnpm typecheck` | TypeScript in all packages |
-| `pnpm lint` | ESLint |
-| `pnpm test` | Vitest and Supertest against `movemate_test` |
-| `pnpm db:up` | start Postgres only |
-| `pnpm db:generate` | create a migration from the schema |
-| `pnpm db:migrate` | apply migrations to the dev database |
+| Script             | What it does                                 |
+| ------------------ | -------------------------------------------- |
+| `pnpm dev`         | API and web with reload                      |
+| `pnpm check`       | typecheck, lint and tests. Must pass         |
+| `pnpm typecheck`   | TypeScript in all packages                   |
+| `pnpm lint`        | ESLint                                       |
+| `pnpm test`        | Vitest and Supertest against `movemate_test` |
+| `pnpm db:up`       | start Postgres only                          |
+| `pnpm db:generate` | create a migration from the schema           |
+| `pnpm db:migrate`  | apply migrations to the dev database         |
+
+---
 
 ## Environment variables
 
 Set in `.env` (copied from `.env.example`). Compose reads the same file.
 
-| Name | Required | Default | Description |
-| --- | --- | --- | --- |
-| `OPENROUTER_API_KEY` | Optional | empty | OpenRouter key. Without it the app runs with manual checks |
-| `OPENROUTER_VISION_MODEL` | Optional | empty locally, `nvidia/nemotron-3.5-super-vl:free` in Docker | Vision model id. Without it AI is off |
-| `OPENROUTER_TIMEOUT_MS` | Optional | `45000` locally, `60000` in Docker | Timeout for one AI call |
-| `IF_INSURANCE_URL` | Optional | empty | Link behind the "Get a quote" button. Empty hides it |
-| `POSTGRES_PASSWORD` | Optional | `change_me` | Database password. Also used in the Docker `DATABASE_URL` |
-| `DATABASE_URL` | Required for local dev | in `.env.example` | Postgres connection string. Set by Compose in Docker |
-| `TEST_DATABASE_URL` | Tests only | in `.env.example` | Database used by `pnpm test`. Never the dev database |
-| `NODE_ENV` | Optional | `development` | `production` in Docker |
-| `PORT` | Optional | `3000` | API port |
-| `UPLOAD_DIR` | Optional | `./uploads` locally, `/data/uploads` in Docker | Where photos are stored |
-| `MAX_UPLOAD_MB` | Optional | `10` | Upload size limit per photo |
-| `ENABLE_RESET` | Optional | `false`, `true` in Docker | Allows `POST /api/reset` (Start over) when `NODE_ENV=production`. Outside production it always works |
+| Name                      | Required               | Default                                                      | Description                                                                                          |
+| ------------------------- | ---------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`      | Optional               | empty                                                        | OpenRouter key. Without it the app runs with manual checks                                           |
+| `OPENROUTER_VISION_MODEL` | Optional               | empty locally, `nvidia/nemotron-3.5-super-vl:free` in Docker | Vision model id. Without it AI is off                                                                |
+| `OPENROUTER_TIMEOUT_MS`   | Optional               | `45000` locally, `60000` in Docker                           | Timeout for one AI call                                                                              |
+| `IF_INSURANCE_URL`        | Optional               | empty                                                        | Link behind the "Get a quote" button. Empty hides it                                                 |
+| `POSTGRES_PASSWORD`       | Optional               | `change_me`                                                  | Database password. Also used in the Docker `DATABASE_URL`                                            |
+| `DATABASE_URL`            | Required for local dev | in `.env.example`                                            | Postgres connection string. Set by Compose in Docker                                                 |
+| `TEST_DATABASE_URL`       | Tests only             | in `.env.example`                                            | Database used by `pnpm test`. Never the dev database                                                 |
+| `NODE_ENV`                | Optional               | `development`                                                | `production` in Docker                                                                               |
+| `PORT`                    | Optional               | `3000`                                                       | API port                                                                                             |
+| `UPLOAD_DIR`              | Optional               | `./uploads` locally, `/data/uploads` in Docker               | Where photos are stored                                                                              |
+| `MAX_UPLOAD_MB`           | Optional               | `10`                                                         | Upload size limit per photo                                                                          |
+| `ENABLE_RESET`            | Optional               | `false`, `true` in Docker                                    | Allows `POST /api/reset` (Start over) when `NODE_ENV=production`. Outside production it always works |
 
 The API validates its environment at startup and refuses to start if it is invalid.
 
+---
+
 ## Pages
 
-| Path | What |
-| --- | --- |
-| `/` | Landing page |
-| `/move` | The app: stepper, phase screens, checklist panel. Phases live at `/move/:phase`, for example `/move/report` |
-| `/design` | The living design system: tokens, type scale and every component in its states |
-| `/demo` | A mock rental listing used in the pitch, with the before photos and a sample lease PDF |
+| Path      | What                                                                                                        |
+| --------- | ----------------------------------------------------------------------------------------------------------- |
+| `/`       | Landing page                                                                                                |
+| `/move`   | The app: stepper, phase screens, checklist panel. Phases live at `/move/:phase`, for example `/move/report` |
+| `/design` | The living design system: tokens, type scale and every component in its states                              |
+| `/demo`   | A mock rental listing used in the pitch, with the before photos and a sample lease PDF                      |
+
+---
 
 ## Architecture
 
@@ -172,12 +224,16 @@ docs/            SPEC.md and PLAN.md
 
 **Tests.** Vitest and Supertest in each context's `__tests__/`, against the `movemate_test` database. The AI client is always mocked, so tests never use the network. There are no web unit tests.
 
+---
+
 ## Demo tips
 
 - `demo-assets/` holds four sample photos: before and move-in pairs for a bedroom and a kitchen/living room, with planted differences. Upload the "stock original" photos in Before photos and the "defects" photos in Move-in photos. The `/demo` page serves the same before photos.
 - **Start over** (in the move header) deletes the move, photos, findings and reports so you can record again. It works in Docker and in development.
 - Free models are rate limited. Run the comparison once before recording and avoid repeating it many times in a row.
 - A short reliable path: create a move, upload a before photo, run the baseline, upload a move-in photo, compare, answer the findings, generate the report.
+
+---
 
 ## Limitations and out of scope
 
@@ -188,24 +244,30 @@ docs/            SPEC.md and PLAN.md
 - AI results can be wrong. That is why you confirm every one.
 - The API image keeps development dependencies so it can run TypeScript directly.
 
+---
+
 ## Troubleshooting
 
-| Problem | Fix |
-| --- | --- |
-| "AI is not set up" | Set `OPENROUTER_API_KEY` and `OPENROUTER_VISION_MODEL` in `.env`, then restart (`docker compose up -d` recreates the API). Meanwhile add checks by hand |
-| 502 or "AI failed" | OpenRouter or the model failed or timed out. Try again, raise `OPENROUTER_TIMEOUT_MS`, or choose another vision model. Rooms that succeeded are kept |
-| Rate limit or 429 style errors | Free models are throttled. Wait a minute, or use a paid model |
-| `port is already allocated` or `address already in use` | Something else uses 5173, 5433 or 3000. Stop it (often a running `pnpm dev`) or stop the Compose stack |
-| Database not ready | `docker compose ps` and wait for `healthy`. Locally run `pnpm db:up` first, then `pnpm db:migrate` |
-| "Database is not reachable" (503) | Postgres is down or `DATABASE_URL` is wrong. Check the password matches `POSTGRES_PASSWORD` |
-| Password changed but login fails | The database volume keeps the first password. Run `docker compose down -v` to recreate it |
-| Want a clean slate | Use **Start over** in the app, or `docker compose down -v` to remove all data |
+| Problem                                                 | Fix                                                                                                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "AI is not set up"                                      | Set `OPENROUTER_API_KEY` and `OPENROUTER_VISION_MODEL` in `.env`, then restart (`docker compose up -d` recreates the API). Meanwhile add checks by hand |
+| 502 or "AI failed"                                      | OpenRouter or the model failed or timed out. Try again, raise `OPENROUTER_TIMEOUT_MS`, or choose another vision model. Rooms that succeeded are kept    |
+| Rate limit or 429 style errors                          | Free models are throttled. Wait a minute, or use a paid model                                                                                           |
+| `port is already allocated` or `address already in use` | Something else uses 5173, 5433 or 3000. Stop it (often a running `pnpm dev`) or stop the Compose stack                                                  |
+| Database not ready                                      | `docker compose ps` and wait for `healthy`. Locally run `pnpm db:up` first, then `pnpm db:migrate`                                                      |
+| "Database is not reachable" (503)                       | Postgres is down or `DATABASE_URL` is wrong. Check the password matches `POSTGRES_PASSWORD`                                                             |
+| Password changed but login fails                        | The database volume keeps the first password. Run `docker compose down -v` to recreate it                                                               |
+| Want a clean slate                                      | Use **Start over** in the app, or `docker compose down -v` to remove all data                                                                           |
+
+---
 
 ## Docs
 
 - [docs/SPEC.md](docs/SPEC.md): product scope, flow, data model, API, AI rules.
 - [docs/PLAN.md](docs/PLAN.md): build order and per-slice scope.
 - [CLAUDE.md](CLAUDE.md): project rules for contributors and coding agents.
+
+---
 
 ## License
 
